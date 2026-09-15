@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/data/:file",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, immutable" }]
+    }
+  ],
+  "redirects": [
+    { "source": "/app/:path*", "destination": "/:path*", "permanent": true }
+  ]
+}

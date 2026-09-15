@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GeoHackathon 2026 — Competition Information</title>
 <style>
-  body { font-family: "Segoe UI", Tahoma, sans-serif; margin: 0; background: #f7f4ef; color: #333; }
+  body { font-family: "Segoe UI", Tahoma, sans-serif; margin: 0; padding-top: 40px; background: #f7f4ef; color: #333; }
   header.page { background: #4e342e; color: #fff; padding: 18px 28px; }
   header.page h1 { margin: 0 0 4px; font-size: 20px; }
   header.page p { margin: 0; font-size: 12px; opacity: .8; }
@@ -25,9 +25,34 @@
   img { max-width: 100%; height: auto; }
   a { color: #1565c0; }
   i.mdi, .v-icon { display: none; }
+
+  /* ---- shared site header nav ---- */
+  #site-header {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
 </style>
 </head>
 <body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="geohackathon_information.html" class="active">Info</a>
+  </nav>
+</div>
+
 <header class="page">
   <h1>GeoHackathon 2026 — Competition Information</h1>
   <p>Source: https://geohackathon.gistda.or.th/ — Information dialog (EN), all 11 tabs · captured 2026-09-05 · original markup preserved per section</p>
