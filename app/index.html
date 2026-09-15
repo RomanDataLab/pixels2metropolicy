@@ -356,7 +356,7 @@
 
       cb.addEventListener("change", function () {
         if (!layer) return;
-        if (cb.checked) { layer.addTo(map); el.classList.remove("off"); if (d.fitTo) map.flyToBounds(d.fitTo); }
+        if (cb.checked) { layer.addTo(map); el.classList.remove("off"); if (d.fitTo) map.fitBounds(d.fitTo, { padding: [30, 30] }); }
         else { map.removeLayer(layer); el.classList.add("off"); }
       });
       el.querySelector(".layer-names").addEventListener("click", function () {
