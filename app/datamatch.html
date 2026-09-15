@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Match — THEOS-2 Scenes vs BMA Land-Use Plan</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: "Segoe UI", system-ui, sans-serif; }
+  #map { width: 100%; height: 100%; background: #1a1a1a; }
+
+  .title-box {
+    position: absolute; top: 12px; left: 12px; z-index: 1000;
+    background: rgba(255,255,255,.95); border-radius: 10px;
+    padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.4); max-width: 350px;
+  }
+  .title-box h1 { font-size: 15px; margin: 0 0 2px; }
+  .title-box p { font-size: 11.5px; margin: 0; color: #555; }
+  .title-box a { color: #1565c0; text-decoration: none; }
+  .title-box a:hover { text-decoration: underline; }
+
+  #panel {
+    position: absolute; top: 12px; right: 12px; z-index: 1000;
+    width: 320px; max-height: calc(100% - 24px);
+    background: rgba(255,255,255,.97); border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.4);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #panel header {
+    padding: 10px 12px 8px; border-bottom: 1px solid #e5e5e5;
+  }
+  #panel header h2 { font-size: 13px; margin: 0; text-transform: uppercase; letter-spacing: .5px; }
+  #panel header p { font-size: 11px; margin: 3px 0 0; color: #666; }
+  #panel .layers { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 12px; }
+  #panel .layers label { display: block; margin: 3px 0; cursor: pointer; }
+  #scene-list { overflow-y: auto; padding: 6px 8px; font-size: 11.5px; }
+  .scene-item {
+    padding: 6px 8px; border-radius: 6px; margin-bottom: 4px; cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .scene-item:hover { background: #f0f4f8; }
+  .scene-item.active { border-color: #1565c0; background: #e3f2fd; }
+  .scene-item .name { font-weight: 600; word-break: break-all; }
+  .scene-item .meta { color: #666; margin-top: 1px; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px;
+           border-radius: 8px; color: #fff; margin-left: 4px; vertical-align: 1px; }
+  .badge.match { background: #2e7d32; }
+  .badge.miss   { background: #9e9e9e; }
+  .badge.unknown{ background: #ef6c00; }
+  .legend-row { font-size: 11.5px; margin: 2px 0; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+            margin-right: 6px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.3); }
+  .leaflet-container { font: inherit; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div class="title-box">
+  <h1>Data Match — THEOS-2 Scenes vs BMA Land-Use Plan</h1>
+  <p>Satellite image footprints (THEOS-2 ORTHO PMS) paired with the BMA comprehensive
+     land-use plan boundary (<code>cmp_landuse_plan.gpkg</code>) on the Google Earth
+     satellite layer. Green = scene overlaps the plan area, grey = no overlap,
+     orange = footprint unreadable (not BigTIFF-II).</p>
+  <p style="margin-top:4px"><a href="index.html">← NGIS Layers Map</a> ·
+     <a href="geohackathon_information.html">Info</a></p>
+</div>
+
+<div id="panel">
+  <header>
+    <h2>Scene – Plan Pairing</h2>
+    <p id="summary">Loading…</p>
+  </header>
+  <div class="layers">
+    <div class="legend-row"><span class="swatch" style="background:#2e7d32"></span>Scene ∩ plan boundary</div>
+    <div class="legend-row"><span class="swatch" style="background:#9e9e9e"></span>Scene outside plan area</div>
+    <div class="legend-row"><span class="swatch" style="background:#ef6c00"></span>Footprint unavailable</div>
+    <div class="legend-row"><span class="swatch" style="background:#ffd54f; border-color:#f57f17"></span>BMA plan boundary</div>
+    <label><input type="checkbox" id="lyr-scenes" checked> THEOS-2 scene footprints</label>
+    <label><input type="checkbox" id="lyr-boundary" checked> BMA plan boundary</label>
+    <label><input type="checkbox" id="lyr-zones"> Plan zones (by land use)</label>
+  </div>
+  <div id="scene-list"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@turf/turf@7.1.0/turf.min.js"></script>
+<script>
+// Base layers: Google Earth (satellite + hybrid labels) and OSM standard
+const googleSat = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 21, subdomains: ['0','1','2','3'], attribution: 'Imagery © Google'
+});
+const googleLabels = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+  maxZoom: 21, subdomains: ['0','1','2','3'], opacity: .9
+});
+const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '© OpenStreetMap contributors'
+});
+
+const map = L.map('map').setView([13.75, 100.55], 9);
+L.control.scale({ imperial: false }).addTo(map);
+
+// Basemap switcher (bottom-right): hybrid = satellite+labels, plain satellite, OSM
+const baseHybrid = L.layerGroup([googleSat, googleLabels]);
+const baseSat = L.layerGroup([googleSat]);
+L.control.layers(
+  { 'Google Earth (hybrid)': baseHybrid, 'Google Earth (satellite)': baseSat, 'OSM standard': osmStandard },
+  {}, { position: 'bottomright', collapsed: false }
+).addTo(map);
+baseHybrid.addTo(map);
+
+const scenesLayer = L.layerGroup().addTo(map);
+const boundaryLayer = L.layerGroup().addTo(map);
+let zonesLayer = null;
+
+// ---- THEOS-2 footprints (from 02_code/geo/scan_footprints.py) ----
+const SCENES = [
+ {folder:"Agri", file:"IMG_T2V_20240131033325_ORTHO_PMS_32.tif", lon:[101.8569,101.9171], lat:[12.9204,13.0524]},
+ {folder:"Agri", file:"IMG_T2V_20240131033325_ORTHO_PMS_32_2.tif", lon:[101.8569,101.9314], lat:[12.9204,13.0522]},
+ {folder:"Agri", file:"IMG_T2V_20241012033956_ORTHO_PMS_32.tif", lon:[100.4583,100.4878], lat:[14.7989,14.8218]},
+ {folder:"Agri", file:"IMG_T2V_20241012033956_ORTHO_PMS_32_2.tif", lon:[100.427,100.4551], lat:[14.6764,14.7033]},
+ {folder:"Coastal", file:"IMG_T2V_20240821033931_ORTHO_PMS_32.tif", lon:[99.5562,99.6691], lat:[7.2683,7.3801]},
+ {folder:"Coastal", file:"IMG_T2V_20241203033748_ORTHO_PMS_32.tif", lon:[100.82,100.9368], lat:[12.7501,12.8639]},
+ {folder:"Coastal", file:"IMG_T2V_20241203033748_ORTHO_PMS_32_2.tif", lon:[100.82,100.9368], lat:[12.7501,12.8639]},
+ {folder:"Disaster", file:"IMG_T2V_20250730033331_ORTHO_PMS_32.tif", lon:[99.7348,99.8845], lat:[17.1052,17.2484]},
+ {folder:"Disaster", file:"IMG_T2V_20250731035100_ORTHO_PMS_32.tif", lon:[100.6934,100.8299], lat:[18.6539,18.7847]},
+ {folder:"LULC", file:"IMG_T2V_20241012033956_ORTHO_PMS_32.tif", lon:[100.4294,100.459], lat:[14.7661,14.789]},
+ {folder:"LULC", file:"IMG_T2V_20241224034201_ORTHO_PMS_32.tif", lon:[100.7764,100.8248], lat:[18.9075,18.9524]},
+ {folder:"LULC", file:"IMG_T2V_20250731035100_ORTHO_PMS_32.tif", lon:[100.6765,100.8133], lat:[18.5789,18.7088]},
+ {folder:"Miscellaneous", file:"IMG_T2V_20240821033931_ORTHO_PMS_32.tif", lon:[99.5562,99.6691], lat:[7.2683,7.3801]},
+ {folder:"Miscellaneous", file:"IMG_T2V_20241229034032_ORTHO_PMS_32.tif", lon:[100.9843,101.0383], lat:[12.7001,12.7418]},
+ {folder:"Miscellaneous", file:"IMG_T2V_20250209034640_ORTHO_PMS_32.TIF", lon:[98.4854,98.5309], lat:[8.4272,8.4722]},
+ {folder:"RAW/Area01_อุดรธานี/Bundle_File(P+MS+PSH)/MS", file:"IMG_T2V_20250608033424_PRIMARY_MS_32.TIF", error:"raw product - no GeoTIFF tags (georef in sidecar)"},
+ {folder:"RAW/Area01_อุดรธานี/Bundle_File(P+MS+PSH)/PAN", file:"IMG_T2V_20250608033424_PRIMARY_P_32.TIF", error:"raw product - no GeoTIFF tags (georef in sidecar)"},
+ {folder:"RAW/Area01_อุดรธานี/Bundle_File(P+MS+PSH)/PSH", file:"IMG_T2V_20250603033815_PRIMARY_PMS_32.TIF", error:"raw product - no GeoTIFF tags (georef in sidecar)"},
+ {folder:"RAW/Area02_ร้อยเอ็ด/L2_P+MS/IMG_T2V_PRIMARY_MS_32", file:"IMG_T2V_20240115032611_PRIMARY_MS_32.TIF", error:"raw product - no GeoTIFF tags (georef in sidecar)"},
+ {folder:"RAW/Area02_ร้อยเอ็ด/L2_P+MS/IMG_T2V_PRIMARY_P_32", file:"IMG_T2V_20240115032611_PRIMARY_P_32.TIF", error:"raw product - no GeoTIFF tags (georef in sidecar)"},
+ {folder:"RAW/Area02_ร้อยเอ็ด/L3ORT_P+MS/IMG_T2V_ORTHO_MS_32", file:"IMG_T2V_20240115032611_ORTHO_MS_32.TIF", lon:[97.5907,97.7122], lat:[16.1182,16.2357]},
+ {folder:"RAW/Area02_ร้อยเอ็ด/L3ORT_P+MS/IMG_T2V_ORTHO_P_32", file:"IMG_T2V_20240115032611_ORTHO_P_32.TIF", lon:[97.5907,97.7122], lat:[16.1182,16.2357]},
+ {folder:"Urban", file:"IMG_T2V_20241012033956_ORTHO_PMS_32_2.tif", lon:[100.5137,100.624], lat:[13.9931,14.0769]},
+ {folder:"Urban", file:"IMG_T2V_20241203033748_ORTHO_PMS_32.tif", lon:[100.82,100.9368], lat:[12.7501,12.8639]},
+ {folder:"Urban", file:"IMG_T2V_20241219034659_ORTHO_PMS_32.tif", lon:[100.4933,100.6026], lat:[13.893,14.0055]},
+];
+
+const STYLE = {
+  match:   {color:'#2e7d32', fill:'#2e7d32'},
+  miss:    {color:'#9e9e9e', fill:'#9e9e9e'},
+  unknown: {color:'#ef6c00', fill:'#ef6c00'},
+};
+
+fetch('data/plan_boundary.geojson').then(r => r.json()).then(boundary => {
+  const plan = L.geoJSON(boundary, {
+    style: {color:'#f57f17', weight:2.5, fillColor:'#ffd54f', fillOpacity:.12}
+  }).addTo(boundaryLayer);
+  map.fitBounds(plan.getBounds(), {padding:[20,20]});
+  // hard-visible frame on Google Earth: also zoom out enough to see nearby scenes
+  map.setZoom(Math.min(map.getZoom(), 9));
+
+  // pair each scene footprint against the plan boundary via turf
+  const planGeom = boundary.features[0].geometry;
+  const list = document.getElementById('scene-list');
+  let nMatch = 0, nMiss = 0, nUnk = 0;
+
+  SCENES.forEach((s, i) => {
+    let kind, overlapPct = null, bounds = null;
+    if (s.error) {
+      kind = 'unknown'; nUnk++;
+    } else {
+      const box = turf.bboxPolygon([s.lon[0], s.lat[0], s.lon[1], s.lat[1]]);
+      const inter = turf.intersect(turf.featureCollection([box, turf.feature(planGeom)]));
+      if (inter) {
+        kind = 'match'; nMatch++;
+        overlapPct = 100 * turf.area(inter) / turf.area(box);
+      } else { kind = 'miss'; nMiss++; }
+      bounds = [[s.lat[0], s.lon[0]], [s.lat[1], s.lon[1]]];
+    }
+
+    const item = document.createElement('div');
+    item.className = 'scene-item';
+    item.innerHTML =
+      `<div class="name">${s.folder} / ${s.file}<span class="badge ${kind}">` +
+      (kind === 'match' ? 'MATCH' : kind === 'miss' ? 'no overlap' : 'unreadable') + `</span></div>` +
+      `<div class="meta">` + (s.error ? s.error :
+        (kind === 'match' ? `overlaps plan by ${overlapPct.toFixed(1)}% of scene area`
+                          : `${s.lon[0].toFixed(3)}–${s.lon[1].toFixed(3)}E, ${s.lat[0].toFixed(3)}–${s.lat[1].toFixed(3)}N`)) +
+      `</div>`;
+
+    if (bounds) {
+      const rect = L.rectangle(bounds, {
+        color: STYLE[kind].color, weight:2, fillColor: STYLE[kind].fill, fillOpacity:.18
+      }).bindTooltip(`${s.folder} — ${s.file}`, {sticky:true}).addTo(scenesLayer);
+      item.onclick = () => {
+        document.querySelectorAll('.scene-item.active').forEach(e => e.classList.remove('active'));
+        item.classList.add('active');
+        map.fitBounds(rect.getBounds(), {maxZoom:13});
+      };
+      rect.on('click', () => item.onclick());
+    }
+    list.appendChild(item);
+  });
+
+  document.getElementById('summary').textContent =
+    `${SCENES.length} THEOS-2 scenes scanned · ${nMatch} overlap the BMA plan · ${nMiss} elsewhere · ${nUnk} unreadable`;
+}).catch(e => {
+  document.getElementById('summary').textContent = 'Failed to load plan boundary: ' + e;
+});
+
+document.getElementById('lyr-scenes').onchange = e =>
+  e.target.checked ? map.addLayer(scenesLayer) : map.removeLayer(scenesLayer);
+document.getElementById('lyr-boundary').onchange = e =>
+  e.target.checked ? map.addLayer(boundaryLayer) : map.removeLayer(boundaryLayer);
+document.getElementById('lyr-zones').onchange = e => {
+  if (e.target.checked) {
+    if (!zonesLayer) {
+      zonesLayer = L.geoJSON(null, {
+        style: f => ({color:f.properties.hex || '#888', weight:1, fillOpacity:.35}),
+        onEachFeature: (f, ly) => ly.bindTooltip(
+          `${f.properties.cat_en || ''} (${f.properties.zone || ''})`, {sticky:true})
+      });
+      fetch('data/plan_zones.geojson').then(r => r.json()).then(z => zonesLayer.addData(z));
+    }
+    map.addLayer(zonesLayer);
+  } else map.removeLayer(zonesLayer);
+};
+</script>
+</body>
+</html>
