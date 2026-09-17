@@ -83,6 +83,9 @@
     <i>segment-geospatial</i> package): its automatic instance raster acts as a gate — a roof only
     counts where SAM sees a discrete structure. Material (zinc / tarpaulin) is still classified by
     the spectral rules; individual roofs are recovered by connected components inside the gate.
+    Outlines are then <b>regularized</b>: each roof is snapped to a rectilinear outline along its
+    dominant bearing (right angles, straight edges — 66% of roofs; blob-shaped components keep a
+    simplified outline). Median vertex count drops from 50+ raw mask vertices to 12.
     <h2>Result (try 1 → try 2)</h2>
     <table>
       <tr><th>Metric</th><th>AOI 1b</th><th>AOI 2</th></tr>
