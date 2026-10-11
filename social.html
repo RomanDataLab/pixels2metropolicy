@@ -101,7 +101,7 @@ function tipHtml(f){
   const p=f.properties, c=p.counts, cat=currentCat;
   if(!p.total) return null;                       // no hover on no-event polygons
   const en=p.name_en?`<div style="color:#0a5f73;font-size:11px">${p.name_en}</div>`:'';
-  const head=`<b>${p.name}</b> (${p.type_en||p.type})${en}<br>${p.sname} · ${p.dname}`;
+  const head=`<b>${p.name}</b>${en}<span style="color:#666">(${p.type_en||p.type}) · ${p.sname} · ${p.dname}</span>`;
   const row=`${LABELS[cat]||cat}: <b>${c[cat]||0}</b> · total: <b>${p.total}</b> · docs: <b>${p.n_docs}</b>`;
   const origins={};
   (p.events||[]).forEach(e=>origins[e.src]=(origins[e.src]||0)+1);
