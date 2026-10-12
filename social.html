@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>slum_pulse — neighborhood category intensity</title>
+<title>social-economic sensing of slums — neighborhood category intensity</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   body{margin:0;font-family:sans-serif}
@@ -45,7 +45,7 @@
 
 <div id="map"></div>
 <div class="panel">
-  <h1>slum_pulse — events per neighborhood (ชุมชน)</h1>
+  <h1>social-economic sensing of slums — events per neighborhood (ชุมชน)</h1>
   <div class="cats" id="cats"></div>
   <label><input type="checkbox" id="khet"/> khet (district) outlines</label>
   <label><input type="checkbox" id="slumonly"/> slum communities only</label>
@@ -56,7 +56,7 @@
   <div id="meth" style="display:none;max-height:56vh;overflow:auto;margin-top:8px;
        border-top:1px solid #ccc;padding-top:6px;font-size:12px;line-height:1.45;text-align:left">
 
-<h3 style="margin:4px 0">slum_pulse methodology</h3>
+<h3 style="margin:4px 0">social-economic sensing of slums methodology</h3>
 <p>Social-signal layer geolocating news, official complaints and public social media
 to Bangkok's 1,993 BMA-registered communities (626 slums). 92-day rolling window.</p>
 
@@ -89,7 +89,12 @@ Headlines carry the location signal in Thai local reporting.</p>
 (t.me/s/), Thai-language channels prioritized (Thai script matches the
 gazetteer). Telegram policy: only channels with 5,000+ verified followers,
 with an exemption for Thai-language channels; subscriber counts cross-checked
-against independent crawlers because t.me serves decoy counts to scrapers.</p>
+against independent crawlers because t.me serves decoy counts to scrapers.</p><p><b>Telegram chat groups (deferred):</b> the large Bangkok communities
+(Бангкок Общение ~14K, Чат Бангкок B-G ~12K, Бангкок Таиланд Чат ~7.5K members,
+Russian-language) are groups without public web previews. Ingestion is prepared
+via the official MTProto API (Telethon, read-only, PII stripped —
+fetch_telethon.py) and awaits account API credentials; group handles are
+registered with status "deferred_telethon" in the source registry.</p>
 
 <h4>Step 6 — Event extraction</h4>
 <p>Open-source Thai NLP (pythainlp tokenization) plus a keyword lexicon
