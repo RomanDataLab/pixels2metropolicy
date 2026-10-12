@@ -50,6 +50,83 @@
   <label><input type="checkbox" id="khet"/> khet (district) outlines</label>
   <label><input type="checkbox" id="slumonly"/> slum communities only</label>
   <label><input type="checkbox" id="risk"/> BMA risk areas (2568)</label>
+  <button id="methbtn" type="button"
+    style="margin-top:8px;width:100%;padding:4px 8px;border:1px solid #2b6cb0;border-radius:6px;
+           background:#2b6cb0;color:#fff;cursor:pointer;font-size:13px">Methodology</button>
+  <div id="meth" style="display:none;max-height:56vh;overflow:auto;margin-top:8px;
+       border-top:1px solid #ccc;padding-top:6px;font-size:12px;line-height:1.45;text-align:left">
+
+<h3 style="margin:4px 0">slum_pulse methodology</h3>
+<p>Social-signal layer geolocating news, official complaints and public social media
+to Bangkok's 1,993 BMA-registered communities (626 slums). 92-day rolling window.</p>
+
+<h4>Step 1 — Gazetteer (name-matching dictionary)</h4>
+<p>Thai name variants built from the official BMA community polygons: full and
+prefix-stripped slum names, landmarks (canals, roads, temples) mined from the
+address and N/S/E/W adjacency text, khwaeng and district names, 46 romanized
+district names (geoBoundaries ADM2 spatial match) and 37 famous-area aliases
+(Sukhumvit, Khaosan, Klong Toey&hellip;). 5,120 variants over 626 slums.</p>
+
+<h4>Step 2 — Official complaints (Traffy Fondue)</h4>
+<p>Pin-level citizen reports from the public share API; GPS coordinates joined
+directly to community polygons (no text matching needed). Limit: the public
+endpoint exposes only a rolling ~100-report sample of ~550; the full traffy360
+dataset requires a free API token.</p>
+
+<h4>Step 3 — Official statistics (gdcatalog)</h4>
+<p>Crime cases, crime arrests, drug cases and corrections statistics downloaded
+as CSV from the Thai government open-data catalog. Province-level granularity:
+used as calibration denominators, not pinned to communities.</p>
+
+<h4>Step 4 — News ingestion</h4>
+<p>RSS feeds (Thairath, Sanook, Prachatai) plus 158 Google News RSS queries
+(one per khwaeng, top-40 slums by population). Article links resolved where
+robots.txt allows; Google News items remain snippet-only (JavaScript redirects).
+Headlines carry the location signal in Thai local reporting.</p>
+
+<h4>Step 5 — Social media</h4>
+<p>Pantip public search threads and Telegram public channel previews
+(t.me/s/), Thai-language channels prioritized (Thai script matches the
+gazetteer). Telegram policy: only channels with 5,000+ verified followers,
+with an exemption for Thai-language channels; subscriber counts cross-checked
+against independent crawlers because t.me serves decoy counts to scrapers.</p>
+
+<h4>Step 6 — Event extraction</h4>
+<p>Open-source Thai NLP (pythainlp tokenization) plus a keyword lexicon
+classifying texts into seven categories: natural disaster, technical disaster,
+traffic incident, crime, adult industry, street retail &amp; popup markets,
+begging &amp; homelessness. Thai texts machine-translated to English for display
+(DeepSeek, batch).</p>
+
+<h4>Step 7 — Geolocation tiers</h4>
+<p>T1 slum name + khwaeng/district both in text (0.9) &middot; T2 slum name alone (0.7)
+&middot; T3 khwaeng/district only, distributed across its slums by population share (0.4)
+&middot; T4 landmark only (0.3). Known limit: headlines rarely name slums directly,
+so T3 dominates; slum-level precision comes from Traffy GPS pins.</p>
+
+<h4>Step 8 — Aggregation &amp; map</h4>
+<p>Weighted event counts per community; color intensity = event count
+(sqrt-scaled, 50% max opacity); white = no events. BMA risk-area registry
+(fiscal year 2568) overlaid as reference pins. Grey-tone OSM basemap.</p>
+
+<h4>References (Harvard)</h4>
+<ol style="padding-left:16px;margin:4px 0">
+<li>Bangkok Metropolitan Administration (2026) <i>ขอบเขตชุมชน (ตรวจสอบแล้ว) [Verified community boundaries]</i>. Available at: https://cpudgiapp.bangkok.go.th/arcgis/rest/services/Community/Service_Community/FeatureServer/14 (Accessed: 8 October 2026).</li>
+<li>Bangkok Metropolitan Administration (2026) <i>บัญชีพื้นที่เสี่ยงและพื้นที่อันตราย กทม. ปีงบประมาณ 2568 [BMA risk and danger-area registry, FY 2568]</i>. Available at: https://data.bangkok.go.th (Accessed: 8 October 2026).</li>
+<li>geoBoundaries (2023) <i>Thitan ADM2 — geoBoundariesSimplified</i>. Available at: https://www.geoboundaries.org (Accessed: 8 October 2026).</li>
+<li>Google (2026) <i>Google News RSS search</i>. Available at: https://news.google.com/rss/search (Accessed: 8 October 2026).</li>
+<li>National Electronics and Computer Technology Center (NECTEC) (2026) <i>Traffy Fondue public share API</i>. Available at: https://publicapi.traffy.in.th/share/search (Accessed: 8 October 2026).</li>
+<li>Pantip (2026) <i>Pantip search</i>. Available at: https://pantip.com/search (Accessed: 8 October 2026).</li>
+<li>Royal Thai Government (2026) <i>gdcatalog: คดีอาชญากรรมที่เกิดขึ้น, การจับกุมผู้ก่อคดีอาชญากรรม, คดียาเสพติด, สถิติผู้ต้องราชทัณฑ์คดียาเสพติด</i>. Available at: https://gdcatalog.go.th (Accessed: 8 October 2026).</li>
+<li>Prachatai (2026) <i>RSS feed</i>. Available at: https://prachatai.com/feed (Accessed: 8 October 2026).</li>
+<li>Sanook (2026) <i>Sanook news RSS</i>. Available at: http://rssfeeds.sanook.com/rss/feeds/sanook/news.crime.xml (Accessed: 8 October 2026).</li>
+<li>Telegram (2026) <i>Public channel web previews</i>. Available at: https://t.me/s/&lt;channel&gt; (Accessed: 8 October 2026).</li>
+<li>Thairath (2026) <i>Thairath RSS</i>. Available at: https://www.thairath.co.th/rss/news (Accessed: 8 October 2026).</li>
+<li>DeepSeek (2026) <i>DeepSeek API — machine translation (Thai to English)</i>. Available at: https://api.deepseek.com (Accessed: 11 October 2026).</li>
+<li>PyThaiNLP (2024) <i>PyThaiNLP: Thai natural language processing toolkit</i>. Available at: https://pythainlp.github.io (Accessed: 8 October 2026).</li>
+</ol>
+
+  </div>
   <div class="note">Darker/more opaque = more events. White = no events.
   Fills at 50% transparency. 92-day window.</div>
 </div>
@@ -153,6 +230,10 @@ document.getElementById('risk').onchange=e=>{
         )))
       .addTo(map);
   }
+};
+document.getElementById('methbtn').onclick=()=>{
+  const m=document.getElementById('meth');
+  m.style.display = m.style.display==='none' ? 'block' : 'none';
 };
 </script>
 </body>
