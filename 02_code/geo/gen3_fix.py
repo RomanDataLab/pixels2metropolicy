@@ -208,7 +208,7 @@ def regularize(geom, simplify=0.5, snap=1.5):
     rot = affinity.rotate(g, -np.degrees(ang), origin="centroid")
     # rectilinear snap: merge near-equal y then x on the exterior ring
     ring = list(rot.exterior.coords)
-    ys_ = sorted(set(round(p[1], 1) for p in ring))
+    ys_ = sorted(set(p[1] for p in ring))
     def remap(vals, tol):
         """every input value -> group mean; groups are runs within tol"""
         out, grp = {}, [vals[0]]
@@ -228,7 +228,7 @@ def regularize(geom, simplify=0.5, snap=1.5):
         return int(round(v * 10))
     ymap = remap(ys_, snap)
     pts = [(p[0], ymap[key(p[1])]) for p in ring]
-    xs_ = sorted(set(round(p[0], 1) for p in pts))
+    xs_ = sorted(set(p[0] for p in pts))
     xmap = remap(xs_, snap)
     pts = [(xmap[key(p[0])], p[1]) for p in pts]
     from shapely.geometry import Polygon
