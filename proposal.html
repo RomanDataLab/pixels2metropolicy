@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel2Policy TH — Proposal: from stale data to policy kits</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; margin: 0; padding-top: 36px; background: #f7f4ef; color: #333; }
+  /* ---- shared site header nav ---- */
+  #site-header {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  header.page { background: #12314e; color: #fff; padding: 22px 28px; }
+  header.page h1 { margin: 0 0 6px; font-size: 22px; }
+  header.page p { margin: 0; font-size: 13px; opacity: .85; max-width: 980px; line-height: 1.5; }
+  .layout { display: flex; align-items: flex-start; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+  nav.toc { position: sticky; top: 52px; width: 230px; flex: none; background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 4px; }
+  nav.toc a { color: #12314e; text-decoration: none; font-size: 12.5px; padding: 5px 8px; border-radius: 6px; }
+  nav.toc a:hover { background: #e8eff6; }
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+  section { background: #fff; border-radius: 10px; padding: 22px 26px; box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+  section > h2 { margin: 0 0 14px; color: #12314e; font-size: 19px; border-bottom: 2px solid #d7ccc8; padding-bottom: 8px; }
+  h3 { color: #1d4e79; margin: 18px 0 8px; font-size: 15.5px; }
+  h4 { color: #5d4037; margin: 12px 0 6px; font-size: 13.5px; }
+  p { line-height: 1.65; margin: 8px 0; font-size: 14px; }
+  ul, ol { line-height: 1.7; padding-left: 22px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+  th, td { border: 1px #d7ccc8 solid; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #efebe9; }
+  a { color: #1565c0; }
+  .thai { color: #777; font-size: .92em; }
+
+  /* hero claim */
+  .claim { display: flex; gap: 18px; flex-wrap: wrap; align-items: stretch; }
+  .claim .old, .claim .new { flex: 1; min-width: 260px; border-radius: 10px; padding: 14px 16px; }
+  .claim .old { background: #fdf0ec; border-left: 5px solid #b95d3d; }
+  .claim .new { background: #eaf3ec; border-left: 5px solid #2e7d32; }
+  .claim h3 { margin: 0 0 6px; font-size: 14.5px; }
+  .claim p { font-size: 13px; margin: 4px 0; }
+  .vs { align-self: center; font-weight: 700; color: #888; }
+
+  /* pipeline */
+  .pipe { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; margin: 12px 0; }
+  .stage { flex: 1; min-width: 190px; background: #f4f7fa; border: 1px solid #cfdde9; border-radius: 8px; padding: 10px 12px; }
+  .stage h4 { margin: 0 0 6px; color: #12314e; }
+  .stage ul { margin: 4px 0 0; padding-left: 16px; font-size: 12px; line-height: 1.55; }
+  .arrow { align-self: center; color: #2b6cb0; font-size: 20px; font-weight: 700; }
+
+  /* scorecard mock */
+  .scorecard { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+  .score-left { flex: 0 0 250px; background: #12314e; color: #fff; border-radius: 10px; padding: 14px 16px; }
+  .score-left .big { font-size: 44px; font-weight: 700; line-height: 1; }
+  .score-left .grade { font-size: 13px; opacity: .85; margin-top: 2px; }
+  .score-left .name { margin-top: 10px; font-size: 13px; opacity: .9; line-height: 1.5; }
+  .bars { flex: 1; min-width: 280px; }
+  .bar-row { display: grid; grid-template-columns: 150px 1fr 42px; gap: 8px; align-items: center; font-size: 12.5px; margin: 7px 0; }
+  .bar-row .track { background: #eee; border-radius: 5px; height: 13px; overflow: hidden; }
+  .bar-row .fill { height: 100%; border-radius: 5px; }
+  .bar-row .val { color: #666; text-align: right; }
+
+  /* policy kit cards */
+  .kits { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; margin-top: 10px; }
+  .kit { border: 1px solid #e0d8cd; border-radius: 10px; padding: 14px 16px; background: #fffdf9; display: flex; flex-direction: column; gap: 6px; }
+  .kit h3 { margin: 0; font-size: 14.5px; color: #4e342e; }
+  .kit .precedent { font-size: 11.5px; color: #8d6e63; border-left: 3px solid #d7ccc8; padding-left: 8px; }
+  .kit p { font-size: 12.5px; margin: 2px 0; }
+  .kit .trigger { font-size: 12px; background: #eef3f8; border-radius: 6px; padding: 6px 9px; margin-top: auto; }
+  .kit .trigger b { color: #12314e; }
+
+  /* open questions */
+  .oq { border: 1px solid #e0d8cd; border-left: 5px solid #b95d3d; border-radius: 8px; padding: 12px 16px; margin: 12px 0; background: #fffdf9; }
+  .oq h3 { margin: 0 0 6px; font-size: 15px; }
+  .oq .stance { font-size: 12.5px; background: #eaf3ec; border-radius: 6px; padding: 6px 10px; margin-top: 8px; }
+  .oq .stance b { color: #2e7d32; }
+
+  .flowmap { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .chip { background: #12314e; color: #fff; font-size: 11.5px; border-radius: 20px; padding: 4px 11px; }
+  .chip.lite { background: #4a7196; }
+
+  .footnote { font-size: 11.5px; color: #999; }
+  .refs li { font-size: 12px; line-height: 1.55; color: #555; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html">Slum policies</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="social.html">Social pulse</a>
+    <a href="proposal.html" class="active">Proposal</a>
+    <a href="geohackathon_information.html">Info</a>
+  </nav>
+</div>
+
+<header class="page">
+  <h1>From pixels to policy — an operating system for neighborhood governance</h1>
+  <p>Thailand's local governance still plans informal-settlement policy with data that is
+     years or decades old. This proposal turns THEOS-2 satellite pixels and daily public
+     signals into a live neighborhood score, and pairs every score profile with a
+     ready-made <b>policy kit</b> drawn from proven upgrading programs worldwide.</p>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <a href="#message">1 · Main message</a>
+  <a href="#problem">2 · The stale-data problem</a>
+  <a href="#dashboard">3 · Live dashboard &amp; score</a>
+  <a href="#kits">4 · Policy kits (researched)</a>
+  <a href="#segmentation">5 · Segmentation tool</a>
+  <a href="#questions">6 · Open questions</a>
+  <a href="#roadmap">7 · Roadmap &amp; site map</a>
+  <a href="#refs">References</a>
+</nav>
+
+<main>
+
+<!-- ============ 1 MESSAGE ============ -->
+<section id="message">
+  <h2>1 · Main message</h2>
+  <p><b>Cities change every day; the data that governs them does not.</b>
+     Bangkok's 626 official slum polygons, the NHA low-income community registry, and
+     decadal census tables describe a city that in places is up to twenty years old.
+     A fire last night, a new row of roofs this monsoon, a street market that moved —
+     none of it reaches the desk that allocates upgrading budgets.</p>
+
+  <div class="claim">
+    <div class="old">
+      <h3>Today: policy on stale data</h3>
+      <p>✔ One-off surveys, some from the 2000s</p>
+      <p>✔ Census every 10 years</p>
+      <p>✔ Complaints answered case-by-case</p>
+      <p>✘ No measure of change between surveys</p>
+      <p>✘ Budgets chase the loudest voice, not the worst conditions</p>
+    </div>
+    <div class="vs">→</div>
+    <div class="new">
+      <h3>Proposal: policy on a live score</h3>
+      <p>✔ Daily signals: complaints, news, public social media (92-day rolling window)</p>
+      <p>✔ Statistical baselines: registries, census, plan zones, flood layers</p>
+      <p>✔ Per-neighborhood score, refreshed continuously</p>
+      <p>✔ Score profile maps to a costed <b>policy kit</b> with a named precedent</p>
+      <p>✔ Satellite segmentation audits the result from orbit</p>
+    </div>
+  </div>
+
+  <p style="margin-top:12px">The three building blocks already exist as working prototypes on this site:</p>
+  <div class="flowmap">
+    <a class="chip" href="social.html">Social pulse — daily signal layer</a>
+    <a class="chip" href="gen1_samgeo.html">Gen 1: SAM roofs — satellite segmentation</a>
+    <a class="chip" href="gen2_unet.html">Gen 2: U-Net roofs — scalable segmentation</a>
+    <a class="chip" href="index.html">Main map — statistical + plan layers</a>
+    <span class="chip lite">Proposal tab — score design + policy kits (this page)</span>
+  </div>
+</section>
+
+<!-- ============ 2 PROBLEM ============ -->
+<section id="problem">
+  <h2>2 · The stale-data problem, quantified</h2>
+  <table>
+    <tr><th>What governance uses</th><th>Source</th><th>Refresh cycle</th><th>What it misses</th></tr>
+    <tr>
+      <td>Slum / community boundaries</td>
+      <td>BMA community polygons (1,993 communities, 626 slums); NHA registry (1,588 communities)</td>
+      <td>Survey-driven; year columns often 2000s-vintage</td>
+      <td>New settlements, merged or cleared ones, density change</td>
+    </tr>
+    <tr>
+      <td>Population &amp; households</td>
+      <td>NSO census; NHA/CODI aggregates (site figures are <i>modeled</i>, not measured)</td>
+      <td>10 years</td>
+      <td>Everything between two census nights</td>
+    </tr>
+    <tr>
+      <td>Risk areas</td>
+      <td>BMA risk &amp; danger-area registry (FY 2568)</td>
+      <td>Annual list</td>
+      <td>Event timing, severity, resolution after works</td>
+    </tr>
+    <tr>
+      <td>Land-use legality</td>
+      <td>Comprehensive-plan zones (ผังเมืองรวม)</td>
+      <td>Plan revision cycles (years–decade)</td>
+      <td>Actual ground use; informal tenure arrangements</td>
+    </tr>
+    <tr>
+      <td>Citizen distress</td>
+      <td>Traffy Fondue complaints (pin-level)</td>
+      <td>Daily — but consumed one ticket at a time</td>
+      <td>Aggregated neighborhood picture; silent populations</td>
+    </tr>
+  </table>
+  <p class="footnote">Every row above is already loaded somewhere on this site — the gap is not data
+     existence, it is aggregation cadence and the missing link to decisions.</p>
+</section>
+
+<!-- ============ 3 DASHBOARD ============ -->
+<section id="dashboard">
+  <h2>3 · Live dashboard: aggregation and the neighborhood score</h2>
+
+  <div class="pipe">
+    <div class="stage">
+      <h4>Daily layer <span class="thai">(สัญญาณรายวัน)</span></h4>
+      <ul>
+        <li>Traffy Fondue complaint pins (GPS-joined)</li>
+        <li>News RSS: 158 Google News queries + Thai feeds</li>
+        <li>Pantip threads, public Telegram channels</li>
+        <li>92-day rolling window, 6 event categories (Thai NLP lexicon)</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage">
+      <h4>Statistical layer <span class="thai">(สถิติฐาน)</span></h4>
+      <ul>
+        <li>BMA/NHA community registries + population</li>
+        <li>Crime &amp; drug statistics (gdcatalog, province-level denominators)</li>
+        <li>Plan zones, flood-frequency WMS, risk registry</li>
+        <li>THEOS-2 roof density from the segmentation tool (§5)</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage">
+      <h4>Score engine</h4>
+      <ul>
+        <li>Events per 1,000 residents, tier-weighted (T1 0.9 … T4 0.3)</li>
+        <li>Category sub-scores + complaint backlog ratio</li>
+        <li>Composite 0–100, trend arrow vs previous window</li>
+        <li>Confidence flag from match-tier mix per community</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stage">
+      <h4>Policy kit dispatch</h4>
+      <ul>
+        <li>Score profile triggers a kit (§4)</li>
+        <li>Kit = precedent + measures + budget band + KPIs</li>
+        <li>After-action: segmentation audits physical change (§5)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Scorecard mockup (one community)</h3>
+  <div class="scorecard">
+    <div class="score-left">
+      <div class="big">38<span style="font-size:20px;opacity:.7">/100</span></div>
+      <div class="grade">Urgency: HIGH · trend ▲ +6 in 4 weeks</div>
+      <div class="name">Community 626-041 · khwaeng example<br>
+        population ~2,400 (modeled)<br>
+        confidence: MEDIUM (T3-dominated)</div>
+    </div>
+    <div class="bars">
+      <div class="bar-row"><span>Natural disaster exposure</span><div class="track"><div class="fill" style="width:84%;background:#1a9850"></div></div><span class="val">84</span></div>
+      <div class="bar-row"><span>Complaint backlog (Traffy)</span><div class="track"><div class="fill" style="width:71%;background:#f46d43"></div></div><span class="val">71</span></div>
+      <div class="bar-row"><span>Technical disaster / fire</span><div class="track"><div class="fill" style="width:63%;background:#a6d96a"></div></div><span class="val">63</span></div>
+      <div class="bar-row"><span>Crime signal</span><div class="track"><div class="fill" style="width:41%;background:#7fb8da"></div></div><span class="val">41</span></div>
+      <div class="bar-row"><span>Roof density change (satellite)</span><div class="track"><div class="fill" style="width:38%;background:#d7301f"></div></div><span class="val">38</span></div>
+      <div class="bar-row"><span>Street-economy vitality</span><div class="track"><div class="fill" style="width:66%;background:#fdae61"></div></div><span class="val">66</span></div>
+      <p class="footnote">Illustrative values. Higher bar = more attention needed, except street-economy vitality
+         where a floor is healthy (too low = livelihood stress, zero signal = possible data blindness).</p>
+    </div>
+  </div>
+
+  <h3>Why daily + statistical must be fused</h3>
+  <p>Daily signals alone are biased toward loud, connected, Thai-literate neighborhoods;
+     statistics alone are stale. The score uses statistics as the denominator and baseline,
+     daily signals as the change detector, and never ranks communities on a single source.
+     Communities with weak signal get an explicit <i>data-blindness flag</i> instead of a
+     falsely clean score — an anti-stigmatization guardrail (see §6, Q3).</p>
+</section>
+
+<!-- ============ 4 KITS ============ -->
+<section id="kits">
+  <h2>4 · Policy kits — assembled from proven programs</h2>
+  <p>Each kit is a package a district office can actually launch: a named precedent,
+     standard measures, a budget band, and the score signature that triggers it.
+     Precedents come from real upgrading programs; scale figures are approximate, cited
+     for orientation.</p>
+
+  <div class="kits">
+    <div class="kit">
+      <h3>KIT 1 · Collective in-situ upgrading <span class="thai">(บ้านมั่นคง 2.0)</span></h3>
+      <div class="precedent">Baan Mankong, CODI Thailand — from 2003; community-planned upgrading
+        (on-site, re-blocking, reconstruction, land sharing) with infrastructure subsidy + collective
+        loans to community organizations; reported 100,000+ households across phases.</div>
+      <p>Collective tenure negotiation (lease/CO-op) + infrastructure subsidy + housing credit,
+         planned and managed by the community savings group. 9–24 months.</p>
+      <div class="trigger"><b>Trigger:</b> stable settlement, high complaint backlog, willing CBO,
+        landowner identifiable (registry + plan-zone layers confirm site is not in a sensitive zone §5).</div>
+    </div>
+
+    <div class="kit">
+      <h3>KIT 2 · Minimal re-blocking + infrastructure</h3>
+      <div class="precedent">Kampung Improvement Program, Jakarta — from 1969, governor-led, later
+        World Bank-supported; paved footpaths, drainage, water points, toilets, schools/health posts;
+        reached millions of residents nationwide.</div>
+      <p>Fire lanes cut through dense fabric, drainage, water points, lighting, waste collection.
+         Housing stays resident-built. Cheapest kit; visible in weeks.</p>
+      <div class="trigger"><b>Trigger:</b> satellite roof density &gt; threshold (§5) + fire/technical-disaster
+        events + narrow-lane fabric on imagery.</div>
+    </div>
+
+    <div class="kit">
+      <h3>KIT 3 · Land sharing / readjustment</h3>
+      <div class="precedent">Land-sharing instruments in Thai practice (part of the Baan Mankong menu)
+        and Korean-style land readjustment; also the core logic of Mukuru SPA, Nairobi — 2017,
+        ≈645 acres, ~100k households, county + Muungano Alliance consortium planning.</div>
+      <p>Deal with landowner: part of the plot commercialized, part secured for residents on-site.
+         Requires cadastre check + value appraisal; longest kit (2–5 years).</p>
+      <div class="trigger"><b>Trigger:</b> high land value (plan zone = commercial/mixed) + eviction
+        pressure signal in news + viable density for partial relocation on same plot.</div>
+    </div>
+
+    <div class="kit">
+      <h3>KIT 4 · Risk-first retrofit</h3>
+      <div class="precedent">Favela-Bairro, Rio de Janeiro — 1994–2000s, IDB-financed (≈US$180M first
+        phase): infrastructure + public space to integrate favelas into the formal city; and
+        Medellín PUI (2004–), cable transit + library-parks as anchor investments.</div>
+      <p>Flood-proofing, fire breaks, slope works, evacuation routes; anchored on the BMA risk
+        registry + GISTDA repeated-flood layer, cross-checked against daily disaster events.</p>
+      <div class="trigger"><b>Trigger:</b> natural-disaster sub-score high + community inside
+        repeated-flood WMS zone or FY-2568 risk registry.</div>
+    </div>
+
+    <div class="kit">
+      <h3>KIT 5 · Street-economy legitimization</h3>
+      <div class="precedent">Street-vendor licensing + popup-market programs in Bangkok and
+        international variants (e.g., Medellín and Seoul night-market regularization).</div>
+      <p>Vending permits, market days, sanitation + waste service for popup markets, micro-credit.
+         Turns the strongest daily signal (street retail events) into taxable, safer activity.</p>
+      <div class="trigger"><b>Trigger:</b> street-retail/popup sub-score high AND vending-related
+        complaints rising — vitality with friction, not repression.</div>
+    </div>
+
+    <div class="kit">
+      <h3>KIT 6 · Relocation with common-use dividend</h3>
+      <div class="precedent">CODI relocations (part of Baan Mankong); contrast case: evictions without
+        re-homing historically deepened poverty (documented for pre-Baan-Mankong Bangkok clearances).</div>
+      <p>Last resort for unsafe land. Package must include: near-site units, transport continuity,
+         and a <b>rebuilt common-use area</b> on the vacated land (see §6 Q2). No bare relocation.</p>
+      <div class="trigger"><b>Trigger:</b> settlement inside sensitive zone (§5) with no retrofit
+        option + disaster exposure — never triggered by land value alone.</div>
+    </div>
+  </div>
+
+  <h3>Score signature → kit mapping (dispatch table)</h3>
+  <table>
+    <tr><th>If the scorecard shows…</th><th>First-response kit</th><th>Escalates to</th></tr>
+    <tr><td>Dense roofs + fire events, narrow lanes</td><td>KIT 2 (re-blocking)</td><td>KIT 1 if community organizes</td></tr>
+    <tr><td>Flood zone + disaster sub-score high</td><td>KIT 4 (risk retrofit)</td><td>KIT 6 if land unsafe</td></tr>
+    <tr><td>Complaint backlog high, tenure unclear, land valuable</td><td>KIT 3 (land sharing)</td><td>KIT 1 after tenure agreed</td></tr>
+    <tr><td>Street-economy high + vending complaints</td><td>KIT 5 (legitimization)</td><td>—</td></tr>
+    <tr><td>All sub-scores low but signal confidence low</td><td>Field enumeration visit (§6 Q1 protocol)</td><td>re-score after enumeration</td></tr>
+  </table>
+</section>
+
+<!-- ============ 5 SEGMENTATION ============ -->
+<section id="segmentation">
+  <h2>5 · Companion tool: segmentation of slums and sensitive areas</h2>
+  <p>The second tool in the stack is a computer-vision layer that reads THEOS-2 imagery
+     (0.5 m) directly, independent of any registry — so it also sees settlements the
+     registries missed or dropped.</p>
+
+  <h3>What exists today (working prototypes on this site)</h3>
+  <ul>
+    <li>Try 2 (SAM) — first segmentation attempt on THEOS-2 blocks (superseded by Gen 1).</li>
+    <li><a href="gen1_samgeo.html">Gen 1: SAM roofs</a> — dense 48-point/side grid prompt sweep:
+        5,627 roof polygons, 5,620 after regularization (straight edges, median bbox-fill 1.00).</li>
+    <li><a href="gen2_unet.html">Gen 2: U-Net roofs</a> — student U-Net trained on the Gen 1 teacher,
+        IoU 0.542 vs teacher, runs without prompts at scale.</li>
+    <li><a href="slum.html">Slum map</a> — 1,588 NHA communities × plan zones; the registry view
+        the segmentation is benchmarked against.</li>
+    <li><a href="slum_policies.html">Slum policies</a> — 16-country comparison of slum policies and outcomes.</li>
+  </ul>
+
+  <h3>What it adds to the dashboard</h3>
+  <table>
+    <tr><th>Capability</th><th>How</th><th>Feeds</th></tr>
+    <tr><td>Roof census &amp; density</td><td>Gen 2 inference over AOI; regularized outlines</td><td>Density sub-score; KIT 2 trigger</td></tr>
+    <tr><td>Growth detection</td><td>Roof count delta between image epochs</td><td>"Roof density change" bar; new-settlement alerts</td></tr>
+    <tr><td>Clearance / fire scar detection</td><td>Roof loss between epochs</td><td>KIT 6 after-action audit</td></tr>
+    <tr><td>Sensitive-area screening</td><td>Roofs × flood WMS, risk registry, plan zones, state/railway land</td><td>KIT 3/6 eligibility gate — no upgrading money into zones where it will be wasted or contested</td></tr>
+  </table>
+  <p>"Sensitive areas" = repeated-flood zones, registered danger areas, conservation/protected
+     boundaries, and land where tenure cannot be secured. The segmentation tool makes that
+     screening automatic before any kit is dispatched.</p>
+</section>
+
+<!-- ============ 6 OPEN QUESTIONS ============ -->
+<section id="questions">
+  <h2>6 · Open questions — we take a position, you decide</h2>
+
+  <div class="oq">
+    <h3>Q1 · Should the governor come to the slum before starting a policy?</h3>
+    <p><b>For:</b> Baan Mankong succeeded because planning started in community meetings, not
+       offices — field presence built the trust that made collective loans bankable. A visit
+       ground-truths a score that may rest on T3 (district-level) matches. Enumeration visits
+       historically produce the data that no census collects.</p>
+    <p><b>Against:</b> a single visit without protocol becomes a photo-op; it raises expectations,
+       distorts the daily signal for weeks (event categories spike around VIP visits), and can
+       intimidate exactly the households the policy is meant to reach.</p>
+    <div class="stance"><b>Our position:</b> yes — but as a <b>structured enumeration visit</b>, not
+      a ceremony: community leaders + district officers + scorecard in hand, one walking audit,
+      findings written back into the dashboard within 48 hours. The score triggers the visit;
+      the visit re-scores the neighborhood.</div>
+  </div>
+
+  <div class="oq">
+    <h3>Q2 · Should rebuilt areas be provided to slum dwellers for common use?</h3>
+    <p><b>For:</b> relocation and upgrading fail politically when residents see only losses.
+       A common-use dividend — the vacated or redeveloped parcel returned as a market hall,
+       playground, community center or productive land held by the community cooperative —
+       converts policy from extraction into investment. Precedent logic: Medellín's library-parks
+       and public-space anchors made upgrading legitimate; CODI's collective title includes
+       common land by design.</p>
+    <p><b>Against:</b> common space on valuable land is costly; maintenance responsibility is
+       unclear without a cooperative structure; poorly used commons can decay into re-occupation.</p>
+    <div class="stance"><b>Our position:</b> yes, as a standing component of KIT 6 (and optional in
+      KIT 1/3): every relocation/upgrading package reserves a share of the rebuilt area as
+      community-held common use, with the cooperative as manager. The segmentation tool (§5)
+      proposes candidate parcels — vacated footprints large enough to be useful.</div>
+  </div>
+
+  <div class="oq">
+    <h3>Q3 · Can a live neighborhood score stigmatize the neighborhoods it scores?</h3>
+    <p>A public "worst slums" ranking invites redlining by insurers, employers and landlords.
+       The same daily-signal pipeline also touches PDPA questions (complaints are individual
+       records; we strip PII at ingestion, but re-identification risk grows with resolution).</p>
+    <div class="stance"><b>Our position:</b> the score is an <b>investment-priority instrument for
+      the administration, not a public label</b>. Published form: budget-allocation tiers and
+      positive-action lists, never a ranked league table. Data-blindness flags are published
+      alongside so quiet communities are not read as problem-free.</div>
+  </div>
+</section>
+
+<!-- ============ 7 ROADMAP ============ -->
+<section id="roadmap">
+  <h2>7 · Roadmap — how the existing tabs become the product</h2>
+  <table>
+    <tr><th>Phase</th><th>Content</th><th>Status on this site</th></tr>
+    <tr><td>Done</td><td>Reference layers, plan-zone match, NHA community map</td>
+        <td><a href="index.html">Main map</a> · <a href="datamatch.html">Data match</a> · <a href="slum.html">Slum map</a> ·
+    <a href="slum_policies.html">Slum policies</a></td></tr>
+    <tr><td>Done</td><td>THEOS-2 segmentation gen 1 (SAM) + gen 2 (U-Net teacher-student)</td>
+        <td><a href="gen1_samgeo.html">Gen 1</a> · <a href="gen2_unet.html">Gen 2</a></td></tr>
+    <tr><td>Done (92-day window)</td><td>Daily-signal ingestion + Thai NLP event extraction + per-community mapping</td>
+        <td><a href="social.html">Social pulse</a></td></tr>
+    <tr><td>Next</td><td>Score engine: fuse §3 layers into composite + confidence, weekly re-run</td>
+        <td>This page (design)</td></tr>
+    <tr><td>Next</td><td>Dispatch table wiring + kit one-pagers (cost bands, KPIs, precedent dossiers)</td>
+        <td>This page (§4)</td></tr>
+    <tr><td>Later</td><td>Epoch-2 THEOS-2 acquisition for growth detection; sensitive-area gate in dispatch</td>
+        <td>§5 design</td></tr>
+  </table>
+  <p class="footnote">Team submission frame: GeoHackathon 2026 "ResilienCity TH" (GISTDA) — see the
+     <a href="geohackathon_information.html">Info tab</a> for competition context and the build plan.</p>
+</section>
+
+<!-- ============ REFS ============ -->
+<section id="refs">
+  <h2>References (program precedents)</h2>
+  <ol class="refs">
+    <li>Community Organizations Development Institute (CODI) (2003–) <i>Baan Mankong collective
+        housing programme</i>. Bangkok: CODI. Available at: https://www.codi.or.th (Accessed: 16 October 2026).</li>
+    <li>Jakarta Municipal Government / World Bank (1974–1990s) <i>Kampung Improvement Program
+        documentation</i>. Jakarta urban development project series. Available at:
+        https://projects.worldbank.org (Accessed: 16 October 2026).</li>
+    <li>Prefeitura do Rio de Janeiro / Inter-American Development Bank (1994) <i>Favela-Bairro
+        programme</i>. Available at: https://www.iadb.org (Accessed: 16 October 2026).</li>
+    <li>Alcaldía de Medellín (2004–2007) <i>Proyectos Urbanos Integrales (PUI), Comuna 13 and
+        Northeastern zone</i>. Available at: https://www.medellin.gov.co (Accessed: 16 October 2026).</li>
+    <li>Nairobi City County Government (2017) <i>Mukuru Special Planning Area declaration and
+        consortia plan</i>, with Muungano Alliance / SDI Kenya. Available at:
+        https://www.nairobi.go.ke (Accessed: 16 October 2026).</li>
+    <li>UN-Habitat (2008–) <i>Participatory Slum Upgrading Programme (PSUP)</i>. Available at:
+        https://unhabitat.org (Accessed: 16 October 2026).</li>
+    <li>Bangkok Metropolitan Administration (2026) <i>Verified community boundaries + risk and
+        danger-area registry FY 2568</i>. Available at: https://data.bangkok.go.th (Accessed: 8 October 2026).</li>
+    <li>GISTDA (2026) <i>THEOS-2 ORTHO PMS imagery; Vallaris repeated-flood WMS; GeoHackathon 2026
+        NGIS platform</i>. Available at: https://geohackathon.gistda.or.th (Accessed: 8 October 2026).</li>
+  </ol>
+</section>
+
+</main>
+</div>
+</body>
+</html>
