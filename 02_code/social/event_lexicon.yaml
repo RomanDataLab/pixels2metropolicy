@@ -1,0 +1,130 @@
+# slum_pulse event lexicon v2 — Thai keyword → category
+# Segmentation taxonomy (team decision 2026-10-06):
+#   crime, natural_disaster, prostitution, street_retail_popup,
+#   traffic_incident, begging_homeless, technical_disaster
+# Matching = substring on raw text (Thai has no spaces). Bare generic words
+# (ตลาด alone, ร้านค้า) are deliberately excluded to avoid place-name false hits.
+# primary_type chosen by priority: first category below that matches.
+
+priority: [natural_disaster, technical_disaster, traffic_incident, crime, street_retail_popup, begging_homeless]
+
+categories:
+  natural_disaster:
+    - น้ำท่วม
+    - อุทกภัย
+    - น้ำหลาก
+    - น้ำย้อน
+    - มหาน้ำ
+    - ฝนตกหนัก
+    - พายุ
+    - พายุฝนฟ้าคะนอง
+    - ลมกระโชก
+    - วาตภัย
+    - ดินถล่ม
+    - ดินโคลนถล่ม
+    - ถล่ม
+    - แผ่นดินไหว
+    - สึนามิ
+    - ภัยแล้ง
+    - ไฟป่า
+    - คลื่นความร้อน
+  technical_disaster:
+    - ไฟฟ้าดับ
+    - ไฟดับ
+    - ไฟฟ้าลัดวงจร
+    - ลัดวงจร
+    - ไฟฟ้าสาธารณะ
+    - เสาไฟฟ้า
+    - สายไฟ
+    - ท่อรั่ว
+    - ท่อแตก
+    - น้ำรั่ว
+    - รั่วซึม
+    - ท่อระบายอุดตัน
+    - อุดตัน
+    - น้ำเสีย
+    - บ่อเน่า
+    - มลพิษ
+    - ฝุ่นละออง
+    - ฝุ่นจิ๋ว
+    - PM2.5
+    - หมอกควัน
+    - แก๊สรั่ว
+    - ขยะตกค้าง
+    - ขยะ
+    - เสียงดัง
+    - สะพานพัง
+    - ถนนพัง
+  traffic_incident:
+    - อุบัติเหตุ
+    - ชนกัน
+    - รถชน
+    - วิ่งชน
+    - ชนคน
+    - ชนเสา
+    - ชนรั้ว
+    - พลิกคว่ำ
+    - เสียหลัก
+    - จราจร
+    - รถติด
+    - จอดรถบนทางเท้า
+    - ทางแยกตัน
+  crime:
+    - อาชญากรรม
+    - ฆาตกรรม
+    - ฆ่า
+    - ศพ
+    - กราดยิง
+    - ยิงกัน
+    - ยิงปืน
+    - อาวุธปืน
+    - แทง
+    - ทำร้าย
+    - ซ้อม
+    - ลักทรัพย์
+    - ขโมย
+    - ชิงทรัพย์
+    - ปล้น
+    - ข่มขืน
+    - มิจฉาชีพ
+    - ฉ้อโกง
+    - ปลอมแปลง
+    - จับกุม
+    - ค้ายา
+    - ยาเสพติด
+    - ยาบ้า
+    - การพนัน
+    - พนัน
+    - วางระเบิด
+  street_retail_popup:
+    - ตลาดนัด
+    - ตลาดเช้า
+    - ตลาดค่ำ
+    - ตลาดชั่วคราว
+    - แผงลอย
+    - หาบเร่
+    - รถเข็น
+    - แม่ค้า
+    - พ่อค้า
+    - ขายของริมทาง
+    - ค้าขาย
+    - ก๋วยเตี๋ยว
+    - ขายของ
+  begging_homeless:
+    - ขอทาน
+    - คนไร้บ้าน
+    - ไร้บ้าน
+    - เร่ร่อน
+    - นอนข้างทาง
+    - นอนริมทาง
+    - นอนบนทางเท้า
+    - ขอเงิน
+    - เช็ดกระจกรถ
+
+# Traffy Fondue complaint hashtags → same taxonomy (substring match on hashtag)
+traffy_map:
+  natural_disaster: [น้ำท่วม, อุทกภัย, น้ำหลาก, พายุ, ฝน]
+  technical_disaster: [ไฟ, ไฟฟ้า, รั่ว, ซึม, อุดตัน, น้ำเสีย, ขยะ, มลพิษ, ฝุ่น, เสียงดัง, สะพาน, ถนนพัง, ทางเท้าพัง, หลอดไฟ]
+  traffic_incident: [จราจร, รถติด, จอดรถ, จอด, ทางแยก, อุบัติเหตุ]
+  crime: [ความปลอดภัย, จุดเสี่ยง, ยาเสพติด, การพนัน, โจร]
+  begging_homeless: [ขอทาน, เช็ดกระจก, ไร้บ้าน]

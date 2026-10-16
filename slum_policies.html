@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slum Policies — 16-Country Comparison — Pixel2Policy TH</title>
+<style>
+  html, body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f6f8; color: #1c2833; }
+  #site-header {
+    position: sticky; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; flex-wrap: wrap; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; color: #12314e; }
+  .sub { color: #5d6d7e; font-size: 13.5px; margin: 0 0 18px; max-width: 900px; line-height: 1.5; }
+
+  .legend-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; }
+  .chip { font-size: 11.5px; padding: 3px 10px; border-radius: 12px; color: #fff; }
+  .chip.ok { background: #2e7d32; } .chip.mid { background: #b07d00; }
+  .chip.bad { background: #b02a2a; } .chip.neutral { background: #4a6785; }
+
+  .table-scroll { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+  table { border-collapse: collapse; width: 100%; min-width: 1180px; }
+  th, td { vertical-align: top; padding: 10px 10px; border-bottom: 1px solid #e3e8ec; font-size: 12.5px; line-height: 1.45; text-align: left; }
+  th { background: #12314e; color: #fff; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; position: sticky; top: 36px; }
+  tr:hover td { background: #f6f9fc; }
+  td.country { font-weight: 700; color: #12314e; white-space: nowrap; }
+  td.people { white-space: nowrap; font-weight: 600; color: #34495e; }
+  .slum-name { font-weight: 700; }
+  .map-link { display: inline-block; margin-top: 4px; font-size: 11.5px; color: #1565c0; text-decoration: none; }
+  .map-link:hover { text-decoration: underline; }
+  .img-cell a { display: block; }
+  .img-cell img { width: 132px; height: 88px; object-fit: cover; border-radius: 6px; border: 1px solid #d5dbe0; display: block; }
+  .img-cell .credit { display: block; font-size: 9.5px; color: #8a97a3; margin-top: 3px; max-width: 132px; }
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; color: #fff; margin-bottom: 4px; }
+  .badge.ok { background: #2e7d32; } .badge.mid { background: #b07d00; }
+  .badge.bad { background: #b02a2a; } .badge.neutral { background: #4a6785; }
+  .ref { font-size: 9.5px; color: #7d8b99; }
+
+  h2 { font-size: 18px; color: #12314e; margin: 30px 0 10px; }
+  .patterns ul { font-size: 13.5px; line-height: 1.65; max-width: 900px; padding-left: 20px; }
+  .patterns b { color: #12314e; }
+
+  .refs ol { font-size: 12px; line-height: 1.6; max-width: 950px; padding-left: 22px; }
+  .refs a { color: #1565c0; word-break: break-all; }
+  .refs .accessed { color: #7d8b99; }
+  .footnote { font-size: 11.5px; color: #7d8b99; margin-top: 26px; border-top: 1px solid #dde3e8; padding-top: 10px; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html" class="active">Slum policies</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="social.html">Social pulse</a>
+    <a href="proposal.html">Proposal</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <h1>Slum policies — 16-country comparison</h1>
+  <p class="sub">How 16 countries treated their largest informal settlements: what policy was written, what actually happened on the ground,
+  and whether it worked. One representative case per country, with population estimates, build materials, main issues, the applied policy,
+  and the de facto outcome. Click any image to open the full-resolution source; click the map pin to open the location in Google Maps.
+  Full Harvard-style references with live links at the bottom of the page.</p>
+
+  <div class="legend-chips">
+    <span class="chip ok">Success</span>
+    <span class="chip mid">Mixed / partial</span>
+    <span class="chip bad">Failed / stalled</span>
+    <span class="chip neutral">Contained / in progress</span>
+  </div>
+
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Location &amp; slum</th>
+        <th>Image</th>
+        <th>People (est.)</th>
+        <th>Build material</th>
+        <th>Main issues</th>
+        <th>Policy applied</th>
+        <th>De facto execution — consequences</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td class="country">Brazil</td>
+        <td><span class="slum-name">Rocinha favela</span>, Rio de Janeiro<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Rocinha%2C+Rio+de+Janeiro" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/29ef0c2c6dc8.jpg" target="_blank"><img src="img/slum_policies/br.jpg" alt="Rocinha favela, Rio de Janeiro" loading="lazy"></a><span class="credit">My Solo Footprints</span></td>
+        <td class="people">150k–200k, under 2 km²</td>
+        <td>Brick, concrete, multi-storey self-built</td>
+        <td>No sanitation in parts, landslide risk, gang control, extreme density</td>
+        <td>Favela-Bairro (1994), PAC Favelas (2007), Morar Carioca (2010) — in-situ upgrading <span class="ref">[1][2]</span></td>
+        <td><span class="badge mid">Mixed</span>Works built, then abandoned. No maintenance, no continuous state policy. Programs restart under new names, stop again. Political crisis delays essential works; resident trust eroded after decades of neglect.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Colombia</td>
+        <td><span class="slum-name">Comuna 13</span> + comunas 1–2, Medellín<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Comuna+13%2C+Medellin" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/b86f66c50d84.jpg" target="_blank"><img src="img/slum_policies/co.jpg" alt="Medellín hillside informal settlement" loading="lazy"></a><span class="credit">Ecocity Builders</span></td>
+        <td class="people">Comuna 13 ~130k; comunas 1–2 ~300k+</td>
+        <td>Brick, block, self-built hillside housing</td>
+        <td>Highest homicide rate in city (2004), disconnection from city, informality</td>
+        <td>PUI Integral Urban Project (2004–2015), MetroCable, library parks — "social urbanism" <span class="ref">[3][4]</span></td>
+        <td><span class="badge ok">Success</span>Homicides fell sharply, cable car + services connected the hills to the city, global model. Critique: gentrification pressure, displacement of poorest, maintenance gaps.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Kenya</td>
+        <td><span class="slum-name">Kibera</span>, Nairobi<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Kibera%2C+Nairobi" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/54b8fea64fca.jpg" target="_blank"><img src="img/slum_policies/ke.jpg" alt="Kibera slum alley, Nairobi" loading="lazy"></a><span class="credit">Political Perspectives</span></td>
+        <td class="people">250k official; up to 1M contested</td>
+        <td>Mud walls, timber, corrugated tin sheets</td>
+        <td>Extreme density, no tenure, "flying toilets", flooding, rent extraction by absentee structure-owners</td>
+        <td>KENSUP / KSUP with UN-Habitat (2000s): Lang'ata decanting site, new apartment blocks <span class="ref">[5][6]</span></td>
+        <td><span class="badge mid">Partial</span>Only a few thousand rehoused. Decanting site disrupted social networks, ownership disputes + corruption stalled later phases. Most of Kibera remains as it was.</td>
+      </tr>
+
+      <tr>
+        <td class="country">South Africa</td>
+        <td><span class="slum-name">Khayelitsha</span> township + ~1,500 targeted settlements, Cape Town<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Khayelitsha%2C+Cape+Town" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/dd7ece54607e.jpg" target="_blank"><img src="img/slum_policies/za.jpg" alt="Khayelitsha informal settlement aerial" loading="lazy"></a><span class="credit">NSL – ETH Zürich</span></td>
+        <td class="people">Khayelitsha ~400k</td>
+        <td>Corrugated-iron shacks, wood, cardboard</td>
+        <td>Shack fires, floods, no services, apartheid spatial legacy, violence</td>
+        <td>RDP free houses (1994), Breaking New Ground + UISP in-situ upgrading (2004), ring-fenced ISUP grant (2020) <span class="ref">[7][8][9]</span></td>
+        <td><span class="badge mid">Mixed</span>3M+ free houses built; 84% formal housing now vs 65% in 1996. But RDP houses on far periphery replicate apartheid geography; beneficiaries sell or rent out and return informal. Delivery fell to 23k houses in 2025/26. Shift to upgrading is slow.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Tanzania</td>
+        <td><span class="slum-name">Tandale, Manzese</span> and citywide unplanned areas, Dar es Salaam<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Tandale%2C+Dar+es+Salaam" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/0561072f6beb.jpg" target="_blank"><img src="img/slum_policies/tz.jpg" alt="Dar es Salaam informal settlement aerial" loading="lazy"></a><span class="credit">IIED</span></td>
+        <td class="people">~70% of city informal, millions</td>
+        <td>Mud + poles + iron sheets ("Swahili house"), sand floors</td>
+        <td>No services, flooding, uncontrolled sprawl — informal areas grew 630% 1982–2022</td>
+        <td>20,000 Plots Programme (2002, delivered 36k+ plots), Residential Licences, MKURABITA titling, Citywide Upgrading Strategy (2007) <span class="ref">[10][11][12][13]</span></td>
+        <td><span class="badge mid">Mixed</span>Plots sold fast, costs recovered, titled land commands 71% price premium. But wealthier households bought plots, occupancy stayed low, speculation. Upgrading tiny vs growth — informal expansion continues anyway.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Gabon</td>
+        <td><span class="slum-name">Akébé</span>, Nombakélé, PK zones, Libreville<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Akebe%2C+Libreville%2C+Gabon" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/0b2077d8c0e2.jpg" target="_blank"><img src="img/slum_policies/ga.jpg" alt="Slum demolition with police, Libreville" loading="lazy"></a><span class="credit">Jeune Afrique</span></td>
+        <td class="people">National slum pop ~790k (39% urban)</td>
+        <td>Wood plank, earth, corrugated iron</td>
+        <td>No services, tenure insecurity, demolition risk, decades of under-delivered housing</td>
+        <td>State housing programmes (3,100 units Bikélé-Nzong + Essassa, 2026), déguerpissement clearances for roads, compensation + SNI plots <span class="ref">[14][15][16]</span></td>
+        <td><span class="badge bad">Failed</span>Housing agencies under-delivered for decades (ANGT scandal: 60 funded schools never built). Clearances continue; compensation judged too small, rehousing weak, residents protest.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Angola</td>
+        <td><span class="slum-name">Musseques</span> (Sambizanga etc.), Luanda<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Sambizanga%2C+Luanda%2C+Angola" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/ba0e09c6e3b9.jpg" target="_blank"><img src="img/slum_policies/ao.jpg" alt="Luanda musseque aerial" loading="lazy"></a><span class="credit">Dezeen</span></td>
+        <td class="people">~8M in musseques</td>
+        <td>Mud block, zinc sheets, sand floors</td>
+        <td>No water or sanitation, extreme occupancy, illegal on paper, demolition threat</td>
+        <td>Tabula rasa: demolish central musseques, build Chinese "centralidades" new towns (Kilamba etc., 2007+), rehouse on outskirts <span class="ref">[17][18]</span></td>
+        <td><span class="badge bad">Failed</span>Top-down, zero consultation; master plan implied rehousing 5.9M people (86% of Luanda). Kilamba flats unaffordable at first; now 65% of Kilamba and Sequele residents in rent debt. Musseques keep growing.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Zambia</td>
+        <td><span class="slum-name">Kanyama</span>, George, Garden compounds, Lusaka<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Kanyama%2C+Lusaka%2C+Zambia" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/4715b701a2cc.jpg" target="_blank"><img src="img/slum_policies/zm.jpg" alt="Lusaka informal settlement vs formal neighborhood" loading="lazy"></a><span class="credit">Unequal Scenes</span></td>
+        <td class="people">Kanyama ~250k+; 1973: 1 in 2 Lusaka residents a squatter</td>
+        <td>Mud block, pole-and-mud, iron sheets</td>
+        <td>Cholera outbreaks (2017–18, 2023–24), flooding, no drainage, density</td>
+        <td>World Bank squatter upgrading + sites-and-services (1970s: 17k dwellings serviced, 7,600 new plots) — among the world's first large in-situ programmes <span class="ref">[19][20][21]</span></td>
+        <td><span class="badge mid">Early success, stalled</span>1970s upgrading worked where implemented and became a global model. Then cost recovery and standards killed scale. Today over 50% of urban Zambia is informal and cholera returns to Kanyama.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Namibia</td>
+        <td><span class="slum-name">Katutura</span> + extensions (Havana, Otjomuise), Windhoek<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Katutura%2C+Windhoek%2C+Namibia" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/319ab78f8f30.jpg" target="_blank"><img src="img/slum_policies/na.jpg" alt="Katutura informal settlement shacks" loading="lazy"></a><span class="credit">EnergyTransition.org</span></td>
+        <td class="people">Tens of thousands of shack households, fast growth</td>
+        <td>Corrugated-zinc shacks, wood</td>
+        <td>No services, multi-year land waitlists, tenure insecurity</td>
+        <td>Informal Settlement Upgrading Policy (1999): block-by-block; Shack Dwellers Federation (SDFN) co-production, saving groups buy and service own land; PISUP with UN-Habitat <span class="ref">[22][23]</span></td>
+        <td><span class="badge mid">Partial success</span>Co-production praised globally; SDFN delivered affordable land to thousands. But backlog grows faster than delivery, and poorest cannot afford even serviced plots. State now funds mass land servicing.</td>
+      </tr>
+
+      <tr>
+        <td class="country">India</td>
+        <td><span class="slum-name">Dharavi</span>, Mumbai<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Dharavi%2C+Mumbai" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/bd167b881506.jpg" target="_blank"><img src="img/slum_policies/in.jpg" alt="Dharavi slum housing and canal, Mumbai" loading="lazy"></a><span class="credit">Citizen Matters</span></td>
+        <td class="people">700k–1M on 2.4 km²</td>
+        <td>Brick + concrete + tin, dense mixed residential-industrial</td>
+        <td>Highest density in the city, housing mixed with industry, no tenure, pollution</td>
+        <td>SRA model (1995): developer gets sale FSI, builds free flats for dwellers; Dharavi Redevelopment Project (2004), Adani survey (2024) <span class="ref">[24]</span></td>
+        <td><span class="badge bad">Stalled 20 years</span>Eligibility cutoff disputes, resident and business resistance; only a fraction rehoused. SRA citywide delivered flats but small units, corruption reports, livelihoods lost when workshops move. Redevelopment still contested.</td>
+      </tr>
+
+      <tr>
+        <td class="country">UAE</td>
+        <td><span class="slum-name">Sonapur / Al Muhaisnah labor camps</span>, Dubai<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Al+Muhaisnah+Sonapur+Dubai" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/c2902e1bca4e.jpg" target="_blank"><img src="img/slum_policies/ae.jpg" alt="Dubai labor camp dormitory" loading="lazy"></a><span class="credit">Labor Accommodation Dubai</span></td>
+        <td class="people">Millions of migrant workers nationally; camps 1k–8k each</td>
+        <td>Portacabin and prefab bunk dormitories, company-built</td>
+        <td>Overcrowding, extreme heat, wage abuse, fire risk, no family life possible</td>
+        <td>No slums tolerated: employer-must-house rule, Ministerial Resolution 766/2015 minimum standards, inspections, fines and closure, wage protection system <span class="ref">[25][26]</span></td>
+        <td><span class="badge neutral">Contained, not solved</span>Top-tier worker villages good; bottom-tier subcontracted camps still bad (ventilation failures, permit suspensions). Workers can never settle or bring families. The problem is hidden rather than solved.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Malaysia</td>
+        <td><span class="slum-name">Desa Mentari</span> PPR + former kampung setinggan, Kuala Lumpur / Selangor<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Desa+Mentari+Petaling+Jaya" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/915d713f2c84.jpeg" target="_blank"><img src="img/slum_policies/my.jpg" alt="PPR flats balconies, Malaysia" loading="lazy"></a><span class="credit">Rice Media</span></td>
+        <td class="people">Tens of thousands of households relocated</td>
+        <td>Former squatter housing: wood + zinc; replacement: high-rise concrete flats</td>
+        <td>Open dumping, floodplain occupation, stigma</td>
+        <td>Zero Squatter (Setinggan Sifar): Selangor 2001, target 2005; demolition + relocation to PPR low-cost high-rise; PPRT programme 1980s+ <span class="ref">[27][28][29]</span></td>
+        <td><span class="badge mid">Cleared, quality poor</span>Squatter settlements mostly cleared by mid-2000s and the target declared met. But PPR flats meet minimum standards only — bad design, weak facilities, social problems (Desa Mentari study). Hidden squatting persists; states re-pledged zero squatter in 2014.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Singapore</td>
+        <td><span class="slum-name">Bukit Ho Swee kampong</span> (historic), Singapore<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Bukit+Ho+Swee+Singapore" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/51bc789ece1e.jpg" target="_blank"><img src="img/slum_policies/sg.jpg" alt="Singapore kampong wooden houses, 1960s" loading="lazy"></a><span class="credit">Rice Media</span></td>
+        <td class="people">1961: 16k homeless in one night; squatters a large city share</td>
+        <td>Attap thatch, wood, zinc kampong dwellings</td>
+        <td>Fires 2–3 times a year, no sanitation, congestion</td>
+        <td>HDB public housing (1960), Land Acquisition Act (1966), mass resettlement, 99-year-lease flats sold via CPF <span class="ref">[30][31]</span></td>
+        <td><span class="badge ok">Success — global benchmark</span>1961 fire became the push: victims rehoused within a year, then rolling resettlement. Squatters gone by the 1980s. ~80% of residents live in HDB, ~90% homeownership. Cost: kampong community and culture erased.</td>
+      </tr>
+
+      <tr>
+        <td class="country">China</td>
+        <td><span class="slum-name">Baishizhou urban village</span>, Shenzhen<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Baishizhou%2C+Shenzhen" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/801e340d886b.png" target="_blank"><img src="img/slum_policies/cn.jpg" alt="Shenzhen urban village alley" loading="lazy"></a><span class="credit">The World of Chinese</span></td>
+        <td class="people">150k in ~0.6 km²; urban villages house 10M+ citywide</td>
+        <td>"Handshake" brick-concrete blocks 7–8 floors, villager-built</td>
+        <td>Fire risk, density, poor sanitation — yet the city's only affordable migrant housing</td>
+        <td>Urban village redevelopment: 2019 demolition + LVGEM rebuild, big landlord compensation; hukou blocks migrant access to city services; 2023 national urban-village renovation push <span class="ref">[32][33]</span></td>
+        <td><span class="badge neutral">In progress — displacement</span>Demolition ongoing since 2019; media counted 1,878 landlord millionaires. Migrants lose housing: 28% of Baishizhou residents would leave Shenzhen, 51% face longer commutes. Vanke's no-demolition rental plan was abandoned.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Spain</td>
+        <td><span class="slum-name">Cañada Real Galiana</span>, Madrid<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Canada+Real+Galiana+Madrid" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/bb51269fde79.jpg" target="_blank"><img src="img/slum_policies/es.jpg" alt="Cañada Real informal settlement, Madrid" loading="lazy"></a><span class="credit">El Salto</span></td>
+        <td class="people">~8,000 (4,500 in the cut-off sectors); 39% Roma</td>
+        <td>Shacks, improvised brick/block, caravans, some solid houses</td>
+        <td>No legal electricity for 4+ years (cut 2020), no tenure, drug market in sector 6, evictions</td>
+        <td>2017 closure + rehousing plan for sector 6; inter-ministerial group (2021); social housing promises; partial power restoration <span class="ref">[34][35][36][37]</span></td>
+        <td><span class="badge bad">Failed so far</span>European Committee of Social Rights ruled (Feb 2025) Spain violates the Charter — no decent housing, no electricity. Rehousing slow, families wait years. Largest shantytown in Western Europe persists.</td>
+      </tr>
+
+      <tr>
+        <td class="country">Mexico</td>
+        <td><span class="slum-name">Ciudad Nezahualcóyotl (Neza)</span>, Mexico City metro<br>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Ciudad+Nezahualcoyotl" target="_blank">📍 Google Maps</a></td>
+        <td class="img-cell"><a href="https://image-search-mcp-cn-beijing.oss-cn-beijing.aliyuncs.com/image-search-mcp/images-ppt/4935cb932e1a.jpg" target="_blank"><img src="img/slum_policies/mx.jpg" alt="Ciudad Nezahualcóyotl aerial" loading="lazy"></a><span class="credit">EL PAÍS</span></td>
+        <td class="people">1.1M–1.5M on 25 km² of drained lakebed</td>
+        <td>Self-built cinderblock + concrete; early phase cardboard and metal</td>
+        <td>Decades without water/sewer, lakebed flooding and sinking, poverty, crime</td>
+        <td>Regularization, not demolition: land titles, municipality created 1963, service investment 1970s–80s, CORETT/PASPRAH/PRAH title programmes, Piso Firme cement floors (2007–13, US$1.27B national) <span class="ref">[38][39][40][41][42]</span></td>
+        <td><span class="badge ok">Success</span>Neza became a formal municipality with services, consolidated into the metro area — a textbook regularization model. Piso Firme delivered proven health gains in a randomized evaluation. Residual pockets and title disputes remain.</td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+
+  <div class="patterns">
+    <h2>Cross-country patterns</h2>
+    <ul>
+      <li><b>In-situ upgrading</b> (Medellín, Lusaka 1970s, Namibia): cheapest per household, keeps communities and jobs. Needs 20-year maintenance commitment. Brazil shows what happens without it.</li>
+      <li><b>Demolition + peripheral relocation</b> (Angola, Malaysia, China): clears land fast, breaks livelihoods, creates debt traps (Kilamba: 65% rent arrears) and poor-quality towers (Desa Mentari).</li>
+      <li><b>Mass public housing</b> (Singapore): the only proven full-elimination case. Required a strong state, land acquisition law, sale rather than rent, and 30 years of sustained construction.</li>
+      <li><b>Regularization + titles</b> (Mexico, Tanzania): turns a slum into a city slowly. Tanzania shows titles alone favor cash buyers and feed speculation.</li>
+      <li><b>Free houses</b> (South Africa): big numbers, wrong locations, resale leakage, delivery decay.</li>
+      <li><b>Do nothing / contain</b> (Spain, UAE): court rulings for violations, hidden workforce camps, problem persists.</li>
+    </ul>
+  </div>
+
+  <div class="refs">
+    <h2>References (Harvard style)</h2>
+    <ol>
+      <li>'The Rocinha favela as a paradigmatic case study of informal settlements in large cities: current situation and past slum-upgrading programmes' (2020). Cham: Springer. Available at: <a href="https://link.springer.com/chapter/10.1007/978-3-030-44352-8_1" target="_blank">https://link.springer.com/chapter/10.1007/978-3-030-44352-8_1</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>RioOnWatch (2026) 'The "discontinuous continuity" of favela upgrading programs'. Available at: <a href="https://rioonwatch.org/?p=57288" target="_blank">https://rioonwatch.org/?p=57288</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Harvard Graduate School of Design, Urban Design and Conservation Studies Laboratory (n.d.) 'Northeastern Urban Integration Project, Medellín, 2004–2015'. Available at: <a href="https://udcsa.gsd.harvard.edu/projects/4" target="_blank">https://udcsa.gsd.harvard.edu/projects/4</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>ArchDaily (2024) 'The urban transformation of Medellín: a case study'. Available at: <a href="https://www.archdaily.com/1015216/the-urban-transformation-of-medellin-a-case-study" target="_blank">https://www.archdaily.com/1015216/the-urban-transformation-of-medellin-a-case-study</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Association of Council of Academic Social Scientists (2025) 'Kibera slum upgrading project: progress and challenges'. Available at: <a href="https://www.acash.org.pk/kibera-slum-upgrading-project/" target="_blank">https://www.acash.org.pk/kibera-slum-upgrading-project/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>University of Waterloo (n.d.) 'Decanting and social sustainability: Kenya slum upgrading'. UWSpace. Available at: <a href="https://uwspace.uwaterloo.ca/items/ce1d5564-1628-4393-b273-37d5780289af" target="_blank">https://uwspace.uwaterloo.ca/items/ce1d5564-1628-4393-b273-37d5780289af</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Department of Human Settlements, Republic of South Africa (2004) '"Breaking New Ground": a comprehensive plan for the development of sustainable human settlements'. Available at: <a href="https://www.dhs.gov.za/sites/default/files/documents/Breaking%20New%20Ground.pdf" target="_blank">https://www.dhs.gov.za/sites/default/files/documents/Breaking New Ground.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Department of Human Settlements, Republic of South Africa (2021) 'Baseline evaluation of informal settlements targeted for upgrading: summary report'. Available at: <a href="https://www.dhs.gov.za/sites/default/files/documents/FINAL%20EDITED%2012-2021_BASELINE%20EVALUATION%20OF%20IS%20TARGETED%20FOR%20UPGRADE_SUMMARY%20%281%29.pdf" target="_blank">https://www.dhs.gov.za/sites/default/files/documents/FINAL EDITED 12-2021_BASELINE EVALUATION OF IS TARGETED FOR UPGRADE_SUMMARY (1).pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>AllAfrica (2026) 'South Africa: informal settlements are here to stay — let's upgrade them', 7 September. Available at: <a href="https://allafrica.com/stories/202609070610.html" target="_blank">https://allafrica.com/stories/202609070610.html</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Henderson, V., Libano-Monteiro, F., Manara, M., Michaels, G. and Regan, T. (2025) 'Dynamics of greenfield development: evidence from the "20,000 plots" project in Dar es Salaam — housing and neighbourhoods'. International Growth Centre Policy Brief TZA-20168. Available at: <a href="https://www.theigc.org/sites/default/files/2025-05/Henderson-et-al-Policy-Brief-May-2025-housing-and-neighbourhoods.pdf" target="_blank">https://www.theigc.org/sites/default/files/2025-05/Henderson-et-al-Policy-Brief-May-2025-housing-and-neighbourhoods.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>UN-Habitat (2014) 'Informal settlements and finance in Dar es Salaam, Tanzania'. Nairobi: UN-Habitat. Available at: <a href="https://unhabitat.org/sites/default/files/download-manager-files/Informal%20Settlements%20and%20Finance%20in%20Dar%20es%20Salaam%2C%20Tanzania.pdf" target="_blank">https://unhabitat.org/sites/default/files/download-manager-files/Informal Settlements and Finance in Dar es Salaam, Tanzania.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>UN-Habitat (n.d.) 'Citywide action plan for upgrading unplanned and unserviced settlements in Dar es Salaam'. Nairobi: UN-Habitat. Available at: <a href="https://unhabitat.org/sites/default/files/download-manager-files/Citywide%20Action%20Plan%20for%20Upgrading%20Unplanned%20and%20Unserviced%20Settlements%20in%20Dar%20es%20Salaam.pdf" target="_blank">https://unhabitat.org/sites/default/files/download-manager-files/Citywide Action Plan for Upgrading Unplanned and Unserviced Settlements in Dar es Salaam.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Simon, O. and Ngereja, Z.R. (2025) 'Drivers of informal settlement growth and land use change in Dar es Salaam', Journal of Geography, Association of Tanzania (JGAT), 45(1). Available at: <a href="https://jgat.udsm.ac.tz/index.php/jgat/article/download/333/173/673" target="_blank">https://jgat.udsm.ac.tz/index.php/jgat/article/download/333/173/673</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Mplus Africa (2026) 'Déguerpissements à Libreville: les démolitions à Akébé soulèvent des interrogations', 3 September. Available at: <a href="https://mplus.africa/deguerpissements-a-libreville-les-demolitions-a-akebe/" target="_blank">https://mplus.africa/deguerpissements-a-libreville-les-demolitions-a-akebe/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Gabon Actu (2026) 'Akébé: 33 familles affectées par le projet, entre indemnisation et préoccupations de relogement', 27 August. Available at: <a href="https://gabonactu.com/blog/2026/08/27/akebe-33-personnes-affectees-par-le-projet-entre-indemnisation-et-preoccupations-de-relogement/" target="_blank">https://gabonactu.com/blog/2026/08/27/akebe-33-personnes-affectees-par-le-projet-entre-indemnisation-et-preoccupations-de-relogement/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Statbase (2026) 'Population living in slums: Gabon, 2000–2022'. Available at: <a href="https://statbase.org/data/gab-population-living-in-slums/" target="_blank">https://statbase.org/data/gab-population-living-in-slums/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Estudo Prévio (2014) 'Urbanization in Luanda, musseques expansion and the relocation dossier', 6 January. Available at: <a href="https://www.estudoprevio.net/urbanization-in-luanda-musseques-expansion-and-the-relocation-dossier/?lang=en" target="_blank">https://www.estudoprevio.net/urbanization-in-luanda-musseques-expansion-and-the-relocation-dossier/?lang=en</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Africa Press (2026) 'Centralidades: 65 percent of Kilamba and Sequele residents in debt'. Available at: <a href="https://www.africa-press.net/angola/all-news/centralidades-65-percent-of-kilamba-and-sequele-residents-in-debt" target="_blank">https://www.africa-press.net/angola/all-news/centralidades-65-percent-of-kilamba-and-sequele-residents-in-debt</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>World Bank (n.d.) 'Zambia — Lusaka squatter upgrading and site and services project'. Documents and Reports. Available at: <a href="https://documents.worldbank.org/en/publication/documents-reports/documentdetail/641301468334760499" target="_blank">https://documents.worldbank.org/en/publication/documents-reports/documentdetail/641301468334760499</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'Land, layouts and infrastructure in squatter upgrading: the case of Lusaka' (1987) Land Use Policy. Available at: <a href="https://www.sciencedirect.com/science/article/pii/0264275187900953" target="_blank">https://www.sciencedirect.com/science/article/pii/0264275187900953</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'Community participation in slum upgrading among residents of Kanyama Ward 10 Township in Lusaka, Zambia' (2021). Academia.edu. Available at: <a href="https://www.academia.edu/79015935/Community_Participation_in_Slum_Upgrading_Among_Residents_of_Kanyama_Ward_10_Township_in_Lusaka_Zambia" target="_blank">https://www.academia.edu/79015935/Community_Participation_in_Slum_Upgrading_Among_Residents_of_Kanyama_Ward_10_Township_in_Lusaka_Zambia</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'Co-producing Windhoek: the contribution of the Shack Dwellers Federation of Namibia' (2018) Environment and Urbanization, 30(2). Available at: <a href="https://journals.sagepub.com/doi/full/10.1177/0956247818785784" target="_blank">https://journals.sagepub.com/doi/full/10.1177/0956247818785784</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Namibia University of Science and Technology, Institute for Land, Livelihoods and Housing Management (2022) 'Participatory informal settlement upgrading in Namibia: urban diagnostics and informal settlement upgrading strategies'. Available at: <a href="https://illh.nust.na/PISUP" target="_blank">https://illh.nust.na/PISUP</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Government of Maharashtra (2024) 'Dharavi Redevelopment Project'. Official portal. Available at: <a href="https://drpmumbai.maharashtra.gov.in/" target="_blank">https://drpmumbai.maharashtra.gov.in/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Nour Attorneys and Legal Consultants (2026) 'Construction labor camp regulations in UAE: worker housing', 22 August. Available at: <a href="https://www.nourattorneys.com/articles/construction-labor-camp-regulations-uae-worker-housing" target="_blank">https://www.nourattorneys.com/articles/construction-labor-camp-regulations-uae-worker-housing</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>LawShun (2026) 'Dubai labor camps: special laws and worker rights explained'. Available at: <a href="https://lawshun.com/article/are-there-special-laws-in-labor-camps-dubai" target="_blank">https://lawshun.com/article/are-there-special-laws-in-labor-camps-dubai</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Selangor State Government (2001) 'Report on the Selangor Zero Squatter Plan'. Available at: <a href="https://www.scribd.com/document/660287004/Report-on-Selangor-Zero-squatters-policy" target="_blank">https://www.scribd.com/document/660287004/Report-on-Selangor-Zero-squatters-policy</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'Combating squatters in Malaysia: do we have adequate policies as instrument?' (2017). ResearchGate. Available at: <a href="https://www.researchgate.net/publication/318765883_Combating_Squatters_in_Malaysia_Do_We_have_dequate_Policies_As_Instrument" target="_blank">https://www.researchgate.net/publication/318765883_Combating_Squatters_in_Malaysia_Do_We_have_dequate_Policies_As_Instrument</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Aziz, F.A., Ujang, N. et al. (2022) 'Urban high-rise public housing for squatter resettlement: Desa Mentari as a case study', New Design Ideas, 6(2). Available at: <a href="https://jomardpublishing.com/UploadFiles/Files/journals/NDI/V6N2/Aziz_et_al.pdf" target="_blank">https://jomardpublishing.com/UploadFiles/Files/journals/NDI/V6N2/Aziz_et_al.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Wikipedia (2025) 'Bukit Ho Swee fire'. Available at: <a href="https://en.wikipedia.org/wiki/Bukit_Ho_Swee_fire" target="_blank">https://en.wikipedia.org/wiki/Bukit_Ho_Swee_fire</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>The Straits Times (2021) '60 years on, survivors recall fire that "turned squatters into citizens"', 24 May. Available at: <a href="https://www.straitstimes.com/singapore/60-years-on-survivors-recall-fire-that-turned-squatters-into-citizens-0" target="_blank">https://www.straitstimes.com/singapore/60-years-on-survivors-recall-fire-that-turned-squatters-into-citizens-0</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'The twilight of Shenzhen's great urban village: renovation of Baishizhou' (n.d.). Semantic Scholar. Available at: <a href="https://pdfs.semanticscholar.org/50b2/569aa84085b6329cab788014025ba6e06e76.pdf" target="_blank">https://pdfs.semanticscholar.org/50b2/569aa84085b6329cab788014025ba6e06e76.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Sixth Tone (2019) 'How Shenzhen's urban village advocates are learning from failure', 28 October. Available at: <a href="https://www.sixthtone.com/news/1004711/how-shenzhens-urban-village-advocates-are-learning-from-failure" target="_blank">https://www.sixthtone.com/news/1004711/how-shenzhens-urban-village-advocates-are-learning-from-failure</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>'Disconnected, yet in the spotlight: emergency research on extreme energy poverty in the Cañada Real informal settlement, Spain' (2023) Energy Research &amp; Social Science. Available at: <a href="https://www.sciencedirect.com/science/article/pii/S2214629623002426" target="_blank">https://www.sciencedirect.com/science/article/pii/S2214629623002426</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Environmental Justice Atlas (2021) 'Eviction of Roma and electricity cut-off, Cañada Real Galiana, Madrid'. Available at: <a href="https://ejatlas.org/conflict/city-council-evicted-and-demolished-the-house-of-a-roma-ethnicity-family-in-canada-real-galiana-madrid" target="_blank">https://ejatlas.org/conflict/city-council-evicted-and-demolished-the-house-of-a-roma-ethnicity-family-in-canada-real-galiana-madrid</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Euractiv (2025) 'Spain under fire for neglecting shanty town near Madrid', 27 February. Available at: <a href="https://www.euractiv.com/news/spain-under-fire-for-neglecting-shanty-town-near-madrid/" target="_blank">https://www.euractiv.com/news/spain-under-fire-for-neglecting-shanty-town-near-madrid/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>The Guardian (2024) '"We're living like wild animals": Europe's largest shantytown waits in vain for power', 6 October. Available at: <a href="https://www.theguardian.com/world/2024/oct/06/were-living-like-wild-animals-europes-largest-shantytown-waits-in-vain-for-power" target="_blank">https://www.theguardian.com/world/2024/oct/06/were-living-like-wild-animals-europes-largest-shantytown-waits-in-vain-for-power</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>University of Stuttgart (n.d.) 'Consolidation and differentiation process of Ciudad Nezahualcóyotl'. Available at: <a href="https://elib.uni-stuttgart.de/bitstreams/5c5edfa9-57f5-478a-9a95-938b3bb2df44/download" target="_blank">https://elib.uni-stuttgart.de/bitstreams/5c5edfa9-57f5-478a-9a95-938b3bb2df44/download</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Wikipedia (2024) 'Ciudad Nezahualcóyotl'. Available at: <a href="https://en.wikipedia.org/wiki/Ciudad_Nezahualc%C3%B3yotl" target="_blank">https://en.wikipedia.org/wiki/Ciudad_Nezahualcóyotl</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Borgen Magazine (2023) 'The impacts of Mexico's Piso Firme program', 9 March. Available at: <a href="https://www.borgenmagazine.com/piso-firme-program/" target="_blank">https://www.borgenmagazine.com/piso-firme-program/</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>Cattaneo, M.D., Galiani, S., Gertler, P.J., Martinez, S. and Titiunik, R. (2009) 'Housing, health, and happiness', American Economic Journal: Economic Policy, 1(1). Available at: <a href="https://www.jstor.org/stable/25760028" target="_blank">https://www.jstor.org/stable/25760028</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>International Initiative for Impact Evaluation (3ie) (n.d.) 'Walking on solid ground: a replication study on Piso Firme's impact', Replication Paper 7. Available at: <a href="https://www.3ieimpact.org/evidence-hub/publications/replication-papers/walking-solid-ground-replication-study-piso-firmes" target="_blank">https://www.3ieimpact.org/evidence-hub/publications/replication-papers/walking-solid-ground-replication-study-piso-firmes</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+      <li>World Bank (2019) 'Mexico: improving housing resilience — synthesis report'. Available at: <a href="https://documents1.worldbank.org/curated/en/605571574937088827/pdf/Synthesis-Report.pdf" target="_blank">https://documents1.worldbank.org/curated/en/605571574937088827/pdf/Synthesis-Report.pdf</a> <span class="accessed">(Accessed: 16 October 2026)</span>.</li>
+    </ol>
+  </div>
+
+  <p class="footnote">Population figures are estimates and vary widely by source; ranges are given where counts are contested. Verdict badges summarise the dominant evidence in the cited sources. Page compiled 16 October 2026. Image thumbnails link to their original full-resolution files; credits shown below each thumbnail.</p>
+</div>
+</body>
+</html>
