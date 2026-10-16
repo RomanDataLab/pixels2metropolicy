@@ -10,3 +10,6 @@ theos_block/
 *.part
 *.pdf
 *.parquet
+*.pptx
+*.docx
+*.xlsx
