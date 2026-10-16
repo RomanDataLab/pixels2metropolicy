@@ -1,2 +1,10 @@
 desktop.ini
 *.part
+__pycache__/
+.zcode/
+01_data/
+04_output/
+05_models/
+05_scratch/
+theos_block/
+*.part

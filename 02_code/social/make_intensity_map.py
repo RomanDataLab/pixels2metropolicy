@@ -1,4 +1,4 @@
-"""social-economic sensing of slums step 8b — neighborhood (ชุมชน community) category-intensity choropleth.
+"""slum_pulse step 8b — neighborhood (ชุมชน community) category-intensity choropleth.
 
 Neighborhood polygons = the BMA community boundary layer already in the repo
 (01_data/02_external_vector/bkk_community_boundaries/bkk_community_boundary.shp,
@@ -30,7 +30,7 @@ COMMUNITY_SHP = (REPO / "01_data" / "02_external_vector" / "bkk_community_bounda
 KHER_GEOJSON = REPO / "05_scratch" / "social" / "bkk_khet.geojson"
 RISK_CSV = REPO / "01_data" / "02_raw_imports" / "bma_risk_areas_15-2568.csv"
 CATEGORIES = ["natural_disaster", "technical_disaster", "traffic_incident", "crime",
-              "prostitution", "street_retail_popup", "begging_homeless"]
+              "street_retail_popup", "begging_homeless"]
 RAMP = ["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c"]
 SIMPLIFY_TOL = 0.0004
 TYPE_EN = {"ชุมชนแออัด": "slum community", "ชุมชนเมือง": "urban community",
@@ -198,7 +198,7 @@ def main() -> int:
 
 
 METHOD_HTML = """
-<h3 style="margin:4px 0">social-economic sensing of slums methodology</h3>
+<h3 style="margin:4px 0">slum_pulse methodology</h3>
 <p>Social-signal layer geolocating news, official complaints and public social media
 to Bangkok's 1,993 BMA-registered communities (626 slums). 92-day rolling window.</p>
 
@@ -231,18 +231,12 @@ Headlines carry the location signal in Thai local reporting.</p>
 (t.me/s/), Thai-language channels prioritized (Thai script matches the
 gazetteer). Telegram policy: only channels with 5,000+ verified followers,
 with an exemption for Thai-language channels; subscriber counts cross-checked
-against independent crawlers because t.me serves decoy counts to scrapers.</p><p><b>Telegram chat groups (deferred):</b> the large Bangkok communities
-(Бангкок Общение ~14K, Чат Бангкок B-G ~12K, Бангкок Таиланд Чат ~7.5K members,
-Russian-language) are groups without public web previews. Ingestion is prepared
-via the official MTProto API (Telethon, read-only, PII stripped —
-fetch_telethon.py) and awaits account API credentials; group handles are
-registered with status "deferred_telethon" in the source registry.</p>
+against independent crawlers because t.me serves decoy counts to scrapers.</p>
 
 <h4>Step 6 — Event extraction</h4>
 <p>Open-source Thai NLP (pythainlp tokenization) plus a keyword lexicon
-classifying texts into seven categories: natural disaster, technical disaster,
-traffic incident, crime, adult industry, street retail &amp; popup markets,
-begging &amp; homelessness. Thai texts machine-translated to English for display
+classifying texts into six categories: natural disaster, technical disaster,
+traffic incident, crime, street retail &amp; popup markets, begging &amp; homelessness. Thai texts machine-translated to English for display
 (DeepSeek, batch).</p>
 
 <h4>Step 7 — Geolocation tiers</h4>
@@ -259,7 +253,7 @@ so T3 dominates; slum-level precision comes from Traffy GPS pins.</p>
 <h4>References (Harvard)</h4>
 <ol style="padding-left:16px;margin:4px 0">
 <li>Bangkok Metropolitan Administration (2026) <i>ขอบเขตชุมชน (ตรวจสอบแล้ว) [Verified community boundaries]</i>. Available at: https://cpudgiapp.bangkok.go.th/arcgis/rest/services/Community/Service_Community/FeatureServer/14 (Accessed: 8 October 2026).</li>
-<li>Bangkok Metropolitan Administration (2026) <i>บัญชีพื้นที่เสี่ยงและพื้นที่อันตราย กทม. ปีงบประมาณ 2568 [BMA risk and danger-area registry, FY 2568]</i>, สํานักเทศกิจ. Available at: https://data.bangkok.go.th/dataset/ced48 (Accessed: 8 October 2026).</li>
+<li>Bangkok Metropolitan Administration (2026) <i>บัญชีพื้นที่เสี่ยงและพื้นที่อันตราย กทม. ปีงบประมาณ 2568 [BMA risk and danger-area registry, FY 2568]</i>. Available at: https://data.bangkok.go.th (Accessed: 8 October 2026).</li>
 <li>geoBoundaries (2023) <i>Thitan ADM2 — geoBoundariesSimplified</i>. Available at: https://www.geoboundaries.org (Accessed: 8 October 2026).</li>
 <li>Google (2026) <i>Google News RSS search</i>. Available at: https://news.google.com/rss/search (Accessed: 8 October 2026).</li>
 <li>National Electronics and Computer Technology Center (NECTEC) (2026) <i>Traffy Fondue public share API</i>. Available at: https://publicapi.traffy.in.th/share/search (Accessed: 8 October 2026).</li>
@@ -279,7 +273,7 @@ HTML = """<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>social-economic sensing of slums — neighborhood category intensity</title>
+<title>slum_pulse — neighborhood category intensity</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   body{margin:0;font-family:sans-serif}
@@ -297,7 +291,7 @@ HTML = """<!DOCTYPE html>
 <body>
 <div id="map"></div>
 <div class="panel">
-  <h1>social-economic sensing of slums — events per neighborhood (ชุมชน)</h1>
+  <h1>slum_pulse — events per neighborhood (ชุมชน)</h1>
   <div class="cats" id="cats"></div>
   <label><input type="checkbox" id="khet"/> khet (district) outlines</label>
   <label><input type="checkbox" id="slumonly"/> slum communities only</label>
@@ -318,13 +312,13 @@ const N = __COMMUNITY_GEOJSON__;
 const KH = __KHET_GEOJSON__;
 const RISK = __RISK_PINS__;
 const CATS = __CATS__;
-const LABELS = { prostitution: 'adult industry' };
+const LABELS = {};   // display-name overrides for categories
 const COLORS = {
   natural_disaster:   '#1f78b4',
   technical_disaster: '#ff7f00',
   traffic_incident:   '#6a3d9a',
   crime:              '#e31a1c',
-  prostitution:       '#c51b8a',
+
   street_retail_popup:'#33a02c',
   begging_homeless:   '#8c6d31'
 };
