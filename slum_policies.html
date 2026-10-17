@@ -813,37 +813,35 @@
 
 <script>
 (function () {
-  var pop = null;
-  function close() { if (pop) { pop.remove(); pop = null; } }
-  function center() {
-    var w = pop.offsetWidth, h = pop.offsetHeight;
-    pop.style.left = Math.max(8, (window.innerWidth - w) / 2) + 'px';
-    pop.style.top = Math.max(44, (window.innerHeight - h) / 2) + 'px';
-  }
-  function attach(title, fullSrc, fallbackSrc) {
-    pop = document.createElement('div');
-    pop.className = 'img-pop';
+  function openPop(title, fullSrc, fallbackSrc) {
+    var el = document.createElement('div');
+    el.className = 'img-pop';
     var bar = document.createElement('div');
     bar.className = 'pop-bar';
     var name = document.createElement('b'); name.textContent = title || 'Image';
     var hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'drag to move · double-click to close';
     bar.appendChild(name); bar.appendChild(hint);
     var load = document.createElement('div'); load.className = 'pop-load'; load.textContent = 'loading full image…';
-    pop.appendChild(bar); pop.appendChild(load);
-    document.body.appendChild(pop);
+    el.appendChild(bar); el.appendChild(load);
+    document.body.appendChild(el);
+    function center() {
+      var w = el.offsetWidth, h = el.offsetHeight;
+      el.style.left = Math.max(8, (window.innerWidth - w) / 2) + 'px';
+      el.style.top = Math.max(44, (window.innerHeight - h) / 2) + 'px';
+    }
     center();
-    pop.addEventListener('dblclick', close);
+    el.addEventListener('dblclick', function () { el.remove(); });
     bar.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return;
-      var sx = e.clientX - pop.offsetLeft, sy = e.clientY - pop.offsetTop;
-      bar.setPointerCapture(e.pointerId);
+      var sx = e.clientX - el.offsetLeft, sy = e.clientY - el.offsetTop;
+      try { bar.setPointerCapture(e.pointerId); } catch (err) {}
       function mv(ev) {
-        pop.style.left = Math.min(window.innerWidth - 60, Math.max(-pop.offsetWidth + 80, ev.clientX - sx)) + 'px';
-        pop.style.top = Math.min(window.innerHeight - 40, Math.max(36, ev.clientY - sy)) + 'px';
+        el.style.left = Math.min(window.innerWidth - 60, Math.max(-el.offsetWidth + 80, ev.clientX - sx)) + 'px';
+        el.style.top = Math.min(window.innerHeight - 40, Math.max(36, ev.clientY - sy)) + 'px';
       }
-      function up() { bar.removeEventListener('pointermove', mv); bar.removeEventListener('pointerup', up); }
-      bar.addEventListener('pointermove', mv);
-      bar.addEventListener('pointerup', up);
+      function up() { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); }
+      document.addEventListener('pointermove', mv);
+      document.addEventListener('pointerup', up);
       e.preventDefault();
     });
     var pre = new Image();
@@ -870,7 +868,7 @@
     var thumb = a.querySelector('img');
     var title = (thumb && thumb.alt ? thumb.alt : (credit ? credit.textContent : 'Image'));
     var fallback = thumb ? thumb.src : '';
-    attach(title, a.href, fallback);
+    openPop(title, a.href, fallback);
   });
 })();
 </script>
