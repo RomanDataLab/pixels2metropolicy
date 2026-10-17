@@ -16,12 +16,14 @@
   .panel .btns button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer; }
   #slum_video { position: absolute; right: 10px; z-index: 1000; background: white; display: none;
            padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.3);
-           font-family: sans-serif; font-size: 13px; max-width: 300px; }
+           font-family: sans-serif; font-size: 13px; max-width: 324px; box-sizing: border-box;
+           max-height: calc(100vh - 56px); overflow-y: auto; }
   #slum_video .vid-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
   #slum_video .vid-title { font-weight: bold; font-size: 13px; margin: 0; }
   #slum_video .vid-sub { font-size: 11px; color: #555; margin: 2px 0 4px; }
   #slum_video .vid-close { border: 0; background: none; font-size: 16px; line-height: 1; cursor: pointer; color: #666; padding: 0 0 0 4px; }
   #slum_video iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 6px; display: block; }
+  #slum_video .tt-wrap iframe { width: 100%; max-width: 240px; height: 427px; aspect-ratio: auto; margin: 0 auto; }
   #slum_video .vid-note { font-size: 11px; color: #555; margin: 5px 0 0; }
   #slum_video .vid-nav { margin-top: 7px; }
   #slum_video .vid-nav button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer; }
@@ -761,23 +763,22 @@ L.control.layers({ 'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/
 document.getElementById('count').textContent = NHA.features.length;
 function fly(lat, lon, z) { map.flyTo([lat, lon], z); }
 
-// ---- slum video panel: curated YouTube videos, name-verified (search title + YouTube oEmbed title) ----
-// match: "exact" = video about this named community; "area" = video about the community's temple/canal/district
+// ---- slum video panel: curated street-level videos (TikTok + YouTube), name-verified twice ----
+// (parallel-search title + live oEmbed title). src: "tt:<id>" = TikTok, "yt:<id>" = YouTube.
+// Only real street/walk/market footage; no slideshows, ceremonies, or presentations.
 const SLUM_VIDEOS = {
-  "100431": { vid: "TyVZfA2y6XY", match: "exact", vtitle: "EP.87 ร้อยอาชีพพลิกฝัน | วิสาหกิจชุมชนกลุ่มแม่บ้านชุมชนสันประเสริฐ", ch: "Munwork Mediafilm" },
-  "105737": { vid: "CXhN5yzOrW4", match: "area", vtitle: "วัดสระเกศฯ ร่วมกับ ชุมชนโรงไม้วัดสระเกศ สืบสานประเพณีสงกรานต์", ch: "Worawan Mukda" },
-  "101041": { vid: "gfwzExWzuTs", match: "exact", vtitle: "ตรวจเยี่ยมชุมชนหลังไปรษณีย์สำเหร่", ch: "เขตธนบุรี กรุงเทพมหานคร" },
-  "110426": { vid: "UiwQhBXuz3s", match: "area", vtitle: "ตลาดพระประแดง ชุมชนโบราณ นครเขื่อนขันธ์ | Thailand Street Food Vlog", ch: "Richie on the way" },
-  "100406": { vid: "U_tiw8x2yhU", match: "area", vtitle: "EP.149 | เดินเล่นริมคลองบางซื่อ ชุมชนรุ่งเรือง ถนนรัชดาภิเษก กรุงเทพฯ", ch: "Sunny ontour" },
-  "830013": { vid: "agGHN6TIAug", match: "exact", vtitle: "ชุมชนถนนสุทัศน์ ซอย 2", ch: "คมสัน วิริยะสมภพ" },
-  "101563": { vid: "YJQ5lWpKz84", match: "exact", vtitle: "#ชุมชนเพิ่มสินถมยาสามัคคี #เพิ่มสินจ๋าทนายแจมมาแล้ว #เขตสายไหม", ch: "People Voice PPLE" },
-  "115037": { vid: "bPizRffjJbE", match: "area", vtitle: "“เมืองพระประแดง” แรกสุด และตำนานจระเข้พระประแดงที่คนรุ่นหลังยังเล่าขาน", ch: "TONISTYLE" },
-  "705056": { vid: "kUxo1eBdZSI", match: "area", vtitle: "วัดเขาเหลือ ราชบุรี", ch: "walking around เดิน ชม ดู เที่ยว" },
-  "100844": { vid: "VbjuA6CjXZo", match: "area", vtitle: "กรุวัดยางสุทธาราม บางกอกน้อย", ch: "visetniyum Amulet" },
-  "840044": { vid: "KnuQn7gAPuc", match: "exact", vtitle: "ปัญหาเอดส์ชุมชนทองไมล์", ch: "Chaiyadej Bunson" },
-  "100548": { vid: "u5f81yTx91s", match: "exact", vtitle: "#ชุมชนวัดคลองเตยใน1 #ดับเพลิงคลองเตย", ch: "APISIT ORANGE CHANNEL 35" }
+  "105737": { src: "yt:jA2ZMg6q7LA", kind: "street walk · Golden Mount", vtitle: "เดินขึ้นภูเขาทอง (วัดสระเกศ) ชมวิวกรุงเทพมุมสูง [4K]", ch: "DriveThruThailand" },
+  "101041": { src: "tt:7675593623479569685", kind: "street walk · ย่านสำเหร่", vtitle: "เดินเล่นย่านสำเหร่ พาชมบรรยากาศช่วงหัวค่ำหลังเลิกงาน", ch: "@neng_arthid" },
+  "110426": { src: "yt:ta1NfvPbZUQ", kind: "market walk · ตลาดเช้าพระประแดง", vtitle: "ตลาดเช้าพระประแดง ตลาดสดและตลาดของกินพื้นบ้าน", ch: "ช่างไฟไทย" },
+  "100406": { src: "tt:7683784436013419794", kind: "community walk · ริมคลองบางซื่อ", vtitle: "ไม่ได้ก(ลั)บบบ้าน พาเดินชุมชนริมคลองบางซื่อ", ch: "@klapbaan" },
+  "830013": { src: "tt:7414038989910347015", kind: "street · ถนนสุทัศน์ ภูเก็ต", vtitle: "ถนนสุทัศน์ เมืองภูเก็ต", ch: "@tatsuthat_rattanasin" },
+  "101563": { src: "tt:7627870185185217810", kind: "community clip · เพิ่มสินถมยาสามัคคี", vtitle: "#ชุมชนเพิ่มสินถมยาสามัคคี เพิ่มสินจ๋าทนายแจมมาแล้ว", ch: "@sasinan.pple" },
+  "115037": { src: "yt:Cc6pJ81lvaE", kind: "street walk · ริมท่าน้ำพระประแดง", vtitle: "น่าเที่ยว เมืองสวย พระประแดง เดินเล่น ริมท่าน้ำ", ch: "somboon saetia" },
+  "705056": { src: "yt:kUxo1eBdZSI", kind: "walk · วัดเขาเหลือ ราชบุรี", vtitle: "วัดเขาเหลือ ราชบุรี", ch: "walking around เดิน ชม ดู เที่ยว" },
+  "100844": { src: "yt:1-iqMCd8pA0", kind: "footage · วัดยางสุทธาราม", vtitle: "วัดยางสุทธาราม กทม.", ch: "รายทางสตอรี่" },
+  "100548": { src: "tt:7279774168797826309", kind: "street doc · ชุมชนคลองเตย", vtitle: "ที่นี่ ชุมชนคลองเตย หรือ #สลัมคลองเตย คนจนเมือง", ch: "@sorlorstyle" }
 };
-const SLUM_VIDEO_ORDER = ["100431", "105737", "101041", "110426", "100406", "830013", "101563", "115037", "705056", "100844", "840044", "100548"];
+const SLUM_VIDEO_ORDER = ["105737", "101041", "110426", "100406", "830013", "101563", "115037", "705056", "100844", "100548"];
 let svIndex = -1; // position in SLUM_VIDEO_ORDER; -1 = community without curated video
 
 function positionSlumVideo() {
@@ -785,6 +786,7 @@ function positionSlumVideo() {
   const box = document.getElementById('slum_video');
   box.style.top = (panel.offsetTop + panel.offsetHeight + 10) + 'px';
   box.style.width = panel.offsetWidth + 'px';
+  box.style.maxHeight = Math.max(innerHeight - box.offsetTop - 10, 200) + 'px'; // never run past viewport; scrolls inside
 }
 
 function showSlumVideo(commId) {
@@ -796,11 +798,12 @@ function showSlumVideo(commId) {
   document.getElementById('sv_sub').textContent = p.NAME_EN || '';
   if (v) {
     svIndex = SLUM_VIDEO_ORDER.indexOf(commId);
-    document.getElementById('sv_body').innerHTML =
-      '<iframe src="https://www.youtube-nocookie.com/embed/' + v.vid + '" title="' + v.vtitle.replace(/"/g, '&quot;') +
-      '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+    const attrs = ' title="' + v.vtitle.replace(/"/g, '&quot;') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"';
+    document.getElementById('sv_body').innerHTML = v.src.startsWith('tt:')
+      ? '<div class="tt-wrap"><iframe src="https://www.tiktok.com/embed/v2/' + v.src.slice(3) + '"' + attrs + '></iframe></div>'
+      : '<iframe src="https://www.youtube-nocookie.com/embed/' + v.src.slice(3) + '"' + attrs + '></iframe>';
     document.getElementById('sv_note').innerHTML = '▶ ' + v.vtitle + ' — ' + v.ch +
-      ' <span style="color:#888">(' + (v.match === 'exact' ? 'community video' : 'area video') + ')</span>';
+      ' <span style="color:#888">(' + v.kind + ')</span>';
     document.getElementById('sv_pos').textContent = (svIndex + 1) + ' / ' + SLUM_VIDEO_ORDER.length;
   } else {
     svIndex = -1;
