@@ -63,7 +63,8 @@
     background: #12314e; color: #fff; font: 12px/1 "Segoe UI", system-ui, sans-serif; padding: 7px 12px; cursor: move; }
   .img-pop .pop-bar b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
   .img-pop .pop-bar .hint { color: #9fb8d4; white-space: nowrap; }
-  .img-pop img { display: block; max-width: min(92vw, 1400px); max-height: 78vh; }
+  .img-pop img { display: block; max-width: 80vw; max-height: 76vh; }
+  .img-pop .pop-load { color: #9fb8d4; font: 12px "Segoe UI", system-ui, sans-serif; padding: 26px 40px; }
 </style>
 </head>
 <body>
@@ -814,8 +815,12 @@
 (function () {
   var pop = null;
   function close() { if (pop) { pop.remove(); pop = null; } }
-  function open(href, title) {
-    close();
+  function center() {
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    pop.style.left = Math.max(8, (window.innerWidth - w) / 2) + 'px';
+    pop.style.top = Math.max(44, (window.innerHeight - h) / 2) + 'px';
+  }
+  function attach(title, fullSrc, fallbackSrc) {
     pop = document.createElement('div');
     pop.className = 'img-pop';
     var bar = document.createElement('div');
@@ -823,14 +828,10 @@
     var name = document.createElement('b'); name.textContent = title || 'Image';
     var hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'drag to move · double-click to close';
     bar.appendChild(name); bar.appendChild(hint);
-    var img = document.createElement('img'); img.src = href; img.alt = title || '';
-    pop.appendChild(bar); pop.appendChild(img);
+    var load = document.createElement('div'); load.className = 'pop-load'; load.textContent = 'loading full image…';
+    pop.appendChild(bar); pop.appendChild(load);
     document.body.appendChild(pop);
-    requestAnimationFrame(function () {
-      var w = pop.offsetWidth, h = pop.offsetHeight;
-      pop.style.left = Math.max(8, (window.innerWidth - w) / 2) + 'px';
-      pop.style.top = Math.max(44, (window.innerHeight - h) / 2) + 'px';
-    });
+    center();
     pop.addEventListener('dblclick', close);
     bar.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return;
@@ -845,6 +846,20 @@
       bar.addEventListener('pointerup', up);
       e.preventDefault();
     });
+    var pre = new Image();
+    pre.onload = function () {
+      var img = document.createElement('img');
+      img.src = fullSrc; img.alt = title || '';
+      load.replaceWith(img);
+      center();
+    };
+    pre.onerror = function () {
+      var img = document.createElement('img');
+      img.src = fallbackSrc; img.alt = title + ' (full image unavailable - showing cached thumbnail)';
+      load.replaceWith(img);
+      center();
+    };
+    pre.src = fullSrc;
   }
   document.addEventListener('click', function (e) {
     var a = e.target.closest('.img-cell a');
@@ -852,8 +867,10 @@
     e.preventDefault();
     var cell = a.closest('.img-cell');
     var credit = cell ? cell.querySelector('.credit') : null;
-    var img = a.querySelector('img');
-    open(a.href, (img && img.alt ? img.alt : (credit ? credit.textContent : 'Image')));
+    var thumb = a.querySelector('img');
+    var title = (thumb && thumb.alt ? thumb.alt : (credit ? credit.textContent : 'Image'));
+    var fallback = thumb ? thumb.src : '';
+    attach(title, a.href, fallback);
   });
 })();
 </script>
