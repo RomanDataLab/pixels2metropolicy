@@ -55,6 +55,15 @@
   .refs a { color: #1565c0; word-break: break-all; }
   .refs .accessed { color: #7d8b99; }
   .footnote { font-size: 11.5px; color: #7d8b99; margin-top: 26px; border-top: 1px solid #dde3e8; padding-top: 10px; }
+
+  /* ---- floating image popup ---- */
+  .img-pop { position: fixed; z-index: 3000; background: #fff; border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.45); overflow: hidden; user-select: none; }
+  .img-pop .pop-bar { display: flex; justify-content: space-between; gap: 14px; align-items: center;
+    background: #12314e; color: #fff; font: 12px/1 "Segoe UI", system-ui, sans-serif; padding: 7px 12px; cursor: move; }
+  .img-pop .pop-bar b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+  .img-pop .pop-bar .hint { color: #9fb8d4; white-space: nowrap; }
+  .img-pop img { display: block; max-width: min(92vw, 1400px); max-height: 78vh; }
 </style>
 </head>
 <body>
@@ -800,5 +809,53 @@
 
   <p class="footnote">Population figures are estimates and vary widely by source; ranges are given where counts are contested. Cases selected for being outstanding — largest, most cited, or most instructive in outcome — not as a random sample. Verdict badges summarise the dominant evidence in the cited sources. Page compiled 16 October 2026. Image thumbnails link to their original full-resolution files; credits shown below each thumbnail.</p>
 </div>
+
+<script>
+(function () {
+  var pop = null;
+  function close() { if (pop) { pop.remove(); pop = null; } }
+  function open(href, title) {
+    close();
+    pop = document.createElement('div');
+    pop.className = 'img-pop';
+    var bar = document.createElement('div');
+    bar.className = 'pop-bar';
+    var name = document.createElement('b'); name.textContent = title || 'Image';
+    var hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'drag to move · double-click to close';
+    bar.appendChild(name); bar.appendChild(hint);
+    var img = document.createElement('img'); img.src = href; img.alt = title || '';
+    pop.appendChild(bar); pop.appendChild(img);
+    document.body.appendChild(pop);
+    requestAnimationFrame(function () {
+      var w = pop.offsetWidth, h = pop.offsetHeight;
+      pop.style.left = Math.max(8, (window.innerWidth - w) / 2) + 'px';
+      pop.style.top = Math.max(44, (window.innerHeight - h) / 2) + 'px';
+    });
+    pop.addEventListener('dblclick', close);
+    bar.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      var sx = e.clientX - pop.offsetLeft, sy = e.clientY - pop.offsetTop;
+      bar.setPointerCapture(e.pointerId);
+      function mv(ev) {
+        pop.style.left = Math.min(window.innerWidth - 60, Math.max(-pop.offsetWidth + 80, ev.clientX - sx)) + 'px';
+        pop.style.top = Math.min(window.innerHeight - 40, Math.max(36, ev.clientY - sy)) + 'px';
+      }
+      function up() { bar.removeEventListener('pointermove', mv); bar.removeEventListener('pointerup', up); }
+      bar.addEventListener('pointermove', mv);
+      bar.addEventListener('pointerup', up);
+      e.preventDefault();
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('.img-cell a');
+    if (!a) return;
+    e.preventDefault();
+    var cell = a.closest('.img-cell');
+    var credit = cell ? cell.querySelector('.credit') : null;
+    var img = a.querySelector('img');
+    open(a.href, (img && img.alt ? img.alt : (credit ? credit.textContent : 'Image')));
+  });
+})();
+</script>
 </body>
 </html>
