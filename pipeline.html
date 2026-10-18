@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Pipeline — Pixel2Policy TH</title>
+<style>
+  html, body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f6f8; color: #1c2833; }
+  #site-header {
+    position: sticky; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; flex-wrap: wrap; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; color: #12314e; }
+  .sub { color: #5d6d7e; font-size: 13.5px; margin: 0 0 18px; max-width: 940px; line-height: 1.5; }
+  .sub a { color: #1565c0; }
+
+  h2 { font-size: 18px; color: #12314e; margin: 30px 0 10px; }
+  h3 { font-size: 14.5px; color: #12314e; margin: 16px 0 6px; }
+  p { font-size: 13.5px; line-height: 1.6; max-width: 900px; }
+  p.note { color: #7d8b99; font-size: 12px; }
+  ul { font-size: 13.5px; line-height: 1.65; max-width: 900px; padding-left: 20px; }
+  ul li { margin-bottom: 7px; }
+  ul b, p b { color: #12314e; }
+
+  /* ---- flow diagram ---- */
+  .flow { display: flex; flex-direction: column; gap: 0; align-items: stretch; margin: 20px 0 8px; }
+  .frow { display: flex; gap: 12px; }
+  .frow.branch { flex-wrap: wrap; }
+  .fbox { background: #fff; border: 1px solid #d5dbe0; border-radius: 10px; padding: 10px 12px;
+    box-shadow: 0 1px 5px rgba(0,0,0,.10); flex: 1; min-width: 0; }
+  .fbox .fk { display: inline-block; font: 700 10.5px "Segoe UI", system-ui, sans-serif; color: #fff;
+    background: #12314e; border-radius: 10px; padding: 2px 9px; margin-bottom: 5px; letter-spacing: .04em; }
+  .fbox h3 { margin: 0 0 4px; font-size: 13px; color: #12314e; }
+  .fbox p { font-size: 11.5px; line-height: 1.45; margin: 0; color: #5d6d7e; max-width: none; }
+  .fbox.seg .fk { background: #2b6cb0; }
+  .fbox.soc .fk { background: #1d6e5e; }
+  .fbox.join .fk { background: #7a4f01; }
+  .fbox.loop .fk { background: #6a3d8a; }
+  .farrow { text-align: center; color: #8a97a3; font-size: 15px; line-height: 1.5; }
+  .fjoinbar { background: #f0e6d2; border: 1px dashed #b48a2a; color: #7a4f01; border-radius: 10px;
+    text-align: center; font: 700 12px/1.2 "Segoe UI", system-ui, sans-serif; padding: 8px 12px; }
+  .fback { border: 1px dashed #6a3d8a; color: #6a3d8a; border-radius: 10px; text-align: center;
+    font: 600 11.5px "Segoe UI", system-ui, sans-serif; padding: 7px 10px; margin-top: 2px; }
+  @media (max-width: 760px) { .frow { flex-direction: column; } .frow.chain { flex-direction: column; } }
+  .frow.chain .fbox { min-width: 130px; }
+
+  /* ---- tables, chips ---- */
+  .table-scroll { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.12); margin-bottom: 6px; }
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  @media (max-width: 900px) { table { table-layout: auto; min-width: 860px; } }
+  th, td { vertical-align: top; padding: 10px 10px; border-bottom: 1px solid #e3e8ec; font-size: 12.5px; line-height: 1.45; text-align: left; }
+  th { background: #12314e; color: #fff; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+  tr:hover td { background: #f6f9fc; }
+  td b { color: #12314e; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+  .chip { font-size: 11.5px; font-weight: 600; padding: 3px 11px; border-radius: 12px; color: #fff; background: #4a6785; }
+  .chip.crit { background: #b02a2a; }
+
+  .footnote { font-size: 11.5px; color: #7d8b99; margin-top: 26px; border-top: 1px solid #dde3e8; padding-top: 10px; }
+  .footnote a { color: #1565c0; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html">Slum policies review</a>
+    <a href="participation.html">Participation</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="social.html">Social pulse</a>
+    <a href="pipeline.html" class="active">Pipeline</a>
+    <a href="proposal.html">Proposal</a>
+    <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <h1>Decision pipeline</h1>
+  <p class="sub">The tool end-to-end, for metropolitan urban management: satellite segmentation and socio-economic
+  analysis run in parallel, land on the same community polygon, get ranked by domain, and flow through
+  selection, participation and a policy kit — with an after-action audit that re-scores the polygon and closes
+  the loop. Human decides at stage 3; the tool prioritizes, never decides. The unit throughout is the reconciled
+  community polygon (<b>CMT_ID</b>), the join of <a href="datamatch.html">BMA boundaries and the NHA register</a>.</p>
+
+  <div class="flow">
+    <div class="fbox">
+      <span class="fk">STAGE 0 · INPUTS</span>
+      <h3>Public data only</h3>
+      <p>THEOS-2 scenes (GISTDA) · BMA 626 community polygons + NHA 1,588 registry · DPT plan zones (ผังเมืองรวม) · flood WMS · FY 2568 risk registry</p>
+    </div>
+    <div class="farrow">&#9660;</div>
+    <div class="frow branch">
+      <div class="fbox seg">
+        <span class="fk">STAGE 1A · PIXELS</span>
+        <h3>Satellite segmentation — slums &amp; sensitive neighborhoods</h3>
+        <p>Chips &#8594; MobileSAM (gen 1) &#8594; Kabsch/RANSAC alignment vs Overture &#8594; U-Net (gen 2) &#8594; rectilinear roofs &#8594; density, growth, fire scar &#8594; screening queue. Sensitive neighborhoods: slum-like morphology + risk exposure with <b>no register entry</b> — flagged for enumeration, never auto-classified.</p>
+      </div>
+      <div class="fbox soc">
+        <span class="fk">STAGE 1B · SOCIO-ECONOMIC</span>
+        <h3>Multi-source analysis, evaluated per source</h3>
+        <p>Official statistics · Traffy Fondue complaints · social media text · cameras as aggregated text digests. Cross-source agreement raises the confidence flag; disagreement routes to enumeration.</p>
+      </div>
+    </div>
+    <div class="farrow">&#9660;</div>
+    <div class="fjoinbar">JOIN ON CMT_ID — same polygon carries pixels, complaints and zoning</div>
+    <div class="farrow">&#9660;</div>
+    <div class="frow chain">
+      <div class="fbox">
+        <span class="fk">STAGE 2</span>
+        <h3>Rank</h3>
+        <p>Domain sub-scores, critical flags, composite 0–100 + trend + confidence</p>
+      </div>
+      <div class="fbox">
+        <span class="fk">STAGE 3</span>
+        <h3>Select</h3>
+        <p>Governance body picks neighborhoods to react to now, within budget tiers</p>
+      </div>
+      <div class="fbox">
+        <span class="fk">STAGE 4</span>
+        <h3>Participate</h3>
+        <p>Participation technique from the pool, matched to kit and community capacity</p>
+      </div>
+      <div class="fbox">
+        <span class="fk">STAGE 5</span>
+        <h3>Dispatch kit</h3>
+        <p>Policy kit applied · 48-hour writeback of findings</p>
+      </div>
+    </div>
+    <div class="fback loopbox">STAGE 5 &#8594; after-action THEOS-2 audit &#8594; polygon re-scored &#8594; back to STAGE 2 — the loop closes</div>
+  </div>
+
+  <h2>Stage 1A — Segmentation: two outputs, one honest gate</h2>
+  <ul>
+    <li><b>Corroboration:</b> roof density, growth and fire-scar indicators over registered communities — the pixels agree or disagree with the register.</li>
+    <li><b>Screening queue:</b> 244 review areas city-wide — 154 with no register overlap (inspect evidence beyond the register), 90 with overlapping boundaries to reconcile. A survey queue, not a claim of new settlements.</li>
+    <li><b>Honest gate:</b> spatial AUC 0.733 sits below our own pre-set classification gate, so model output is a screening signal — where to send enumerators — never a settlement verdict. <i>The map does not establish poverty, tenure or legality.</i></li>
+    <li>Evidence: <a href="gen1_samgeo.html">Gen 1 viewer</a> · <a href="gen2_unet.html">Gen 2 viewer</a>.</li>
+  </ul>
+
+  <h2>Stage 1B — Socio-economic sources, evaluated not just collected</h2>
+  <div class="table-scroll">
+  <table>
+    <colgroup><col style="width:17%"><col style="width:30%"><col style="width:18%"><col style="width:22%"><col style="width:13%"></colgroup>
+    <thead><tr><th>Source class</th><th>Examples</th><th>Strength</th><th>Weakness</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><b>Official statistics</b></td><td>NSO census, NHA/BMA registers, gdcatalog crime, FY 2568 risk registry, plan zones</td><td>Authoritative, comparable</td><td>Stale, coarse, register blind spots</td><td>Backbone / priors</td></tr>
+      <tr><td><b>Complaint platforms</b></td><td>Traffy Fondue pins</td><td>Geocoded, fresh, actionable</td><td>Self-selected complainants</td><td>Live signal</td></tr>
+      <tr><td><b>Social media</b></td><td>Pantip, news RSS, Telegram channels</td><td>Fresh, narrative context</td><td>Biased to online Thai readers; JS-redirect snippets</td><td>Context + events</td></tr>
+      <tr><td><b>Cameras, aggregated as text</b></td><td>CCTV crowd/vendor/activity digests, transit and smart-card aggregates reported as text</td><td>Spatially precise, fresh</td><td>Privacy-sensitive — <b>aggregates only, no individuals, no raw video</b></td><td>Proposed extension</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Cross-source agreement raises the confidence flag; disagreement lowers it and routes the polygon to
+  field enumeration. The evaluation is explicit: social data is a signal, not truth. Match tiers T1–T4 carry explicit
+  confidence (0.9 / 0.7 / 0.4 / 0.3) — see the <a href="social.html">social pulse page</a>.</p>
+
+  <h2>Stage 2 — Domain ranking</h2>
+  <p>Per-community sub-scores per domain, critical conditions highlighted, composite 0–100 with trend arrow and
+  confidence flag:</p>
+  <div class="chips">
+    <span class="chip crit">fire risk</span>
+    <span class="chip crit">flood exposure</span>
+    <span class="chip">service backlog</span>
+    <span class="chip">complaint intensity</span>
+    <span class="chip">street economy</span>
+    <span class="chip">tenure pressure</span>
+  </div>
+  <p>Publication guardrail: scores are an internal investment-priority tool — published only as <b>budget tiers</b>,
+  never a ranked league table, with data-blindness flags showing who the sources miss.</p>
+
+  <h2>Stage 3 — Selection</h2>
+  <p>The governance body (BMA district office, NHA, CODI) selects which neighborhoods to react to now, within
+  budget tiers. Ranking prioritizes; the human decides. Selection is logged with the score snapshot that justified it.</p>
+
+  <h2>Stage 4 — Participation</h2>
+  <p>Participation techniques are chosen from the classified pool — matched to the kit and to community capacity:
+  enumeration before engineering works, collective negotiation before tenure instruments. Classes 3–5 are the
+  operable pool; failure modes from 49 global cases constrain the selector. See the
+  <a href="participation.html">participation techniques page</a>.</p>
+
+  <h2>Stage 5 — Policy kit dispatch</h2>
+  <p>Score profile triggers a kit via an explicit dispatch table. Every terminal state is a funded programme or an
+  enumeration visit — never "monitor". Kit detail on the <a href="proposal.html">proposal page</a>.</p>
+  <div class="table-scroll">
+  <table>
+    <colgroup><col style="width:44%"><col style="width:20%"><col style="width:36%"></colgroup>
+    <thead><tr><th>Score profile (trigger)</th><th>Kit</th><th>Escalation</th></tr></thead>
+    <tbody>
+      <tr><td>Dense roofs + fire events</td><td><b>KIT 2</b> re-blocking</td><td>escalates to KIT 1</td></tr>
+      <tr><td>Flood zone + high disaster sub-score</td><td><b>KIT 4</b> risk-first retrofit</td><td>KIT 6 if land unsafe</td></tr>
+      <tr><td>Complaint backlog + valuable land</td><td><b>KIT 3</b> land sharing</td><td>escalates to KIT 1</td></tr>
+      <tr><td>High street-retail score + vending complaints</td><td><b>KIT 5</b> street-economy</td><td>—</td></tr>
+      <tr><td>Low scores + low confidence</td><td colspan="2">field enumeration visit first</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>After delivery: an after-action THEOS-2 audit re-runs the same sensor that screened the area, the polygon is
+  re-scored, and the ranking updates — <b>the loop closes on evidence, not on completion reports</b>. The governor-visit
+  protocol carries the same discipline: structured enumeration visits, findings written back within 48 hours.</p>
+
+  <p class="footnote">Sources: pipeline stages as implemented in <code>02_code/</code> (geo + social runbooks);
+  dispatch table and guardrails from the <a href="proposal.html">proposal page</a>; participation pool from the
+  <a href="participation.html">participation techniques page</a>; camera-aggregated-text source is a proposed
+  extension, not yet built — presented as roadmap, keeping the anti-hype stance intact.</p>
+</div>
+</body>
+</html>
