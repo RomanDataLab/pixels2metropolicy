@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Participation Techniques — Pixel2Policy TH</title>
+<style>
+  html, body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f6f8; color: #1c2833; }
+  #site-header {
+    position: sticky; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; flex-wrap: wrap; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; color: #12314e; }
+  .sub { color: #5d6d7e; font-size: 13.5px; margin: 0 0 18px; max-width: 940px; line-height: 1.5; }
+  .sub a { color: #1565c0; }
+
+  h2 { font-size: 18px; color: #12314e; margin: 30px 0 10px; }
+  p { font-size: 13.5px; line-height: 1.6; max-width: 900px; }
+  p.note { color: #7d8b99; font-size: 12px; }
+  ul { font-size: 13.5px; line-height: 1.65; max-width: 900px; padding-left: 20px; }
+  ul li { margin-bottom: 7px; }
+  ul b { color: #12314e; }
+
+  /* ---- class palette ---- */
+  .c1 { --cc: #8a97a3; } .c2 { --cc: #4a6785; } .c3 { --cc: #2b6cb0; }
+  .c4 { --cc: #1d6e5e; } .c5 { --cc: #2e7d32; } .c6 { --cc: #b02a2a; }
+
+  /* ---- filter bar ---- */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 14px 0 10px; }
+  .fbtn { border: 1px solid var(--cc, #b9c4ce); color: var(--cc, #5d6d7e); background: #fff;
+    font: 600 12px "Segoe UI", system-ui, sans-serif; padding: 5px 12px; border-radius: 14px; cursor: pointer; }
+  .fbtn:hover { background: #eef3f8; }
+  .fbtn.on { background: var(--cc, #12314e); color: #fff; }
+  .fcount { font-size: 11.5px; color: #7d8b99; margin-left: 4px; }
+
+  /* ---- carousel ---- */
+  .caro-wrap { position: relative; }
+  .caro { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 4px 2px 14px; scrollbar-width: thin; }
+  .caro::-webkit-scrollbar { height: 8px; }
+  .caro::-webkit-scrollbar-thumb { background: #c3ced8; border-radius: 4px; }
+  .caro-btn { position: absolute; top: 40%; transform: translateY(-50%); z-index: 10;
+    width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+    background: #12314e; color: #fff; font-size: 16px; line-height: 1;
+    box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  .caro-btn:hover { background: #2b6cb0; }
+  .caro-btn.prev { left: -10px; } .caro-btn.next { right: -10px; }
+
+  /* ---- card ---- */
+  .card { flex: 0 0 300px; scroll-snap-align: start; background: #fff; border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.12); border-top: 5px solid var(--cc);
+    padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; min-height: 240px; }
+  .card[hidden] { display: none; }
+  .card .head { display: flex; align-items: center; gap: 8px; }
+  .lvl { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: var(--cc); color: #fff;
+    font: 700 12px/24px "Segoe UI", system-ui, sans-serif; text-align: center; }
+  .card .cls { font: 700 11px "Segoe UI", system-ui, sans-serif; color: var(--cc); text-transform: uppercase; letter-spacing: .04em; }
+  .card h3 { margin: 0; font-size: 14.5px; color: #12314e; line-height: 1.3; }
+  .card p { font-size: 12.5px; line-height: 1.5; margin: 0; color: #34495e; flex: 1; }
+  .card .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+  .tag { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #edf1f5; color: #5d6d7e; }
+  .tag.th { background: #fdeeda; color: #b45309; }
+  .tag.kit { background: #e7eef7; color: #12314e; }
+
+  .table-scroll { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.12); margin-bottom: 6px; }
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  @media (max-width: 900px) { table { table-layout: auto; min-width: 760px; } }
+  th, td { vertical-align: top; padding: 10px 10px; border-bottom: 1px solid #e3e8ec; font-size: 12.5px; line-height: 1.45; text-align: left; }
+  th { background: #12314e; color: #fff; font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+  tr:hover td { background: #f6f9fc; }
+
+  .footnote { font-size: 11.5px; color: #7d8b99; margin-top: 26px; border-top: 1px solid #dde3e8; padding-top: 10px; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html">Slum policies review</a>
+    <a href="participation.html" class="active">Participation</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="social.html">Social pulse</a>
+    <a href="proposal.html">Proposal</a>
+    <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
+  </nav>
+</div>
+
+<div class="wrap">
+  <h1>Participation techniques</h1>
+  <p class="sub">The participation pool behind stage 4 of the decision pipeline: one card per technique,
+  extracted from the 49-case <a href="slum_policies.html">slum policies review</a>, classified against two standard
+  frames (Arnstein's ladder, 1969; the IAP2 spectrum: inform / consult / involve / collaborate / empower),
+  and extended with techniques that exist and operate in Thailand today. Card colour = class; the
+  <span class="tag th">TH</span> tag marks Thai institutions; <span class="tag kit">KIT n</span> marks which policy
+  kit on the <a href="proposal.html">proposal page</a> uses it. Filter by class or drag/scroll the carousel.</p>
+
+  <div class="filters" id="filters">
+    <button class="fbtn on" data-f="all">All classes</button>
+    <button class="fbtn c1" data-f="1">1 · Inform</button>
+    <button class="fbtn c2" data-f="2">2 · Consult</button>
+    <button class="fbtn c3" data-f="3">3 · Involve / co-produce</button>
+    <button class="fbtn c4" data-f="4">4 · Collaborate / co-decide</button>
+    <button class="fbtn c5" data-f="5">5 · Empower</button>
+    <button class="fbtn c6" data-f="6">6 · Extra-institutional (risk)</button>
+    <span class="fcount" id="fcount"></span>
+  </div>
+
+  <div class="caro-wrap">
+    <button class="caro-btn prev" id="prev" aria-label="Previous cards">&#10094;</button>
+    <div class="caro" id="caro">
+
+      <div class="card c1">
+        <div class="head"><span class="lvl">1</span><span class="cls">Inform</span></div>
+        <h3>Showcase social programming</h3>
+        <p>Visibility events and social programmes delivered alongside mega-works, communicated to rather than shaped by residents. Participation in name; information in practice.</p>
+        <div class="meta"><span class="tag">PAC · Complexo do Alemão, Rio</span></div>
+      </div>
+
+      <div class="card c1">
+        <div class="head"><span class="lvl">1</span><span class="cls">Inform</span></div>
+        <h3>Mandated consultation, in practice</h3>
+        <p>Community consultation legally required by the upgrading programme (UISP) but executed as one-way notice once budgets are locked — the formal floor every project must exceed.</p>
+        <div class="meta"><span class="tag">UISP · South Africa</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Design contests per settlement</h3>
+        <p>Architectural competitions run per favela, with entries exhibited to residents. Opens design options; decision frame stays with the state.</p>
+        <div class="meta"><span class="tag">Favela-Bairro · Rio</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Residents vote on proposals</h3>
+        <p>Intervention options put to a resident vote before works are scheduled. Pair with enumeration so the option set itself reflects resident data.</p>
+        <div class="meta"><span class="tag">Favela-Bairro / Morar Carioca</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Infrastructure design workshops</h3>
+        <p>Community workshops on station and facility design for transit-led projects. Cheap, fast, improves acceptance — but scope stays fixed.</p>
+        <div class="meta"><span class="tag">TransMiCable · Bogotá</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Household compensation negotiation</h3>
+        <p>Relocation compensation negotiated household by household with no community-level planning. Kept in the pool as a caution: it fragments voice and disadvantages the least informed.</p>
+        <div class="meta"><span class="tag">Canal resettlement · Ho Chi Minh City</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Statutory public hearings (ประชาพิจารณ์)</h3>
+        <p>Legally required public hearings under EIA and related notification rules. Formalistic alone — always pair with enumeration or a survey round.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">EIA rules · Thailand</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Works notice + layout vote</h3>
+        <p>Minimum viable participation for quick re-blocking: residents notified, then vote on the block layout (fire lanes, water points) before machinery moves.</p>
+        <div class="meta"><span class="tag kit">KIT 2</span></div>
+      </div>
+
+      <div class="card c2">
+        <div class="head"><span class="lvl">2</span><span class="cls">Consult</span></div>
+        <h3>Vendor committee consultation</h3>
+        <p>Street-vendor committees consulted on permit zones, market days and sanitation rules before street-economy regularization is fixed.</p>
+        <div class="meta"><span class="tag kit">KIT 5</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>Resident-run house enumerations</h3>
+        <p>Residents count and map their own households — the evidence base tenure negotiation and infrastructure design rest on. Cheaper and better-trusted than contractor surveys.</p>
+        <div class="meta"><span class="tag">Kibera · Nairobi</span><span class="tag">South Africa UISP</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>City-wide community surveys</h3>
+        <p>Community organizations survey all settlements city-wide, producing the register the programme then finances. Baan Mankong's entry gate — a Thai class-3 export.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Baan Mankong · CODI</span><span class="tag kit">KIT 1</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>Consortium plan co-writing</h3>
+        <p>A consortium of 40+ community organizations and NGOs co-writes the special planning area plan — the settlement's own plan becomes the statutory document.</p>
+        <div class="meta"><span class="tag">Mukuru SPA · Nairobi</span><span class="tag kit">KIT 3</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>Women's issue campaigns</h3>
+        <p>"Too Pressed to Wait": women organized around shared-sanitation failures, produced the demand data, and moved sanitation up the plan's priority order.</p>
+        <div class="meta"><span class="tag">Mukuru SPA · Nairobi</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>Resident mapping of evacuation routes</h3>
+        <p>Residents walk and map their own evacuation routes, fire breaks and flood spots — local knowledge that risk-first retrofit designs around.</p>
+        <div class="meta"><span class="tag kit">KIT 4</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>Digital complaints with write-back</h3>
+        <p>Traffy Fondue: government-run city-scale complaint channel, already ingested by our pipeline. Upgrades from class 1 toward class 3 when ticket status is written back to the community within days.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Traffy Fondue · BMA</span></div>
+      </div>
+
+      <div class="card c3">
+        <div class="head"><span class="lvl">3</span><span class="cls">Involve / co-produce data</span></div>
+        <h3>District youth councils</h3>
+        <p>Mandatory district-level youth councils under the Children and Youth Councils Act B.E. 2560 (2017) — a statutory channel for young residents in street-economy and public-space components.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Youth councils · B.E. 2560</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Participatory budgeting of project shares</h3>
+        <p>Residents allocate a defined share of project budgets across neighbourhoods. The most-copied Medellín mechanism; needs real money on the table or it decays into consultation.</p>
+        <div class="meta"><span class="tag">PUI · Medellín</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Committees co-decide works sequence</h3>
+        <p>Community committees decide in what order streets, drainage and housing get done — trading off against their own constraints, not the contractor's.</p>
+        <div class="meta"><span class="tag">Paraisópolis · São Paulo</span><span class="tag kit">KIT 2</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Youth co-design of public space</h3>
+        <p>Young residents co-design parks, libraries and sports facilities as equity tools, not decoration — the social-urbanism signature.</p>
+        <div class="meta"><span class="tag">Comuna 13 · Medellín</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Associations as service providers</h3>
+        <p>Neighbourhood associations contract and deliver services themselves, not just advise. Fragile: Rio's iBase-contracted meetings were cut in 2013 and trust followed.</p>
+        <div class="meta"><span class="tag">Rocinha · Rio</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Participatory local planning rounds</h3>
+        <p>Annual participatory planning mandated by the Decentralization Act B.E. 2542 (1999) for local administrative organizations — the formal slot where community priorities enter district plans.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Decentralization Act 2542</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Pracha-rath partnership</h3>
+        <p>State–private–people (ประชารัฐ) coordinating framework: private-sector participation in community projects brokered with community consent rather than around it.</p>
+        <div class="meta"><span class="tag th">TH</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Khlong Toei community interlocutors</h3>
+        <p>Experienced community organizations (the Duang Prateep Foundation lineage; committees in NHA–port-authority land negotiations) that can hold a negotiation across years.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Khlong Toei · Bangkok</span><span class="tag kit">KIT 3</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Vendor co-management of market days</h3>
+        <p>Street vendors co-manage market days, permits and sanitation rules — the ceiling for street-economy legitimization.</p>
+        <div class="meta"><span class="tag kit">KIT 5</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Co-decided relocation package</h3>
+        <p>Relocation package (unit mix, transport continuity, timing) co-decided with residents — the non-negotiable floor for KIT 6, not a ceiling.</p>
+        <div class="meta"><span class="tag kit">KIT 6</span></div>
+      </div>
+
+      <div class="card c4">
+        <div class="head"><span class="lvl">4</span><span class="cls">Collaborate / co-decide</span></div>
+        <h3>Co-decided retrofit package</h3>
+        <p>Residents co-decide the risk-reduction package (flood-proofing, fire breaks, slope works, routes) against their own risk ranking.</p>
+        <div class="meta"><span class="tag kit">KIT 4</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Collective tenure + direct subsidy</h3>
+        <p>Subsidy paid straight to the community group, which negotiates tenure collectively. The Baan Mankong core: 142,254 households, 1,246 projects, 75 provinces — the world's largest community-managed upgrading programme.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Baan Mankong · CODI</span><span class="tag kit">KIT 1</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Community savings groups</h3>
+        <p>กลุ่มออมทรัพย์เพื่อการผลิต — savings groups that pool credit and repayments, giving the community a balance sheet landlords and banks must negotiate with.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Baan Mankong / SDI federations</span><span class="tag kit">KIT 1</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Collective land negotiation</h3>
+        <p>The community, organized and enumerated, buys or leases land as one counterparty — the ceiling for land sharing and the difference between negotiation and eviction defense.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">Baan Mankong · CODI</span><span class="tag kit">KIT 3</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Board seats for the poor</h3>
+        <p>CODI's board reserves seats for community representatives — institutionalized class-5 voice where programmes are designed, not just delivered.</p>
+        <div class="meta"><span class="tag th">TH</span><span class="tag">CODI</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Federation co-production</h3>
+        <p>The Shack Dwellers Federation co-produces settlements with the state: enumeration, land, housing, with the federation as delivery partner.</p>
+        <div class="meta"><span class="tag">Namibia</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Anti-eviction organizing</h3>
+        <p>Decades of organizing that forced the declaration of a Special Planning Area over 645 acres — power that predates and outlasts any single programme.</p>
+        <div class="meta"><span class="tag">Mukuru · Nairobi</span></div>
+      </div>
+
+      <div class="card c5">
+        <div class="head"><span class="lvl">5</span><span class="cls">Empower</span></div>
+        <h3>Cooperative-managed common use</h3>
+        <p>The relocated community's cooperative owns and manages the common-use area and its dividend — our standing KIT 6 component so relocation builds an asset, not just a unit.</p>
+        <div class="meta"><span class="tag kit">KIT 6</span></div>
+      </div>
+
+      <div class="card c6">
+        <div class="head"><span class="lvl">6</span><span class="cls">Extra-institutional (risk)</span></div>
+        <h3>Protest as the de facto channel</h3>
+        <p>Where formal channels fail, protest becomes how settlements are heard. Tracked as a leading indicator that classes 1–2 participation failed — not a technique to plan on.</p>
+        <div class="meta"><span class="tag">South Africa</span></div>
+      </div>
+
+      <div class="card c6">
+        <div class="head"><span class="lvl">6</span><span class="cls">Extra-institutional (risk)</span></div>
+        <h3>Gang mediation</h3>
+        <p>Armed groups shaping which works happen and where. Recorded because it is real; never selected — its presence marks a governance failure to escalate.</p>
+        <div class="meta"><span class="tag">Rio de Janeiro</span></div>
+      </div>
+
+    </div>
+    <button class="caro-btn next" id="next" aria-label="Next cards">&#10095;</button>
+  </div>
+  <p class="note">Design rule: classes 3–5 are the operable pool; classes 1–2 are recorded as context;
+  class 6 is monitored as a leading indicator that classes 1–2 failed.</p>
+
+  <h2>Failure modes — why "participation" alone is not a technique</h2>
+  <ul>
+    <li><b>Voice without empowerment.</b> Kibera's dialogue forums were dominated by absentee structure-owners: participation written into the project design, power not.</li>
+    <li><b>Participation cut mid-programme.</b> The iBase-contracted participatory meetings in Rio ended in 2013; resident trust followed them out.</li>
+    <li><b>Token timing.</b> Consultation held after the budget is locked — class 1 dressed as class 2.</li>
+    <li><b>Elite capture.</b> The loudest committee, not the most exposed households, sets the works sequence.</li>
+    <li><b>Expectation debt.</b> Announcing participation and then stalling works (Mathare NYS, Nairobi) — participation raises the cost of abandonment.</li>
+  </ul>
+
+  <h2>Kit × participation class selector</h2>
+  <p>Stage 4 of the decision pipeline picks from this matrix: the minimum viable participation level each
+  kit can start at, and the ceiling it should be driven to.</p>
+  <div class="table-scroll">
+  <table>
+    <colgroup><col style="width:34%"><col style="width:33%"><col style="width:33%"></colgroup>
+    <thead><tr><th>Policy kit</th><th>Minimum viable participation</th><th>Recommended ceiling</th></tr></thead>
+    <tbody>
+      <tr><td>KIT 1 · Collective in-situ upgrading (บ้านมั่นคง 2.0)</td><td>3 — enumeration + savings group</td><td>5 — collective tenure negotiation is inherently class 5</td></tr>
+      <tr><td>KIT 2 · Minimal re-blocking + infrastructure</td><td>2 — works notice + vote on layout</td><td>4 — community committee co-decides sequence</td></tr>
+      <tr><td>KIT 3 · Land sharing / readjustment</td><td>3 — community-produced enumeration as negotiation basis</td><td>5 — collective negotiation counterparty</td></tr>
+      <tr><td>KIT 4 · Risk-first retrofit</td><td>3 — resident mapping of evacuation routes</td><td>4 — co-decided retrofit package</td></tr>
+      <tr><td>KIT 5 · Street-economy legitimization</td><td>2 — vendor committee consultation</td><td>4 — vendor co-management of market days</td></tr>
+      <tr><td>KIT 6 · Relocation + common-use dividend</td><td>4 — co-decided relocation package (non-negotiable floor)</td><td>5 — cooperative manages common-use area</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="footnote">Sources: the <a href="slum_policies.html">slum policies review</a> (49 cases, 31 countries — participation column and cross-country patterns),
+  the <a href="proposal.html">proposal page</a> (kits, open-questions positions), and Thai institutional sources for the country-specific list.
+  Arnstein, S. (1969) 'A ladder of citizen participation'; IAP2 Spectrum of Public Participation.</p>
+</div>
+
+<script>
+(function () {
+  var caro = document.getElementById('caro');
+  var cards = Array.prototype.slice.call(caro.querySelectorAll('.card'));
+  var fcount = document.getElementById('fcount');
+  var btns = Array.prototype.slice.call(document.querySelectorAll('.fbtn'));
+
+  function apply(f) {
+    var n = 0;
+    cards.forEach(function (c) {
+      var show = (f === 'all') || (c.classList.contains('c' + f));
+      c.hidden = !show;
+      if (show) n++;
+    });
+    fcount.textContent = n + ' of ' + cards.length + ' techniques';
+    caro.scrollTo({ left: 0 });
+  }
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      apply(b.getAttribute('data-f'));
+    });
+  });
+
+  document.getElementById('prev').addEventListener('click', function () {
+    caro.scrollBy({ left: -caro.clientWidth * 0.8, behavior: 'smooth' });
+  });
+  document.getElementById('next').addEventListener('click', function () {
+    caro.scrollBy({ left: caro.clientWidth * 0.8, behavior: 'smooth' });
+  });
+  apply('all');
+})();
+</script>
+</body>
+</html>
