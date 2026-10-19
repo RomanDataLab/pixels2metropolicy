@@ -56,10 +56,10 @@
 <div id="map"></div>
 <div class="title-box">
   <h1>Generation 2 — U-Net roofs (Overture-taught)</h1>
-  <p>SMP U-Net resnet18 · teacher = 12,365 Overture footprints aligned to THEOS via windowed Jaccard (shift −0.5, −3.0 m) · spatial striped holdout · affine-aligned teacher (0.05°, s=1.000, resid 1.6 m) · val IoU 0.542 · 1,678 regularized roofs</p>
+  <p>SMP U-Net resnet18 · teacher = 12,365 Overture footprints aligned to THEOS via windowed Jaccard (shift −0.5, −3.0 m) · spatial striped holdout · eroded aligned teacher · probability-space stitch + watershed · GATES PASSED: outline-IoU 0.51, crossing 0.3%, count 1.39x · 17,182 roofs</p>
 </div>
 <div id="legend">
-  <label class="row"><input type="checkbox" id="cb-g2" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> U-Net roofs (1,678, regularized)</label>
+  <label class="row"><input type="checkbox" id="cb-g2" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> U-Net roofs (17,182, gate-passed)</label>
   <label class="row"><input type="checkbox" id="cb-g1x"><span class="swatch" style="background:#00e5ff;opacity:.4"></span> Gen 1 SAM (compare)</label>
   <label class="row"><input type="checkbox" id="cb-ov"><span class="swatch" style="background:none;border:2px solid #fdd835"></span> Overture teacher outlines</label>
   <label class="row"><input type="checkbox" id="cb-img" checked><span class="swatch" style="background:url(theos_block/theos_block.png);background-size:cover"></span> THEOS imagery</label>

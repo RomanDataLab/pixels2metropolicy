@@ -1,0 +1,47 @@
+{
+  "gen1_sam": {
+    "name": "gen1_sam",
+    "count": 9771,
+    "fill_med": 1.0,
+    "iou_med": 0.313,
+    "cross_pct": 0.55,
+    "overture_ratio": 0.79,
+    "gates": {
+      "iou": false,
+      "cross": true,
+      "fill": true,
+      "count": true
+    },
+    "passed": false
+  },
+  "gen2_unet": {
+    "name": "gen2_unet",
+    "count": 17182,
+    "fill_med": 1.0,
+    "iou_med": 0.511,
+    "cross_pct": 0.33,
+    "overture_ratio": 1.39,
+    "gates": {
+      "iou": true,
+      "cross": true,
+      "fill": true,
+      "count": true
+    },
+    "passed": true
+  },
+  "gen3_yolo": {
+    "name": "gen3_yolo",
+    "count": 6590,
+    "fill_med": 1.0,
+    "iou_med": 0.503,
+    "cross_pct": 0.53,
+    "overture_ratio": 0.53,
+    "gates": {
+      "iou": true,
+      "cross": true,
+      "fill": true,
+      "count": true
+    },
+    "passed": true
+  }
+}

@@ -59,7 +59,7 @@
   <p>samgeo ViT-B automatic mode, zero training, no prompts · canopy painted out before SAM · 5,620 roof masks (48 pt/side dense grid) · chip overlaps deduped</p>
 </div>
 <div id="legend">
-  <label class="row"><input type="checkbox" id="cb-g1" checked><span class="swatch" style="background:#00e5ff;opacity:.5"></span> SAM roofs (5,620, dense grid, regularized)</label>
+  <label class="row"><input type="checkbox" id="cb-g1" checked><span class="swatch" style="background:#00e5ff;opacity:.5"></span> SAM roofs - NOT PUBLISHED (gate fail)</label>
   <label class="row"><input type="checkbox" id="cb-ov"><span class="swatch" style="background:none;border:2px solid #fdd835"></span> Overture outlines (check)</label>
   <label class="row"><input type="checkbox" id="cb-img" checked><span class="swatch" style="background:url(theos_block/theos_block.png);background-size:cover"></span> THEOS imagery</label>
 </div>
@@ -73,7 +73,7 @@ L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
 const LYR = {};
 LYR.img = L.imageOverlay("theos_block/theos_block.png",
   [[B.south, B.west], [B.north, B.east]], { interactive: false }).addTo(map);
-fetch("theos_block/gen1_roofs.geojson").then(r => r.json()).then(gj => {
+fetch("theos_block/gen1_roofs_FAILED.geojson").then(r => r.json()).then(gj => {
   LYR.g1 = L.geoJSON(gj, {
     style: { color: "#00e5ff", weight: 0.8, fillColor: "#00e5ff", fillOpacity: 0.45 },
     onEachFeature: (f, layer) => layer.bindPopup(
