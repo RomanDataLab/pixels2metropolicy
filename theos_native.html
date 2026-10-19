@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THEOS native resolution</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: "Segoe UI", system-ui, sans-serif; }
+  #map { width: 100%; height: 100%; background: #111; }
+  #site-header { position: absolute; top: 0; left: 0; right: 0; z-index: 1200;
+    display: flex; align-items: center; gap: 14px; padding: 6px 12px;
+    background: #16324f; color: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.4); }
+  #site-header .brand { color: #fff; font-weight: 700; text-decoration: none; font-size: 14px; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+  .title-box {
+    position: absolute; top: 48px; left: 10px; z-index: 1000;
+    background: rgba(255,255,255,.93); border-radius: 10px;
+    padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.4); max-width: 430px;
+  }
+  .title-box h1 { font-size: 14px; margin: 0 0 2px; }
+  .title-box p { font-size: 11px; margin: 0; color: #555; }
+  #legend {
+    position: absolute; bottom: 18px; left: 10px; z-index: 1000;
+    background: rgba(255,255,255,.93); border-radius: 10px;
+    padding: 10px 14px; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.4);
+  }
+  #legend .row { display: flex; align-items: center; gap: 7px; margin: 3px 0; cursor: pointer; }
+  .swatch { width: 20px; height: 12px; border-radius: 2px; flex: none; }
+  .leaflet-interactive { cursor: default !important; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="try2.html">Try 2: SAM</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="gen3_yolo.html">Gen 3: YOLO roofs</a>
+    <a href="theos_native.html" class="active">THEOS native</a>
+    <a href="social.html">Social pulse</a>
+    <a href="geohackathon_information.html">Info</a>
+  </nav>
+</div>
+<div id="map"></div>
+
+<div class="title-box">
+  <h1>THEOS-2 block — native 0.5 m resolution</h1>
+  <p>Full 4738×5002 render (43 MB) — the working raster exactly as segmented,
+     no downsampling. Gen 2 / Gen 3 gate-passed outlines toggle on top.</p>
+</div>
+
+<div id="legend">
+  <label class="row"><input type="checkbox" id="cb-g2"><span class="swatch" style="background:#ff4081;opacity:.5"></span> Gen 2 U-Net roofs (17,182)</label>
+  <label class="row"><input type="checkbox" id="cb-g3"><span class="swatch" style="background:#7c4dff;opacity:.5"></span> Gen 3 YOLO roofs (6,590)</label>
+  <label class="row"><input type="checkbox" id="cb-img" checked><span class="swatch" style="background:url(theos_block/theos_native.png);background-size:cover"></span> THEOS native imagery</label>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const B = {"south": 13.9112, "west": 100.5817, "north": 13.9328, "east": 100.605};
+const map = L.map("map", { preferCanvas: true, minZoom: 14 }).setView([13.922, 100.5935], 16);
+L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+  subdomains: ["mt0", "mt1", "mt2", "mt3"], maxZoom: 20
+}).addTo(map);
+
+const LYR = {};
+LYR.img = L.imageOverlay("theos_block/theos_native.png",
+  [[B.south, B.west], [B.north, B.east]], { interactive: false }).addTo(map);
+
+fetch("theos_block/gen2_roofs.geojson").then(r => r.json()).then(gj => {
+  LYR.g2 = L.geoJSON(gj, {
+    interactive: false,
+    style: { color: "#ff4081", weight: 0.7, fillColor: "#ff4081", fillOpacity: 0.35 }
+  });
+});
+fetch("theos_block/gen3_yolo_roofs.geojson").then(r => r.json()).then(gj => {
+  LYR.g3 = L.geoJSON(gj, {
+    interactive: false,
+    style: { color: "#7c4dff", weight: 0.7, fillColor: "#7c4dff", fillOpacity: 0.35 }
+  });
+});
+
+for (const [id, key] of [["cb-g2", "g2"], ["cb-g3", "g3"], ["cb-img", "img"]]) {
+  document.getElementById(id).addEventListener("change", e => {
+    const l = LYR[key]; if (!l) return;
+    e.target.checked ? map.addLayer(l) : map.removeLayer(l);
+  });
+}
+</script>
+</body>
+</html>
