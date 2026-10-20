@@ -767,8 +767,29 @@ ZONES.features.forEach(f => {
     .addTo(zoneLayer);
 });
 
+// ---- BKK GeoJSON overlays (fetched at runtime, 50% fill transparency) ----
+function addFetchedLayer(url, style, popup) {
+  const group = L.layerGroup();
+  fetch(url)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(g => { L.geoJSON(g, { style: style }).bindPopup(l => popup(l.feature.properties)).addTo(group); })
+    .catch(err => console.warn('failed to load ' + url, err));
+  return group;
+}
+const khetLayer = addFetchedLayer('labeling/qgis_project/bkk_khet_wgs84.geojson',
+  { color: '#f2c500', weight: 1.5, fillColor: '#f2c500', fillOpacity: 0.5 },
+  p => '<b>' + (p.shapeName || '') + '</b><br>Bangkok district (khet)');
+const slum1Layer = addFetchedLayer('labeling/qgis_project/bkk_slum_1_wgs84.geojson',
+  { color: '#00e5ff', weight: 1, fillColor: '#00e5ff', fillOpacity: 0.5 },
+  p => '<b>bkk_slum_1</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
+const slum3Layer = addFetchedLayer('labeling/qgis_project/bkk_slum_3_wgs84.geojson',
+  { color: '#ff4fd8', weight: 1, fillColor: '#ff4fd8', fillOpacity: 0.5 },
+  p => '<b>bkk_slum_3</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
+khetLayer.addTo(map); slum1Layer.addTo(map); slum3Layer.addTo(map);
+
 L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
-  { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer },
+  { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
+    'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'bkk_slum_3': slum3Layer },
   { collapsed: false }).addTo(map);
 
 document.getElementById('count').textContent = NHA.features.length;
