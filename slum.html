@@ -715,10 +715,16 @@ const ZONES = {
 ;
 
 const map = L.map('map').setView([13.75, 100.5], 6);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// default background: satellite imagery without labels (Esri World Imagery)
+const satNoLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
+});
+const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+});
+satNoLabels.addTo(map);
 
 const comLayer = L.layerGroup();
 // dot radius scaled by modeled population (sqrt for area-proportional symbols)
@@ -761,7 +767,7 @@ ZONES.features.forEach(f => {
     .addTo(zoneLayer);
 });
 
-L.control.layers({ 'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}) },
+L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer },
   { collapsed: false }).addTo(map);
 
