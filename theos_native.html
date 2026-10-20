@@ -82,7 +82,7 @@ fetch("theos_block/whuft_roofs.geojson?v=5").then(r => r.json()).then(gj => {
   LYR.whuft = L.geoJSON(gj, {
     interactive: false,
     style: { color: "#ff4081", weight: 0.7, fillColor: "#ff4081", fillOpacity: 0.35 }
-  });
+  }).addTo(map);
 });
 fetch("theos_block/gen2_roofs.geojson?v=5").then(r => r.json()).then(gj => {
   LYR.g2 = L.geoJSON(gj, {
@@ -97,7 +97,7 @@ fetch("theos_block/gen3_yolo_roofs.geojson?v=5").then(r => r.json()).then(gj => 
   });
 });
 
-for (const [id, key] of [["cb-g2", "g2"], ["cb-g3", "g3"], ["cb-img", "img"]]) {
+for (const [id, key] of [["cb-whuft", "whuft"], ["cb-g2", "g2"], ["cb-g3", "g3"], ["cb-img", "img"]]) {
   document.getElementById(id).addEventListener("change", e => {
     const l = LYR[key]; if (!l) return;
     e.target.checked ? map.addLayer(l) : map.removeLayer(l);
