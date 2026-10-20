@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>THEOS native resolution</title>
+<title>THEOS native + WHU roofs</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   html, body { height: 100%; margin: 0; font-family: "Segoe UI", system-ui, sans-serif; }
@@ -53,13 +53,16 @@
 
 <div class="title-box">
   <h1>THEOS-2 block — native 0.5 m resolution</h1>
-  <p>Full 4738×5002 render (43 MB) — the working raster exactly as segmented,
-     no downsampling. Gen 2 / Gen 3 gate-passed outlines toggle on top.</p>
+  <p>Full-resolution 0.5 m true color (bands b3/b4/b2). Featured: WHU UNet++-B4
+     fine-tuned per approved recipe — 29,714 regularized roofs, QA crops at
+     theos_block/qa_ft_*.png. Older gens toggle for compare. Fetches are
+     cache-busted (?v=5).</p>
 </div>
 
 <div id="legend">
-  <label class="row"><input type="checkbox" id="cb-g2"><span class="swatch" style="background:#ff4081;opacity:.5"></span> Gen 2 U-Net roofs (17,182)</label>
-  <label class="row"><input type="checkbox" id="cb-g3"><span class="swatch" style="background:#7c4dff;opacity:.5"></span> Gen 3 YOLO roofs (6,590)</label>
+  <label class="row"><input type="checkbox" id="cb-whuft" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> WHU fine-tuned roofs (29,714)</label>
+  <label class="row"><input type="checkbox" id="cb-g2"><span class="swatch" style="background:#7c4dff;opacity:.35"></span> Gen 2 U-Net (17,182)</label>
+  <label class="row"><input type="checkbox" id="cb-g3"><span class="swatch" style="background:#00e5ff;opacity:.35"></span> Gen 3 YOLO (6,590)</label>
   <label class="row"><input type="checkbox" id="cb-img" checked><span class="swatch" style="background:url(theos_block/theos_native.png);background-size:cover"></span> THEOS native imagery</label>
 </div>
 
@@ -75,13 +78,19 @@ const LYR = {};
 LYR.img = L.imageOverlay("theos_block/theos_native.png",
   [[B.south, B.west], [B.north, B.east]], { interactive: false }).addTo(map);
 
-fetch("theos_block/gen2_roofs.geojson").then(r => r.json()).then(gj => {
+fetch("theos_block/whuft_roofs.geojson?v=5").then(r => r.json()).then(gj => {
+  LYR.whuft = L.geoJSON(gj, {
+    interactive: false,
+    style: { color: "#ff4081", weight: 0.7, fillColor: "#ff4081", fillOpacity: 0.35 }
+  });
+});
+fetch("theos_block/gen2_roofs.geojson?v=5").then(r => r.json()).then(gj => {
   LYR.g2 = L.geoJSON(gj, {
     interactive: false,
     style: { color: "#ff4081", weight: 0.7, fillColor: "#ff4081", fillOpacity: 0.35 }
   });
 });
-fetch("theos_block/gen3_yolo_roofs.geojson").then(r => r.json()).then(gj => {
+fetch("theos_block/gen3_yolo_roofs.geojson?v=5").then(r => r.json()).then(gj => {
   LYR.g3 = L.geoJSON(gj, {
     interactive: false,
     style: { color: "#7c4dff", weight: 0.7, fillColor: "#7c4dff", fillOpacity: 0.35 }

@@ -3,10 +3,28 @@
   "headers": [
     {
       "source": "/data/:file",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/theos_block/:file",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
     }
   ],
   "redirects": [
-    { "source": "/app/:path*", "destination": "/:path*", "permanent": true }
+    {
+      "source": "/app/:path*",
+      "destination": "/:path*",
+      "permanent": true
+    }
   ]
 }
