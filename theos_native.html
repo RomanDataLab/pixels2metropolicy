@@ -60,7 +60,7 @@
 </div>
 
 <div id="legend">
-  <label class="row"><input type="checkbox" id="cb-whuft" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> WHU fine-tuned roofs (29,714)</label>
+  <label class="row"><input type="checkbox" id="cb-whuft" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> YOUR-LABEL-trained roofs (15,841)</label>
   <label class="row"><input type="checkbox" id="cb-g2"><span class="swatch" style="background:#7c4dff;opacity:.35"></span> Gen 2 U-Net (17,182)</label>
   <label class="row"><input type="checkbox" id="cb-g3"><span class="swatch" style="background:#00e5ff;opacity:.35"></span> Gen 3 YOLO (6,590)</label>
   <label class="row"><input type="checkbox" id="cb-img" checked><span class="swatch" style="background:url(theos_block/theos_native.png);background-size:cover"></span> THEOS native imagery</label>
@@ -78,7 +78,7 @@ const LYR = {};
 LYR.img = L.imageOverlay("theos_block/theos_native.png",
   [[B.south, B.west], [B.north, B.east]], { interactive: false }).addTo(map);
 
-fetch("theos_block/whuft_roofs.geojson?v=5").then(r => r.json()).then(gj => {
+fetch("theos_block/whu_user_roofs.geojson?v=6").then(r => r.json()).then(gj => {
   LYR.whuft = L.geoJSON(gj, {
     interactive: false,
     style: { color: "#ff4081", weight: 0.7, fillColor: "#ff4081", fillOpacity: 0.35 }
