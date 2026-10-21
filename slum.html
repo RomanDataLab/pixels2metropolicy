@@ -813,6 +813,9 @@ const tambonLayer = addOutlineLayer('data/tambons.js', 'tambons',
   { color: '#ab7ca1', weight: 0.7, fill: false },
   p => '<b>' + (p.tambon_t || p.tambon_e || '') + '</b><br>' + (p.amphoe_t || '') + ' · ' + (p.changwat_t || ''));
 map.on('overlayadd', e => { if (e.layer && e.layer.ensure) e.layer.ensure(); });
+// visible by default; data files load in background
+amphoeLayer.addTo(map); tambonLayer.addTo(map);
+amphoeLayer.ensure(); tambonLayer.ensure();
 
 L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
