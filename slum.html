@@ -777,7 +777,7 @@ function addFetchedLayer(url, style, popup) {
   return group;
 }
 const khetLayer = addFetchedLayer('labeling/qgis_project/bkk_khet_wgs84.geojson',
-  { color: '#f2c500', weight: 1.5, fillColor: '#f2c500', fillOpacity: 0.5 },
+  { color: '#f2c500', weight: 1.5, fill: false },
   p => '<b>' + (p.shapeName || '') + '</b><br>Bangkok district (khet)');
 const slum1Layer = addFetchedLayer('labeling/qgis_project/bkk_slum_1_wgs84.geojson',
   { color: '#00e5ff', weight: 1, fillColor: '#00e5ff', fillOpacity: 0.5 },
@@ -790,9 +790,34 @@ const slum2Layer = addFetchedLayer('labeling/qgis_project/slum_2_wgs84.geojson',
   p => '<b>slum_2</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
 khetLayer.addTo(map); slum1Layer.addTo(map); slum2Layer.addTo(map); slum3Layer.addTo(map);
 
+// nationwide admin outlines (same data files as main map), lazy-loaded on first enable
+function addOutlineLayer(jsFile, key, style, popup) {
+  const group = L.layerGroup();
+  group.ensure = function () {
+    if (this._loaded) return;
+    this._loaded = true;
+    const s = document.createElement('script');
+    s.src = jsFile;
+    s.onload = () => {
+      const g = window.__LAYERS__ && window.__LAYERS__[key];
+      if (g) L.geoJSON(g, { style: () => style }).bindPopup(l => popup(l.feature.properties)).addTo(group);
+    };
+    document.head.appendChild(s);
+  };
+  return group;
+}
+const amphoeLayer = addOutlineLayer('data/districts.js', 'districts',
+  { color: '#fdae61', weight: 1.4, fill: false },
+  p => '<b>' + (p.amphoe_e || p.amphoe_t || '') + '</b><br>' + (p.changwat_e || ''));
+const tambonLayer = addOutlineLayer('data/tambons.js', 'tambons',
+  { color: '#ab7ca1', weight: 0.7, fill: false },
+  p => '<b>' + (p.tambon_t || p.tambon_e || '') + '</b><br>' + (p.amphoe_t || '') + ' · ' + (p.changwat_t || ''));
+map.on('overlayadd', e => { if (e.layer && e.layer.ensure) e.layer.ensure(); });
+
 L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
-    'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'slum_2': slum2Layer, 'bkk_slum_3': slum3Layer },
+    'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'slum_2': slum2Layer, 'bkk_slum_3': slum3Layer,
+    'Districts (amphoe) outlines': amphoeLayer, 'Tambon (sub-district) outlines': tambonLayer },
   { collapsed: false }).addTo(map);
 
 document.getElementById('count').textContent = NHA.features.length;
