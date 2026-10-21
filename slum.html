@@ -785,11 +785,14 @@ const slum1Layer = addFetchedLayer('labeling/qgis_project/bkk_slum_1_wgs84.geojs
 const slum3Layer = addFetchedLayer('labeling/qgis_project/bkk_slum_3_wgs84.geojson',
   { color: '#ff4fd8', weight: 1, fillColor: '#ff4fd8', fillOpacity: 0.5 },
   p => '<b>bkk_slum_3</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
-khetLayer.addTo(map); slum1Layer.addTo(map); slum3Layer.addTo(map);
+const slum2Layer = addFetchedLayer('labeling/qgis_project/slum_2_wgs84.geojson',
+  { color: '#7cfc00', weight: 1, fillColor: '#7cfc00', fillOpacity: 0.5 },
+  p => '<b>slum_2</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
+khetLayer.addTo(map); slum1Layer.addTo(map); slum2Layer.addTo(map); slum3Layer.addTo(map);
 
 L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
-    'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'bkk_slum_3': slum3Layer },
+    'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'slum_2': slum2Layer, 'bkk_slum_3': slum3Layer },
   { collapsed: false }).addTo(map);
 
 document.getElementById('count').textContent = NHA.features.length;
