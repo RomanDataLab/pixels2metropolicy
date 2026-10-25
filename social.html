@@ -145,13 +145,16 @@ const RISK = [];
 const CATS = ["flooding", "fire", "env_hazard", "contamination", "basic_services", "housing_tenure_risk", "crime_security", "destitution", "informal_economy", "social_support"];
 const LABELS = {};   // display-name overrides for categories
 const COLORS = {
-  natural_disaster:   '#1f78b4',
-  technical_disaster: '#ff7f00',
-  traffic_incident:   '#6a3d9a',
-  crime:              '#e31a1c',
-
-  street_retail_popup:'#33a02c',
-  begging_homeless:   '#8c6d31'
+  flooding:           '#29b6f6',
+  fire:               '#ff7043',
+  env_hazard:         '#fdd835',
+  contamination:      '#ab47bc',
+  basic_services:     '#26a69a',
+  housing_tenure_risk:'#ec407a',
+  crime_security:     '#ef5350',
+  destitution:        '#d4e157',
+  informal_economy:   '#66bb6a',
+  social_support:     '#4dd0e1'
 };
 const map = L.map('map').setView([13.75, 100.52], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
