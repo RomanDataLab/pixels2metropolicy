@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel2Policy TH — Data sources &amp; references</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; margin: 0; padding-top: 36px; background: #f7f4ef; color: #333; }
+  /* ---- shared site header nav ---- */
+  #site-header {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  header.page { background: #12314e; color: #fff; padding: 22px 28px; }
+  header.page h1 { margin: 0 0 6px; font-size: 22px; }
+  header.page p { margin: 0; font-size: 13px; opacity: .85; max-width: 980px; line-height: 1.5; }
+  .layout { display: flex; align-items: flex-start; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+  nav.toc { position: sticky; top: 52px; width: 230px; flex: none; background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: flex; flex-direction: column; gap: 4px; }
+  nav.toc a { color: #12314e; text-decoration: none; font-size: 12.5px; padding: 5px 8px; border-radius: 6px; }
+  nav.toc a:hover { background: #e8eff6; }
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+  section { background: #fff; border-radius: 10px; padding: 22px 26px; box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+  section > h2 { margin: 0 0 14px; color: #12314e; font-size: 19px; border-bottom: 2px solid #d7ccc8; padding-bottom: 8px; }
+  h3 { color: #1d4e79; margin: 18px 0 8px; font-size: 15.5px; }
+  p { line-height: 1.65; margin: 8px 0; font-size: 14px; }
+  ul, ol { line-height: 1.7; padding-left: 22px; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+  th, td { border: 1px #d7ccc8 solid; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #efebe9; }
+  a { color: #1565c0; }
+  .note { font-size: 12.5px; color: #666; background: #f4f7fa; border-left: 4px solid #2b6cb0; padding: 10px 14px; border-radius: 0 8px 8px 0; }
+  .footnote { font-size: 12px; color: #777; }
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html">Slum policies review</a>
+    <a href="participation.html">Participation</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="gen3_yolo.html">Gen 3: YOLO roofs</a>
+    <a href="theos_native.html">THEOS native</a>
+    <a href="social.html">Social pulse</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="proposal.html">Proposal</a>
+    <a href="sources.html" class="active">Sources</a>
+    <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
+  </nav>
+</div>
+
+<header class="page">
+  <h1>Data sources &amp; scientific references</h1>
+  <p>Complete inventory of the data, services, models and literature behind the
+     Pixel2Policy TH maps — Thailand's registered low-income communities
+     (ชุมชนผู้มีรายได้น้อย) against comprehensive-plan zones, AI-detected roof
+     footprints and the social-signal &ldquo;slum pulse&rdquo;.</p>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <a href="#official">Official datasets</a>
+  <a href="#imagery">Satellite imagery &amp; basemaps</a>
+  <a href="#ai">AI-derived layers</a>
+  <a href="#social">Social-pulse sources</a>
+  <a href="#science">Scientific references</a>
+  <a href="#policy">Policy precedents</a>
+  <a href="#caveats">Caveats</a>
+</nav>
+
+<main>
+
+<!-- ============ OFFICIAL ============ -->
+<section id="official">
+  <h2>Official &amp; open datasets</h2>
+  <table>
+    <tr><th>Dataset</th><th>Producer</th><th>Used in</th><th>Access</th></tr>
+    <tr>
+      <td>NHA low-income communities, dataset 23_01 — 1,588 registered communities
+          (points; modeled houses/population fields)</td>
+      <td>National Housing Authority (NHA)</td>
+      <td><a href="slum.html">Slum map</a>, <a href="index.html">Main map</a></td>
+      <td><a href="https://gdcatalog.nha.co.th/th/dataset/23_01" target="_blank" rel="noopener">gdcatalog.nha.co.th</a></td>
+    </tr>
+    <tr>
+      <td>Comprehensive-plan land-use zones (ผังเมืองรวม) — Bangkok plan AOI,
+          zone polygons with category codes</td>
+      <td>Dept. of Public Works and Town &amp; Country Planning (DPT)</td>
+      <td><a href="slum.html">Slum map</a>, <a href="datamatch.html">Data match</a></td>
+      <td>DPT plan publication; exported as <code>data/plan_zones.geojson</code></td>
+    </tr>
+    <tr>
+      <td>BMA verified community boundaries — 1,993 communities, of which 626 slum
+          polygons (key <code>CMT_ID</code>)</td>
+      <td>Bangkok Metropolitan Administration (BMA), Community Development dept.</td>
+      <td><a href="social.html">Social pulse</a>, gazetteer</td>
+      <td><a href="https://cpudgiapp.bangkok.go.th/arcgis/rest/services/Community/Service_Community/FeatureServer/14" target="_blank" rel="noopener">BMA ArcGIS FeatureServer</a></td>
+    </tr>
+    <tr>
+      <td>BMA risk and danger-area registry, fiscal year 2568 (2025)</td>
+      <td>Bangkok Metropolitan Administration</td>
+      <td><a href="social.html">Social pulse</a></td>
+      <td><a href="https://data.bangkok.go.th" target="_blank" rel="noopener">data.bangkok.go.th</a></td>
+    </tr>
+    <tr>
+      <td>Bangkok khet (district) boundaries</td>
+      <td>BMA / NGIS</td>
+      <td><a href="slum.html">Slum map</a> overlay</td>
+      <td>exported as <code>labeling/qgis_project/bkk_khet_wgs84.geojson</code></td>
+    </tr>
+    <tr>
+      <td>Nationwide administrative layers — provinces, districts (amphoe),
+          sub-districts (tambon); rivers, irrigation, highways, parks, wildlife</td>
+      <td>NGIS / Dept. of Provincial Administration (DOPA)</td>
+      <td><a href="index.html">Main map</a>, <a href="slum.html">Slum map</a> outlines</td>
+      <td><code>data/districts.js</code>, <code>data/tambons.js</code>, <code>data/provinces.js</code>, &hellip;</td>
+    </tr>
+    <tr>
+      <td>geoBoundaries ADM2 (Thailand) — used to spatially match 46 romanized
+          district names for the social-pulse gazetteer</td>
+      <td>geoBoundaries</td>
+      <td><a href="social.html">Social pulse</a> methodology</td>
+      <td><a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoboundaries.org</a></td>
+    </tr>
+    <tr>
+      <td>Crime cases, arrests, drug cases, corrections statistics (province level)</td>
+      <td>Royal Thai Government open-data catalog</td>
+      <td><a href="social.html">Social pulse</a> calibration denominators</td>
+      <td><a href="https://gdcatalog.go.th" target="_blank" rel="noopener">gdcatalog.go.th</a></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============ IMAGERY ============ -->
+<section id="imagery">
+  <h2>Satellite imagery &amp; basemaps</h2>
+  <ul>
+    <li><b>GISTDA THEOS-2</b> — ortho PMS scene over the Bangkok study block
+        (EPSG:32647), obtained through the GeoHackathon 2026 NGIS platform.
+        Input to all roof-segmentation generations and the THEOS native page.
+        <a href="https://geohackathon.gistda.or.th" target="_blank" rel="noopener">geohackathon.gistda.or.th</a></li>
+    <li><b>Google satellite tiles</b> — default basemap of the
+        <a href="slum.html">Slum map</a>.</li>
+    <li><b>Esri World Imagery</b> — satellite basemap without labels.
+        Attribution: Esri, Maxar, Earthstar Geographics.</li>
+    <li><b>OpenStreetMap</b> — standard tiles plus the vector corridors
+        (canals, roads, railways, industrial areas) extracted via the Overpass API
+        for the slum-group proximity test.</li>
+    <li><b>CARTO light</b> — gray-tone OSM basemap (Light All), attribution
+        © OpenStreetMap contributors © CARTO.</li>
+    <li><b>GISTDA / LDD live services</b> — WMS tile services referenced by the
+        <a href="index.html">Main map</a> (Vallaris repeated-flood and land-use layers).</li>
+  </ul>
+</section>
+
+<!-- ============ AI ============ -->
+<section id="ai">
+  <h2>AI-derived layers</h2>
+  <table>
+    <tr><th>Layer</th><th>Method</th><th>Shown on</th></tr>
+    <tr>
+      <td>Gen 1 roof footprints</td>
+      <td>Segment Anything (MobileSAM, vit_t) sliding-window segmentation of the
+          THEOS-2 scene, 1024-px chips / 128-px overlap, footprint filter 4–5,000 m²</td>
+      <td><a href="gen1_samgeo.html">Gen 1: SAM roofs</a></td>
+    </tr>
+    <tr>
+      <td>Gen 2 roof footprints + probability raster</td>
+      <td>U-Net (segmentation_models_pytorch) trained on Overture building
+          footprints aligned to SAM centroids with Kabsch/RANSAC similarity fit;
+          256-px chips, Douglas-Peucker rectilinear regularization</td>
+      <td><a href="gen2_unet.html">Gen 2: U-Net roofs</a>,
+          <a href="gen3_yolo.html">Gen 3</a></td>
+    </tr>
+    <tr>
+      <td>Overture building footprints</td>
+      <td>Overture Maps Foundation release, 12.5k buildings clipped to the study
+          block — teacher labels for gen-2 training</td>
+      <td><a href="https://overturemaps.org" target="_blank" rel="noopener">overturemaps.org</a></td>
+    </tr>
+    <tr>
+      <td>Slum-group blobs (v11) + red/pink roof classification</td>
+      <td>Pure-Python algorithm: small-building density (&lt;100 m² footprints,
+          30-m neighborhood), block spacing (mean distance to 5 nearest
+          non-touching neighbours), 10-m raster closing (60 m / 50 m), group
+          acceptance by corridor proximity (canal / road / rail / industrial,
+          150 m) or density or spacing. Full spec:
+          <a href="https://github.com/RomanDataLab/pixels2metropolicy/blob/main/labeling/SLUM_ID_ALGORITHM.md" target="_blank" rel="noopener">SLUM_ID_ALGORITHM.md</a></td>
+      <td><a href="slum.html">Slum map</a> red / pink / orange overlays</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============ SOCIAL ============ -->
+<section id="social">
+  <h2>Social-pulse sources</h2>
+  <ul>
+    <li><b>Traffy Fondue</b> — pin-level citizen complaints, public share API
+        (<a href="https://publicapi.traffy.in.th/share/search" target="_blank" rel="noopener">publicapi.traffy.in.th</a>),
+        GPS joined directly to community polygons. Rolling ~100-report public sample.</li>
+    <li><b>News RSS</b> — Thairath, Sanook, Prachatai feeds plus 158 Google News
+        RSS queries (one per khwaeng, top-40 slums by population).</li>
+    <li><b>Pantip</b> — public search threads parsed from the page payload.</li>
+    <li><b>Telegram</b> — public channel web previews (t.me/s/); channels with
+        5,000+ verified followers, Thai-language exemption; subscriber counts
+        cross-checked against independent crawlers.</li>
+    <li><b>Gazetteer</b> — 5,120 Thai name variants over 626 BMA slum polygons,
+        built from official names, landmarks, khwaeng/district names and famous
+        area aliases.</li>
+    <li><b>Event lexicon</b> — ten deprivation domains grounded in the Domains of
+        Deprivation Framework, SDG 11.1.1 and the Slum Severity Index; Thai NLP via
+        PyThaiNLP; machine translation via DeepSeek API.</li>
+  </ul>
+  <p class="footnote">Full step-by-step methodology: <a href="social.html">Social pulse</a>
+     page, Methodology panel. Pipeline code: <code>02_code/social/</code>.</p>
+</section>
+
+<!-- ============ SCIENCE ============ -->
+<section id="science">
+  <h2>Scientific references</h2>
+  <ol>
+    <li>Abascal, J., Rothwell, N., Shonowo, A., Thomson, D.R., Elias, P., Elsey, H.,
+        Yeboah, G. and Kuffer, M. (2022) '&ldquo;Domains of deprivation&rdquo; framework
+        for mapping slums, informal settlements, and other deprived areas in LMICs to
+        improve urban planning and policy: a scoping review', <i>Habitat International</i>,
+        123, 102776. <a href="https://www.sciencedirect.com/science/article/pii/S019897152200014X" target="_blank" rel="noopener">Link</a></li>
+    <li>Roy, D., Bernal, D. and Lees, M. (2020) 'An exploratory factor analysis model
+        for slum severity index in Mexico City', <i>Urban Studies</i>, 57(4),
+        pp. 797&ndash;819. <a href="https://journals.sagepub.com/doi/10.1177/0042098019869769" target="_blank" rel="noopener">Link</a></li>
+    <li>United Nations Statistics Division (2023) <i>SDG indicator 11.1.1 metadata:
+        proportion of urban population living in slums, informal settlements or
+        inadequate housing</i>.
+        <a href="https://unstats.un.org/sdgs/metadata/files/Metadata-11-01-01.pdf" target="_blank" rel="noopener">PDF</a></li>
+    <li>World Food Programme (2023) <i>Multidimensional Deprivation Index (MDDI):
+        Alkire-Foster essential-needs counting — food, health, education, shelter,
+        WASH, safety</i>.
+        <a href="https://vamresources.manuals.wfp.org/docs/multidimensional-deprivation-index-mddi" target="_blank" rel="noopener">Link</a></li>
+    <li>Ronneberger, O., Fischer, P. and Brox, T. (2015) 'U-Net: Convolutional networks
+        for biomedical image segmentation', <i>MICCAI 2015, LNCS 9351</i>, pp. 234&ndash;241.
+        <a href="https://arxiv.org/abs/1505.04597" target="_blank" rel="noopener">arXiv:1505.04597</a></li>
+    <li>Kirillov, A., Mintun, E., Ravi, N. et al. (2023) 'Segment Anything',
+        <i>IEEE/CVF International Conference on Computer Vision (ICCV)</i>.
+        <a href="https://arxiv.org/abs/2304.02643" target="_blank" rel="noopener">arXiv:2304.02643</a></li>
+  </ol>
+</section>
+
+<!-- ============ POLICY ============ -->
+<section id="policy">
+  <h2>Policy precedents</h2>
+  <ol>
+    <li>Community Organizations Development Institute (CODI) (2003&ndash;)
+        <i>Baan Mankong collective housing programme</i>. Bangkok: CODI.
+        <a href="https://www.codi.or.th" target="_blank" rel="noopener">codi.or.th</a></li>
+    <li>Jakarta Municipal Government / World Bank (1974&ndash;1990s) <i>Kampung
+        Improvement Program documentation</i>.
+        <a href="https://projects.worldbank.org" target="_blank" rel="noopener">projects.worldbank.org</a></li>
+    <li>Prefeitura do Rio de Janeiro / Inter-American Development Bank (1994)
+        <i>Favela-Bairro programme</i>.
+        <a href="https://www.iadb.org" target="_blank" rel="noopener">iadb.org</a></li>
+    <li>Alcaldía de Medellín (2004&ndash;2007) <i>Proyectos Urbanos Integrales (PUI),
+        Comuna 13 and Northeastern zone</i>.
+        <a href="https://www.medellin.gov.co" target="_blank" rel="noopener">medellin.gov.co</a></li>
+    <li>Nairobi City County Government (2017) <i>Mukuru Special Planning Area
+        declaration and consortia plan</i>, with Muungano Alliance / SDI Kenya.
+        <a href="https://www.nairobi.go.ke" target="_blank" rel="noopener">nairobi.go.ke</a></li>
+    <li>UN-Habitat (2008&ndash;) <i>Participatory Slum Upgrading Programme (PSUP)</i>.
+        <a href="https://unhabitat.org" target="_blank" rel="noopener">unhabitat.org</a></li>
+  </ol>
+  <p class="footnote">Case reviews with images: <a href="slum_policies.html">Slum policies review</a>.
+     Programme citations in Harvard form: <a href="proposal.html#refs">Proposal, References</a>.</p>
+</section>
+
+<!-- ============ CAVEATS ============ -->
+<section id="caveats">
+  <h2>Caveats</h2>
+  <div class="note">
+    <p style="margin:4px 0">Household and resident figures on NHA community points are
+    <b>modeled</b> (log-normal distribution calibrated to official NHA/CODI
+    aggregates), not surveyed counts. Official community locations exist only in
+    NHA/BMA registers — slums are not a zoning category in Thai comprehensive
+    plans (ผังเมืองรวม). AI roof footprints and slum-group blobs are
+    model output for triage, not legal delineation; terraced rows can merge into
+    single polygons, and the spacing metric measures gaps between built blocks.</p>
+    <p style="margin:4px 0">Traffy Fondue public endpoint exposes only a rolling
+    ~100-report sample; Google News items remain snippet-only. No API keys are
+    stored in the repository.</p>
+  </div>
+</section>
+
+</main>
+</div>
+</body>
+</html>

@@ -71,6 +71,7 @@
     <a href="social.html">Social pulse</a>
     <a href="pipeline.html">Pipeline</a>
     <a href="proposal.html">Proposal</a>
+    <a href="sources.html">Sources</a>
     <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
   </nav>
 </div>
@@ -150,7 +151,8 @@
         <a href="proposal.html#refs">Proposal references</a> tab and case review in
         <a href="slum_policies.html">Slum policies review</a>.</li>
     </ul>
-    <p style="font-size:11px;color:#555;margin:6px 0 0">Social-signal methodology and its full
+    <p style="font-size:11px;color:#555;margin:6px 0 0">Complete inventory on the
+      <a href="sources.html">Sources</a> page · social-signal methodology and its full
       source list: <a href="social.html">Social pulse</a> (Methodology panel).</p>
   </div>
 </div>
@@ -879,11 +881,11 @@ const slum2Layer = addFetchedLayer('labeling/qgis_project/slum_2_wgs84.geojson',
   p => '<b>slum_2</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
 khetLayer.addTo(map); slum1Layer.addTo(map); slum2Layer.addTo(map); slum3Layer.addTo(map);
 
-// ---- roof classification overlays (v11: + railroad-adjacency, <=50m illegal corridor) ----
+// ---- roof classification overlays (v12: rail 75m, small corridor groups >=6) ----
 // groups = closed clusters of dense-small-building markers (10m grid, closing bridges ~50m gaps)
 // group accepted: >=10 markers AND (>=50% within 150m of canal/road/rail/industrial OR small-den >=40/ha)
 // RED = ALL buildings inside an accepted group (any size); pink = everything else
-const blobLayer = addFetchedLayer('labeling/qgis_project/slum_congestion_blobs_v11.geojson',
+const blobLayer = addFetchedLayer('labeling/qgis_project/slum_congestion_blobs_v12.geojson',
   { renderer: roofsCanvas, color: '#e07000', weight: 1.5, fillColor: '#ff8c00', fillOpacity: 0.45 },
   p => '<b>Slum group</b><br>site: ' + (p.site || '-') +
     '<br>buildings in group: ' + (p.buildings ?? '-') + ' (small: ' + (p.small_buildings ?? '-') + ')' +
@@ -891,12 +893,12 @@ const blobLayer = addFetchedLayer('labeling/qgis_project/slum_congestion_blobs_v
     '<br>within 150m of corridor/industrial: ' + Math.round((p.near_share || 0) * 100) + '%' +
     '<br>&nbsp;canal ' + Math.round((p.canal_share || 0) * 100) + '% · road ' + Math.round((p.road_share || 0) * 100) +
     '% · rail ' + Math.round((p.rail_share || 0) * 100) + '% · industrial ' + Math.round((p.indu_share || 0) * 100) + '%');
-const pinkRoofLayer = addFetchedLayer('labeling/qgis_project/slum_roofs_pink_v11.geojson',
+const pinkRoofLayer = addFetchedLayer('labeling/qgis_project/slum_roofs_pink_v12.geojson',
   { renderer: roofsCanvas, color: '#ffd9df', weight: 0.4, fillColor: '#ffb6c1', fillOpacity: 0.55 },
   p => '<b>Other roof</b><br>site: ' + (p.site || '-') + '<br>area: ' + Math.round(p.area_m2 || 0) + ' m&sup2;');
 const redRoofLayer = (function () {
   const group = L.layerGroup();
-  fetch('labeling/qgis_project/slum_roofs_red_v11.geojson')
+  fetch('labeling/qgis_project/slum_roofs_red_v12.geojson')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(g => {
       const gj = L.geoJSON(g, {
@@ -909,7 +911,7 @@ const redRoofLayer = (function () {
         ' m · rail: ' + (p.rail_m ?? '-') + ' m · industrial: ' + (p.indu_m ?? '-') + ' m'; });
       gj.addTo(group);
     })
-    .catch(err => console.warn('failed to load slum_roofs_red_v11.geojson', err));
+    .catch(err => console.warn('failed to load slum_roofs_red_v12.geojson', err));
   return group;
 })();
 blobLayer.addTo(map); redRoofLayer.addTo(map); pinkRoofLayer.addTo(map);
