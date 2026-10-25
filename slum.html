@@ -14,6 +14,14 @@
            font-family: sans-serif; font-size: 13px; max-width: 300px; }
   .panel h1 { font-size: 14px; margin: 0 0 6px; }
   .panel .btns button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+  .tabbar { display: flex; gap: 4px; margin: 0 0 8px; }
+  .tabbar button { flex: 1; padding: 4px 6px; font-size: 12px; cursor: pointer;
+           border: 1px solid #ccc; border-radius: 6px; background: #f2f2f2; color: #333; }
+  .tabbar button.active { background: #2b6cb0; border-color: #2b6cb0; color: #fff; font-weight: bold; }
+  #tab-data { max-height: calc(100vh - 140px); overflow-y: auto; font-size: 12px; line-height: 1.45; }
+  #tab-data h4 { margin: 8px 0 3px; font-size: 12px; color: #12314e; }
+  #tab-data ul { margin: 2px 0 6px; padding-left: 16px; }
+  #tab-data li { margin: 0 0 4px; }
   #slum_video { position: absolute; right: 10px; z-index: 1000; background: white; display: none;
            padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.3);
            font-family: sans-serif; font-size: 13px; max-width: 324px; box-sizing: border-box;
@@ -70,6 +78,11 @@
 <div id="map"></div>
 <div class="panel">
   <h1>NHA low-income communities (ชุมชนผู้มีรายได้น้อย)</h1>
+  <div class="tabbar">
+    <button id="tabbtn-map" class="active" onclick="switchTab('map')">Map</button>
+    <button id="tabbtn-data" onclick="switchTab('data')">Data &amp; references</button>
+  </div>
+  <div id="tab-map">
   <div><span id="count"></span> communities · source: <a href="https://gdcatalog.nha.co.th/th/dataset/23_01" target="_blank">NHA gdcatalog 23_01</a></div>
   <p style="margin:6px 0 4px"><b>Zoom to region:</b></p>
   <div class="btns">
@@ -83,6 +96,63 @@
      <span class="legend-dot" style="background:#333;opacity:.5"></span>Comprehensive-plan land-use zones<br>
      <span style="font-size:11px;color:#555">Hover a dot: houses + population · Click: details</span></p>
   <p style="font-size:11px;color:#555;margin:6px 0 0">Note: these official community locations exist only in NHA/BMA registers — slums are not a zoning category in the ผังเมืองรวม (comprehensive plans).</p>
+  </div>
+  <div id="tab-data" style="display:none">
+    <h4>Data sources</h4>
+    <ul>
+      <li><b>NHA low-income communities</b> (1,588 points) — National Housing Authority open data,
+        <a href="https://gdcatalog.nha.co.th/th/dataset/23_01" target="_blank">gdcatalog dataset 23_01</a>.
+        House / population figures are <i>modeled</i> (log-normal, calibrated to official NHA/CODI aggregates), not surveyed.</li>
+      <li><b>Comprehensive-plan zones (ผังเมืองรวม)</b> — Dept. of Public Works and Town &amp; Country
+        Planning (DPT) land-use zones, Bangkok plan AOI (see <a href="datamatch.html">Data match</a>).</li>
+      <li><b>BMA khet (district) boundaries</b> — Bangkok Metropolitan Administration open data
+        (<a href="https://data.bangkok.go.th" target="_blank">data.bangkok.go.th</a>).</li>
+      <li><b>Nationwide amphoe / tambon outlines</b> — NGIS / DOPA administrative vector layers
+        (same <code>data/districts.js</code>, <code>data/tambons.js</code> as the
+        <a href="index.html">main map</a>).</li>
+      <li><b>AI-detected building footprints &amp; slum-group blobs</b> (red / pink / orange overlays) —
+        project pipeline: SAM (MobileSAM) + U-Net roof segmentation on a GISTDA THEOS-2 scene,
+        U-Net trained against Overture teacher footprints; v11 slum-group rule
+        (small-building density, spacing, canal/road/rail/industrial corridor proximity).
+        Method: <a href="gen1_samgeo.html">Gen 1</a> · <a href="gen2_unet.html">Gen 2</a> ·
+        <a href="gen3_yolo.html">Gen 3</a>.</li>
+      <li><b>Overture building footprints</b> (gen-2 teacher labels) —
+        <a href="https://overturemaps.org" target="_blank">Overture Maps Foundation</a>.</li>
+      <li><b>Canal / road / rail / industrial corridors</b> — OpenStreetMap via Overpass API.</li>
+      <li><b>Satellite imagery</b> — GISTDA THEOS-2 ortho (GeoHackathon 2026 NGIS platform,
+        <a href="https://geohackathon.gistda.or.th" target="_blank">geohackathon.gistda.or.th</a>).</li>
+      <li><b>Basemaps</b> — Google satellite; Esri World Imagery; © OpenStreetMap contributors;
+        CARTO light.</li>
+    </ul>
+    <h4>Scientific references</h4>
+    <ul>
+      <li>Abascal, J. et al. (2022) '&ldquo;Domains of deprivation&rdquo; framework for mapping slums,
+        informal settlements, and other deprived areas in LMICs', <i>Habitat International</i>, 123, 102776.
+        <a href="https://www.sciencedirect.com/science/article/pii/S019897152200014X" target="_blank">Link</a></li>
+      <li>Roy, D., Bernal, D. and Lees, M. (2020) 'An exploratory factor analysis model for slum
+        severity index in Mexico City', <i>Urban Studies</i>, 57(4), 797&ndash;819.
+        <a href="https://journals.sagepub.com/doi/10.1177/0042098019869769" target="_blank">Link</a></li>
+      <li>United Nations Statistics Division (2023) <i>SDG indicator 11.1.1 metadata: proportion of
+        urban population living in slums or informal settlements</i>.
+        <a href="https://unstats.un.org/sdgs/metadata/files/Metadata-11-01-01.pdf" target="_blank">PDF</a></li>
+      <li>World Food Programme (2023) <i>Multidimensional Deprivation Index (Alkire-Foster
+        counting method)</i>. <a href="https://vamresources.manuals.wfp.org/docs/multidimensional-deprivation-index-mddi" target="_blank">Link</a></li>
+      <li>Ronneberger, O., Fischer, P. and Brox, T. (2015) 'U-Net: Convolutional networks for
+        biomedical image segmentation', <i>MICCAI 2015</i>.
+        <a href="https://arxiv.org/abs/1505.04597" target="_blank">arXiv:1505.04597</a></li>
+      <li>Kirillov, A. et al. (2023) 'Segment Anything', <i>ICCV 2023</i>.
+        <a href="https://arxiv.org/abs/2304.02643" target="_blank">arXiv:2304.02643</a></li>
+    </ul>
+    <h4>Policy precedents</h4>
+    <ul>
+      <li>CODI Baan Mankong (Thailand) · Kampung Improvement Program (Jakarta) · Favela-Bairro
+        (Rio) · PUI Medellín · Mukuru SPA (Nairobi) · UN-Habitat PSUP — full citations on the
+        <a href="proposal.html#refs">Proposal references</a> tab and case review in
+        <a href="slum_policies.html">Slum policies review</a>.</li>
+    </ul>
+    <p style="font-size:11px;color:#555;margin:6px 0 0">Social-signal methodology and its full
+      source list: <a href="social.html">Social pulse</a> (Methodology panel).</p>
+  </div>
 </div>
 <div id="slum_video">
   <div class="vid-head">
@@ -714,7 +784,7 @@ const ZONES = {
 }
 ;
 
-const map = L.map('map').setView([13.75, 100.5], 6);
+const map = L.map('map').setView([13.65, 100.70], 10);
 // default background: satellite imagery without labels (Esri World Imagery)
 const satNoLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom: 19,
@@ -724,7 +794,22 @@ const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
-satNoLabels.addTo(map);
+// gray-tone OSM basemap (CARTO light)
+const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  subdomains: 'abcd',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+});
+// google satellite
+const googleSat = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  subdomains: '0123',
+  attribution: 'Imagery &copy; Google'
+});
+map.createPane('roofsPane');
+map.getPane('roofsPane').style.zIndex = 450;
+const roofsCanvas = L.canvas({ pane: 'roofsPane', padding: 0.3 });
+googleSat.addTo(map);
 
 const comLayer = L.layerGroup();
 // dot radius scaled by modeled population (sqrt for area-proportional symbols)
@@ -768,11 +853,15 @@ ZONES.features.forEach(f => {
 });
 
 // ---- BKK GeoJSON overlays (fetched at runtime, 50% fill transparency) ----
-function addFetchedLayer(url, style, popup) {
+function addFetchedLayer(url, style, popup, onlyAccepted) {
   const group = L.layerGroup();
   fetch(url)
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(g => { L.geoJSON(g, { style: style }).bindPopup(l => popup(l.feature.properties)).addTo(group); })
+    .then(g => {
+      const opts = { style: style };
+      if (onlyAccepted) opts.filter = f => f.properties.accepted;
+      L.geoJSON(g, opts).bindPopup(l => popup(l.feature.properties)).addTo(group);
+    })
     .catch(err => console.warn('failed to load ' + url, err));
   return group;
 }
@@ -789,6 +878,41 @@ const slum2Layer = addFetchedLayer('labeling/qgis_project/slum_2_wgs84.geojson',
   { color: '#7cfc00', weight: 1, fillColor: '#7cfc00', fillOpacity: 0.5 },
   p => '<b>slum_2</b><br>confidence: ' + (p.confidence ?? '-') + '<br>area: ' + (p.area_m2 ?? '-') + ' m&sup2;');
 khetLayer.addTo(map); slum1Layer.addTo(map); slum2Layer.addTo(map); slum3Layer.addTo(map);
+
+// ---- roof classification overlays (v11: + railroad-adjacency, <=50m illegal corridor) ----
+// groups = closed clusters of dense-small-building markers (10m grid, closing bridges ~50m gaps)
+// group accepted: >=10 markers AND (>=50% within 150m of canal/road/rail/industrial OR small-den >=40/ha)
+// RED = ALL buildings inside an accepted group (any size); pink = everything else
+const blobLayer = addFetchedLayer('labeling/qgis_project/slum_congestion_blobs_v11.geojson',
+  { renderer: roofsCanvas, color: '#e07000', weight: 1.5, fillColor: '#ff8c00', fillOpacity: 0.45 },
+  p => '<b>Slum group</b><br>site: ' + (p.site || '-') +
+    '<br>buildings in group: ' + (p.buildings ?? '-') + ' (small: ' + (p.small_buildings ?? '-') + ')' +
+    '<br>small-building density: ' + (p.small_den_ha ?? '-') + '/ha' +
+    '<br>within 150m of corridor/industrial: ' + Math.round((p.near_share || 0) * 100) + '%' +
+    '<br>&nbsp;canal ' + Math.round((p.canal_share || 0) * 100) + '% · road ' + Math.round((p.road_share || 0) * 100) +
+    '% · rail ' + Math.round((p.rail_share || 0) * 100) + '% · industrial ' + Math.round((p.indu_share || 0) * 100) + '%');
+const pinkRoofLayer = addFetchedLayer('labeling/qgis_project/slum_roofs_pink_v11.geojson',
+  { renderer: roofsCanvas, color: '#ffd9df', weight: 0.4, fillColor: '#ffb6c1', fillOpacity: 0.55 },
+  p => '<b>Other roof</b><br>site: ' + (p.site || '-') + '<br>area: ' + Math.round(p.area_m2 || 0) + ' m&sup2;');
+const redRoofLayer = (function () {
+  const group = L.layerGroup();
+  fetch('labeling/qgis_project/slum_roofs_red_v11.geojson')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(g => {
+      const gj = L.geoJSON(g, {
+        renderer: roofsCanvas,
+        style: { color: '#9b0000', weight: 0.6, fillColor: '#ff0000', fillOpacity: 0.65 }
+      }).bindPopup(l => { const p = l.feature.properties; return '<b>In slum group</b><br>site: ' + (p.site || '-') +
+        '<br>area: ' + Math.round(p.area_m2 || 0) + ' m&sup2; · nbrs/20m: ' + (p.nb_20 ?? '-') +
+        '<br>small-bldg density (30m): ' + (p.small_den ?? '-') + '/ha · spacing: ' + (p.spacing_m ?? '-') + ' m' +
+        '<br>dist canal: ' + (p.canal_m ?? '-') + ' m · road: ' + (p.road_m ?? '-') +
+        ' m · rail: ' + (p.rail_m ?? '-') + ' m · industrial: ' + (p.indu_m ?? '-') + ' m'; });
+      gj.addTo(group);
+    })
+    .catch(err => console.warn('failed to load slum_roofs_red_v11.geojson', err));
+  return group;
+})();
+blobLayer.addTo(map); redRoofLayer.addTo(map); pinkRoofLayer.addTo(map);
 
 // nationwide admin outlines (same data files as main map), lazy-loaded on first enable
 function addOutlineLayer(jsFile, key, style, popup) {
@@ -817,14 +941,23 @@ map.on('overlayadd', e => { if (e.layer && e.layer.ensure) e.layer.ensure(); });
 amphoeLayer.addTo(map); tambonLayer.addTo(map);
 amphoeLayer.ensure(); tambonLayer.ensure();
 
-L.control.layers({ 'Satellite (no labels)': satNoLabels, 'OpenStreetMap': osmBase },
+L.control.layers({ 'Google satellite': googleSat, 'OpenStreetMap': osmBase, 'Gray OSM (light)': cartoLight, 'Satellite (no labels)': satNoLabels },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
+    'Slum roofs (red)': redRoofLayer, 'Congestion blobs (orange)': blobLayer, 'Other roofs (pink)': pinkRoofLayer,
     'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'slum_2': slum2Layer, 'bkk_slum_3': slum3Layer,
     'Districts (amphoe) outlines': amphoeLayer, 'Tambon (sub-district) outlines': tambonLayer },
-  { collapsed: false }).addTo(map);
+  { collapsed: true }).addTo(map);
 
 document.getElementById('count').textContent = NHA.features.length;
 function fly(lat, lon, z) { map.flyTo([lat, lon], z); }
+
+// ---- panel tabs: map controls vs data sources + references ----
+function switchTab(name) {
+  document.getElementById('tab-map').style.display = name === 'map' ? '' : 'none';
+  document.getElementById('tab-data').style.display = name === 'data' ? '' : 'none';
+  document.getElementById('tabbtn-map').classList.toggle('active', name === 'map');
+  document.getElementById('tabbtn-data').classList.toggle('active', name === 'data');
+}
 
 // ---- slum video panel: curated street-level videos (TikTok + YouTube), name-verified twice ----
 // (parallel-search title + live oEmbed title). src: "tt:<id>" = TikTok, "yt:<id>" = YouTube.
