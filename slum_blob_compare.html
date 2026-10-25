@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>bkk_slum_3 - blob method comparison</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; font-family: Segoe UI, Arial, sans-serif; }
+  #map { position: absolute; inset: 0; }
+  .titlebox { position: absolute; top: 8px; left: 50px; z-index: 1000; background: rgba(255,255,255,.92);
+              padding: 6px 10px; border-radius: 6px; font-size: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+  .titlebox b { font-size: 13px; }
+  .switcher { position: absolute; top: 8px; right: 8px; z-index: 1000; display: flex; gap: 6px; }
+  .switcher button { border: 2px solid #444; border-radius: 6px; padding: 8px 12px; font-size: 13px;
+                     cursor: pointer; background: #fff; font-weight: 600; }
+  .switcher button.on { color: #fff; }
+  #btnA.on { background: #e07000; border-color: #b34700; }
+  #btnB.on { background: #7b2ff7; border-color: #5b1bd6; }
+  #btnC.on { background: #0a8f3c; border-color: #065c2a; }
+  .stat { position: absolute; bottom: 8px; left: 50px; z-index: 1000; background: rgba(255,255,255,.92);
+          padding: 6px 10px; border-radius: 6px; font-size: 11px; box-shadow: 0 1px 4px rgba(0,0,0,.3); max-width: 460px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="titlebox">
+  <b>bkk_slum_3 — pick blob construction</b><br>
+  Same input: 1,793 congested slum roofs (slum flag + ≥8 nbrs/20 m) ·
+  <span style="color:#1976d2">— khlong (OSM)</span> · roofs faint red.
+  Click <b>A</b> / <b>B</b> / <b>C</b> top-right — one method at a time.
+</div>
+<div class="switcher">
+  <button id="btnA" onclick="showMethod('A')">A hull</button>
+  <button id="btnB" onclick="showMethod('B')">B raster 10m</button>
+  <button id="btnC" onclick="showMethod('C')">C fill 5m</button>
+</div>
+<div class="stat" id="stat">loading…</div>
+<script>
+const map = L.map('map').setView([13.7395, 100.4884], 15);
+const base = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+function fetched(url, style, popup) {
+  const g = L.layerGroup();
+  fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d => L.geoJSON(d, { style, onEachFeature: (f, l) => l.bindPopup(popup(f.properties)) }).addTo(g))
+    .catch(e => console.warn(url, e));
+  return g;
+}
+const statLine = feats => 'blobs: ' + feats.length +
+  ' · biggest: ' + Math.max(...feats.map(f => f.properties.buildings)) + ' bldg · median density: ' +
+  feats.map(f => f.properties.density_ha).sort((a, b) => a - b)[Math.floor(feats.length / 2)] + ' /ha';
+window.__stats = statLine;
+
+const canals = fetched('labeling/qgis_project/osm_canals_bkk_slum_3.geojson',
+  { color: '#1976d2', weight: 2.5, opacity: 0.9 },
+  p => '<b>' + (p.name || 'khlong') + '</b><br>' + (p.waterway || ''));
+
+const roofs = fetched('labeling/qgis_project/bkk_slum_3_roofs_enriched.geojson',
+  { color: '#555', weight: 0.3, fillColor: '#d32f2f', fillOpacity: 0.25 },
+  p => '<b>roof</b><br>area: ' + Math.round(p.area_m2 || 0) + ' m&sup2;' +
+    '<br>neighbours/20m: ' + (p.nb_20 ?? '-') +
+    '<br>orientation conc: ' + (p.orient_conc ?? '-') +
+    '<br>size CV: ' + (p.size_cv ?? '-') +
+    '<br>canal dist: ' + (p.canal_m ?? '-') + ' m');
+
+const blobPopup = p => '<b>' + p.method + '</b><br>' +
+  'buildings: ' + p.buildings + '<br>density: ' + p.density_ha + ' /ha' +
+  '<br>canal median: ' + p.canal_med_m + ' m (&le;150m share: ' + Math.round(p.canal_150m_share * 100) + '%)' +
+  '<br>orient conc: ' + p.orient_conc + ' · size CV: ' + p.size_cv;
+
+const A = fetched('labeling/qgis_project/blobcompare_A_hulls.geojson',
+  { color: '#b34700', weight: 2, fillColor: '#e07000', fillOpacity: 0.45 }, blobPopup);
+const B = fetched('labeling/qgis_project/blobcompare_B_raster10.geojson',
+  { color: '#5b1bd6', weight: 2, fillColor: '#7b2ff7', fillOpacity: 0.45 }, blobPopup);
+const C = fetched('labeling/qgis_project/blobcompare_C_fill5.geojson',
+  { color: '#065c2a', weight: 2, fillColor: '#0a8f3c', fillOpacity: 0.45 }, blobPopup);
+
+roofs.addTo(map); canals.addTo(map);
+
+const METHODS = { A: A, B: B, C: C };
+const LABELS = { A: 'A convex hull', B: 'B raster closing 10 m', C: 'C raster closing 5 m (filled)' };
+function showMethod(key) {
+  for (const k in METHODS) {
+    if (k === key) { if (!map.hasLayer(METHODS[k])) map.addLayer(METHODS[k]); }
+    else if (map.hasLayer(METHODS[k])) map.removeLayer(METHODS[k]);
+    document.getElementById('btn' + k).classList.toggle('on', k === key);
+  }
+  if (window.__statUpdate) window.__statUpdate(key);
+}
+showMethod('A');
+L.control.layers({ 'OpenStreetMap': base },
+  { 'OSM canals': canals, 'Roofs (faint)': roofs }, { collapsed: true }).addTo(map);
+
+const STATS = {};
+Promise.all(
+  ['blobcompare_A_hulls', 'blobcompare_B_raster10', 'blobcompare_C_fill5']
+    .map((n, i) => fetch('labeling/qgis_project/' + n + '.geojson').then(r => r.json())
+      .then(d => { STATS['ABC'[i]] = statLine(d.features); }))
+).then(() => {
+  const orig = document.getElementById('stat');
+  const show = k => orig.innerHTML = '<b>' + LABELS[k] + '</b>: ' + STATS[k];
+  window.__statUpdate = show;
+  show('A');
+});
+</script>
+</body>
+</html>
