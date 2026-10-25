@@ -175,7 +175,7 @@ build-code proximity. Pop&lt;100 unranked.</p>
 
   </div>
   <div style="margin-top:8px;border-top:1px solid #999;padding-top:4px"><b>Rankings</b> (top-3)</div><div style='margin-top:4px'><i>Alkire-Foster composite</i><div>1. Soi Mae Niao Community <b>0.47</b></div><div>2. Soi Somboon Phatthana 2 Community <b>0.47</b></div><div>3. Soi Inthamara 55 Community <b>0.47</b></div></div><div style='margin-top:4px'><i>all-events burden (events/1k pop)</i><div>1. Rim Khlong Hua Mak Noi Community <b>28.77</b></div><div>2. Wang Yai Community <b>28.77</b></div><div>3. Samakkhi Pattana Community <b>28.77</b></div></div><div style='margin-top:4px'><i>most-dangerous events (severity-weighted/1k)</i><div>1. Rim Khlong Hua Mak Noi Community <b>24.21</b></div><div>2. Wang Yai Community <b>24.21</b></div><div>3. Samakkhi Pattana Community <b>24.21</b></div></div><div style='margin-top:4px'><i>flooded blocks (GISTDA flood-frequency)</i><div>1. Santi Suk <b>158.0</b></div><div>2. Yu Di Mi Suk Ruam Jai <b>148.0</b></div><div>3. Mee Suwan Phatthana Community <b>148.0</b></div></div><div style='margin-top:4px'><i>broken build-code proximity (setback proxy)</i><div>1. Wat Sao Hin <b>0.85</b></div><div>2. Yim Prayoon Pattana <b>0.85</b></div><div>3. Wat Suwannaram <b>0.85</b></div></div>
-  <div class="note">Light-to-dark shade = more events. White = no events.
+  <div class="note">Light-to-dark shade = more events; lightest shade = no events.
   92-day window.</div>
   </div><!-- /legendbody -->
 </div>
@@ -222,8 +222,8 @@ function style(cat){
   return f=>{
     const v=f.properties.counts[cat]||0;
     const slum=f.properties.type==='ชุมชนแออัด';
-    if(v===0) return {color:'#bbb',weight:0.4,fillColor:'#ffffff',fillOpacity:0.25};
     const r=RAMPS[cat];
+    if(v===0) return {color:'#bbb',weight:0.4,fillColor:r[0],fillOpacity:0.35};   // lightest shade of the domain ramp
     const i=Math.min(4, Math.floor(Math.sqrt(v/mx)*5));   // light -> dark
     return {color:'#333',weight:0.8,fillColor:r[i],fillOpacity:0.85};
   };
