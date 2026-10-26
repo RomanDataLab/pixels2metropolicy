@@ -13,3 +13,13 @@ theos_block/
 *.pptx
 *.docx
 *.xlsx
+
+# >100MB — exceeds GitHub hard limit, cannot be pushed
+kla/Pixels_to_Metro_Policy_walkthrough_v8.mp4
+kla/final_html/Urban_Intelligence_Platform_landing/web/media/walkthrough.mp4
+video_thailand_disasters/bin/ffmpeg.exe
+video_thailand_disasters/bin/ffprobe.exe
+video_thailand_disasters/dl/0sxHHPnSIsI.mp4
+video_thailand_disasters/dl/5DjO6OXkW6k.mp4
+video_thailand_disasters/dl/hcBfFghrBuw.mp4
+video_thailand_disasters/dl/yKj538hcPGU.mp4
