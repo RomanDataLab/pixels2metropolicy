@@ -494,8 +494,9 @@ function collect(g){
 }
 N.features.forEach(f=>collect(f.geometry));
 const map = L.map('map').fitBounds(BKK.pad(0.03), {animate:false});
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  {maxZoom:19, subdomains:'abcd',
+   attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
 
 let layer=null, khetLayer=null, riskLayer=null, currentCat='flooding';
 
