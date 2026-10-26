@@ -76,6 +76,71 @@ def main() -> int:
     weighted = weighted[weighted["cmt_id"].isin(poly.index)]
     print(f"weighted event assignments: {len(weighted)} over {weighted['cmt_id'].nunique()} slums")
 
+    # ---------- Alkire-Foster composite ranking ----------
+    DOMS = ["flooding", "fire", "env_hazard", "contamination", "basic_services",
+            "housing_tenure_risk", "crime_security", "destitution",
+            "informal_economy", "social_support"]
+    piv_w = (weighted[weighted["event_type"].isin(DOMS)]
+             .pivot_table(index="cmt_id", columns="event_type",
+                          values="weight", aggfunc="sum", fill_value=0)
+             .reindex(columns=DOMS, fill_value=0))
+    pop = poly["POP_TOTAL"].reindex(piv_w.index)
+    rates = piv_w.div(pop.replace(0, pd.NA), axis=0) * 1000
+    cutoffs = {}
+    for d in DOMS:
+        nz = rates[d].dropna()
+        nz = nz[nz > 0]
+        cutoffs[d] = float(nz.quantile(0.75)) if len(nz) >= 8 else None
+    scores = pd.DataFrame(index=piv_w.index)
+    for d in DOMS:
+        c = cutoffs[d]
+        scores[d] = (rates[d] / c).clip(upper=1.0) if c else 0.0
+    scores = scores.fillna(0.0)
+    composite = scores.mean(axis=1)
+    affected = (scores >= 1.0).sum(axis=1)
+    rankable = pop >= 100
+    ranking = pd.DataFrame({
+        "cmt_id": scores.index, "score": composite.round(3),
+        "affected_domains": affected.astype(int),
+        "pop": pop.astype("Int64"), "rankable": rankable,
+    }).sort_values(["score", "affected_domains"], ascending=False)
+    ranking["rank"] = 0
+    mask = ranking["rankable"].fillna(False)
+    ranking.loc[mask, "rank"] = range(1, int(mask.sum()) + 1)
+    ranking = ranking.reset_index(drop=True)
+    names = poly[["CMT_NAME", "DNAME", "SNAME"]].reset_index().rename(columns={"CMT_ID": "cmt_id"})
+    ranking = ranking.merge(names, on="cmt_id", how="left")
+    # ---- problem-focused rankings (2026-10-25) ----
+    SEV = {"fire": 1.0, "flooding": 0.9, "crime_security": 0.9, "env_hazard": 0.8,
+           "contamination": 0.6, "housing_tenure_risk": 0.6, "basic_services": 0.5,
+           "destitution": 0.4, "informal_economy": 0.2, "social_support": 0.1}
+    problem_total = piv_w.sum(axis=1)
+    danger_total = sum(piv_w[d] * SEV[d] for d in DOMS)
+    pr = (problem_total / pop.replace(0, pd.NA) * 1000).round(2)
+    dr = (danger_total / pop.replace(0, pd.NA) * 1000).round(2)
+    pr.index = pr.index.astype(str)
+    dr.index = dr.index.astype(str)
+    ranking["problem_rate"] = ranking["cmt_id"].astype(str).map(pr)
+    ranking["danger_rate"] = ranking["cmt_id"].astype(str).map(dr)
+
+    fl = pd.read_csv(SOCIAL_OUT / "flood_scores.csv", dtype={"cmt_id": str})
+    ranking["cmt_id"] = ranking["cmt_id"].astype(str)
+    ranking = ranking.merge(fl[["cmt_id", "flood_frac", "flood_alpha"]], on="cmt_id", how="left")
+    cr = pd.read_csv(SOCIAL_OUT / "code_risk.csv", dtype={"cmt_id": str})
+    ranking = ranking.merge(cr[["cmt_id", "code_risk", "viol_count"]], on="cmt_id", how="left")
+    ranking["flood_score"] = (ranking["flood_frac"].fillna(0) * ranking["flood_alpha"].fillna(0)).astype(int)
+
+    ok = ranking["rankable"].fillna(False)
+    for col, name in (("problem_rate", "rank_problem"), ("danger_rate", "rank_danger"),
+                      ("flood_score", "rank_flood"), ("code_risk", "rank_code")):
+        ranking[name] = 0
+        sub = ranking[ok].sort_values(col, ascending=False)
+        ranking.loc[sub.index, name] = range(1, len(sub) + 1)
+
+    ranking.to_csv(SOCIAL_OUT / "slum_rankings.csv", index=False, encoding="utf-8-sig")
+    print(f"rankings: {int(mask.sum())} rankable of {len(ranking)}")
+    print(ranking[ranking['rank']>0].head(8)[["rank","CMT_NAME","DNAME","score","affected_domains","pop"]].to_string(index=False))
+
     piv = (weighted.pivot_table(index="cmt_id", columns="event_type",
                                 values="weight", aggfunc="sum", fill_value=0)
            .rename(columns=lambda c: f"ev_{c}"))
@@ -153,6 +218,9 @@ def main() -> int:
         if c.startswith(("ev_", "traffy")):
             prof[f"{c}_per1k"] = (prof[c] / prof["POP_TOTAL"].replace(0, pd.NA) * 1000).round(2)
 
+    if "score" in ranking.columns:
+        rk = ranking.set_index("cmt_id")[["score", "rank", "affected_domains"]]
+        prof = prof.join(rk)
     prof = prof.fillna({c: 0 for c in prof.columns if c.startswith(("ev_", "n_", "traffy"))})
     prof.round(3).to_csv(SOCIAL_OUT / "slum_social_profile.csv", encoding="utf-8-sig")
 

@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"kind": "indu", "name": "KT Enterprise"}, "geometry": {"type": "LineString", "coordinates": [[100.5886914, 13.9127246], [100.5888153, 13.9126715], [100.5886185, 13.912239], [100.5884948, 13.9122921], [100.5886914, 13.9127246]]}}]}
