@@ -53,7 +53,22 @@
   #site-header nav a:hover { background: #1d4e79; color: #fff; }
   #site-header nav a.active { background: #2b6cb0; color: #fff; }
 
+  /* ---- embed mode (?embed=1): hide site nav header ---- */
+  html.embed #site-header { display: none; }
+  html.embed .panel { top: 10px; }
+  .panel .rollbtn { position: absolute; top: 5px; left: 5px; width: 22px; height: 22px;
+                    display: flex; align-items: center; justify-content: center;
+                    border: 1px solid #1d4e79; border-radius: 5px; background: #fff; color: #1d4e79;
+                    cursor: pointer; font-size: 11px; line-height: 1; padding: 0; z-index: 5; }
+  .panel .rollbtn:hover { background: #e8f1f8; }
+  .panel h1 { padding-left: 27px; }
+  .panel.rolled > *:not(.rollbtn) { display: none; }
+  .panel.rolled { padding: 30px 14px 12px; max-width: none; }
+
 </style>
+<script>
+  if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embed');
+</script>
 </head>
 <body>
 <div id="site-header">
@@ -78,6 +93,7 @@
 
 <div id="map"></div>
 <div class="panel">
+  <button class="rollbtn" type="button" title="Roll panel up" aria-label="Roll panel up" onclick="rollPanel(this)">▾</button>
   <h1>NHA low-income communities (ชุมชนผู้มีรายได้น้อย)</h1>
   <div class="tabbar">
     <button id="tabbtn-map" class="active" onclick="switchTab('map')">Map</button>
@@ -968,6 +984,16 @@ function switchTab(name) {
   document.getElementById('tab-data').style.display = name === 'data' ? '' : 'none';
   document.getElementById('tabbtn-map').classList.toggle('active', name === 'map');
   document.getElementById('tabbtn-data').classList.toggle('active', name === 'data');
+}
+
+// ---- panel roll up/down toggle (button in panel top-left corner) ----
+function rollPanel(btn) {
+  const p = btn.closest('.panel');
+  p.classList.toggle('rolled');
+  const rolled = p.classList.contains('rolled');
+  btn.textContent = rolled ? '▴' : '▾';
+  btn.title = rolled ? 'Roll panel down' : 'Roll panel up';
+  btn.setAttribute('aria-label', btn.title);
 }
 
 // ---- slum video panel: curated street-level videos (TikTok + YouTube), name-verified twice ----
