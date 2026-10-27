@@ -272,15 +272,7 @@ def main() -> int:
     khet = (json.loads(Path(KHER_GEOJSON).read_text(encoding="utf-8"))
             if KHER_GEOJSON.exists() else {"type": "FeatureCollection", "features": []})
 
-    carto_key = ""
-    try:
-        carto_key = json.loads((Path(r"G:\My Drive\J_Projects_Archive\config")
-                                 / "config_cartobasemap.json").read_text(encoding="utf-8")
-                                )["CARTO Basemaps API key"]
-    except Exception:
-        pass
     html = (HTML
-            .replace("__CARTOKEY__", carto_key)
             .replace("__RANKSETS__", json.dumps(rank_sets, ensure_ascii=False))
             .replace("__ZONES__", json.dumps(zones, ensure_ascii=False))
             .replace("__PUBFEATS__", json.dumps({"type": "FeatureCollection", "features": pub_feats}, ensure_ascii=False))
@@ -502,9 +494,12 @@ function collect(g){
 }
 N.features.forEach(f=>collect(f.geometry));
 const map = L.map('map').fitBounds(BKK.pad(0.03), {animate:false});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?api_key=__CARTOKEY__',
-  {maxZoom:19, subdomains:'abcd',
-   attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19, maxNativeZoom:16,
+   attribution:'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19, maxNativeZoom:16, opacity:0.7,
+   attribution:''}).addTo(map);
 
 let layer=null, khetLayer=null, riskLayer=null, currentCat='flooding';
 
