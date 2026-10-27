@@ -179,18 +179,17 @@ def main() -> int:
                 f"{thr:.0f} m allowed — {law}"
                 for src, name, thr, law in NORMS if int(row[f"viol_{src}"]) == 1]
     RK_DEFS = [("rank", "score", "Alkire-Foster composite"),
-               ("rank_problem", "problem_rate", "all-events burden (events/1k pop)"),
                ("rank_danger", "danger_rate", "most-dangerous events (severity-weighted/1k)"),
                ("rank_flood", "flood_score", "flooded blocks (GISTDA flood-frequency)"),
                ("rank_code", "code_risk", "broken build-code proximity (setback proxy)")]
+    # rank_problem (all-events burden) dropped: same 30 communities as the
+    # severity-weighted danger ranking over the 92-day window
     DESCS = {
         "rank": "Multidimensional deprivation score (Alkire-Foster method, as used by the "
                 "WFP Multidimensional Deprivation Index): each of the 10 event domains counts "
                 "as deprived when its rate per 1,000 residents exceeds the citywide P75 "
                 "cutoff; the score is the mean of the 10 domain scores. Higher = more domains "
                 "affected, more intensely. Communities with pop&lt;100 are unranked.",
-        "rank_problem": "All extracted events per 1,000 residents over the 92-day window — "
-                        "the overall reporting burden, unweighted by type.",
         "rank_danger": "Events per 1,000 residents weighted by domain severity: fire 1.0, "
                        "flooding/crime 0.9, accidents 0.8, contamination/tenure 0.6, "
                        "services 0.5, destitution 0.4, informal economy 0.2, support 0.1.",
@@ -494,8 +493,12 @@ function collect(g){
 }
 N.features.forEach(f=>collect(f.geometry));
 const map = L.map('map').fitBounds(BKK.pad(0.03), {animate:false});
-setTimeout(()=>{ map.invalidateSize();
-  if(map.getZoom()<8) map.fitBounds(BKK.pad(0.03), {animate:false}); }, 300);
+(function refit(){                       // background-tab load: size 0 -> zoom 0; retry until real fit
+  if(map.getZoom()>=8) return;
+  map.invalidateSize();
+  map.fitBounds(BKK.pad(0.03), {animate:false});
+  setTimeout(refit, 400);
+})();
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
   {maxZoom:19, maxNativeZoom:16,
    attribution:'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'}).addTo(map);
