@@ -19,16 +19,24 @@ with the block's text and its own video.
 
 ## Sections (one per tool block)
 
-1. **Satellite segmentation tool** — process strip; interactive map of segmented
-   roofs (3 sites, ~9k buildings from `slum_roofs_red_v8`) with accepted blob hulls
-   (blobcompare A/B/C); hover roofs and hulls for evidence.
-2. **Match to regular properties** — BMA plan zones (605) under the roofs; live
-   morphology sliders (roof area / neighbour count) flag true irregular blocks;
-   zone hit-testing via an offscreen id raster.
-3. **Social sensing tool** — datalake process, 6 domain layers over 1,993
-   communities (from `social.html`'s embedded dataset), then the **ranked
-   irregular neighborhoods** sub-block: signal-weighted ranking, top-15 table,
-   solo / bivariate (score × event volume) map.
+1. **Satellite segmentation tool** — embedded `slum.html` (full NHA low-income
+   communities map: community dots, plan zones, red / pink AI roofs, congestion
+   blobs) in an iframe, served from the repo root.
+2. **Match to regular properties** — embedded `checkcadaster.html` (check
+   cadastre): red slum houses (v12, Bangkok sites) over Overture building
+   footprints (full-Bangkok extract, `01_data/03_derived_vector/buildings/
+   bangkok_buildings_overture.parquet`); a house with no overlapping Overture
+   footprint turns orange = potentially irregular building. Legend in the
+   iframe panel. Data prep: `02_code/geo/prep_checkcadaster.py` (roofs +
+   Overture clipped to site windows → `labeling/qgis_project/
+   checkcadaster_*.geojson`, `overture_bkk_sites.geojson`).
+3. **Social sensing tool** — embedded
+   `04_output/social_patterns/bangkok/category_intensity_map.html` (iframe,
+   self-contained, 1,993 communities with category-intensity markers), then
+   the **ranked irregular neighborhoods** sub-block: top-15 table plus the
+   same map embedded again in **rankings-only** mode (non-ranking controls
+   hidden via injected CSS, rankings panel auto-opened, Alkire-Foster radio
+   + top-30 rank numbers auto-selected).
 4. **Priorities & selection** — district aggregation of community scores via
    raster point-in-polygon; P1–P4 priority classes.
 5. **Selection of participation techniques** — 35 cards in 6 class carousels,

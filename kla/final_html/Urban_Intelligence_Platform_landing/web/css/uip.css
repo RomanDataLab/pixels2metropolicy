@@ -86,6 +86,8 @@ h2.sec{font-size:clamp(30px,4.6vw,60px);font-weight:760;text-transform:uppercase
 
 /* map frame */
 .mapbox{position:relative;border:1px solid var(--line-2);background:var(--graphite);margin-top:18px}
+.embedbox{position:relative;border:1px solid var(--line-2);background:var(--graphite);margin-top:18px;padding-bottom:62%}
+.embedbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .mapbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mapbox .hint{position:absolute;left:10px;bottom:10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;pointer-events:none}
@@ -144,7 +146,7 @@ tr.sel td{background:var(--graphite-3)!important}
 .caro-btn:hover{border-color:var(--cyan)}
 .caro-btn.prev{left:-8px}.caro-btn.next{right:-8px}
 .pcard{flex:0 0 290px;scroll-snap-align:start;border:1px solid var(--line-2);background:var(--graphite-2);display:flex;flex-direction:column;min-height:270px;position:relative;overflow:hidden}
-.pcard .bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.28;filter:saturate(.7)}
+.pcard .bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.38;filter:saturate(.75)}
 .pcard .in{position:relative;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
 .pcard .lvl{width:24px;height:24px;border-radius:50%;color:#030507;font:700 12px/24px var(--mono);text-align:center}
 .pcard .cls{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
@@ -218,3 +220,13 @@ footer a{color:var(--cyan)}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}.pnode:hover{transform:none}}
+
+/* floating mini-pipeline nav: 70% transparent, 1/10 screen width, right under the header's Pipeline button */
+#pipenav{position:fixed;top:64px;left:auto;right:var(--gutr);width:10vw;min-width:96px;max-width:170px;z-index:60;display:none;flex-direction:column;gap:2px;padding:7px;background:rgba(3,5,7,.82);border:1px solid var(--line-2);opacity:.3;transition:opacity .25s}
+#pipenav.on{display:flex}
+#pipenav:hover{opacity:.95}
+#pipenav a{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:#e8eef2;text-decoration:none;padding:4px 5px;border:1px solid rgba(232,238,242,.4);background:rgba(232,238,242,.07);display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#pipenav a i{font-style:normal;color:#93a3ad;margin-right:5px}
+#pipenav a:hover{border-color:#fff}
+#pipenav a.here{background:#ff5a4e;border-color:#ff5a4e;color:#030507}
+#pipenav a.here i{color:#2b0000}

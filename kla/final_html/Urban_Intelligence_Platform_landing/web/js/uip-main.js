@@ -107,6 +107,43 @@
       setTimeout(poll, 300);
     })();
     UIP_MAPS.push(st);
+    // Esri Dark Gray Canvas raster basemap under the vector layers
+    var TILE_CACHE = {};
+    function baseTile(layer, z, x, y, onImg) {
+      var k = layer + "/" + z + "/" + x + "/" + y;
+      var e = TILE_CACHE[k];
+      if (e) { if (e.img) onImg(e.img); else e.cbs.push(onImg); return; }
+      e = TILE_CACHE[k] = { img: null, cbs: [onImg] };
+      var im = new Image();
+      im.onload = function () {
+        var cbs = e.cbs; e.img = im; e.cbs = [];
+        cbs.forEach(function (f) { f(im); });
+      };
+      im.src = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/" + layer +
+        "/MapServer/tile/" + z + "/" + y + "/" + x;
+    }
+    st.base = function (ctx) {
+      var s = st.proj.scale(), W = 2 * Math.PI * s;
+      var z = Math.max(0, Math.min(16, Math.round(Math.log(W / 256) / Math.LN2)));
+      var n = 1 << z, ts = W / n, t = st.proj.translate();
+      var x0 = Math.max(0, Math.floor((W / 2 - t[0]) / ts)), x1 = Math.min(n - 1, Math.floor((st.w - t[0] + W / 2) / ts));
+      var y0 = Math.max(0, Math.floor((W / 2 - t[1]) / ts)), y1 = Math.min(n - 1, Math.floor((st.h - t[1] + W / 2) / ts));
+      ["World_Dark_Gray_Base", "World_Dark_Gray_Reference"].forEach(function (layer) {
+        for (var ty = y0; ty <= y1; ty++) {
+          for (var tx = x0; tx <= x1; tx++) {
+            (function (layer, z, x, y, px, py, size) {
+              baseTile(layer, z, x, y, function (img) {
+                ctx.drawImage(img, px, py, size + .6, size + .6);
+                if (!st._redrawQueued) {
+                  st._redrawQueued = true;
+                  requestAnimationFrame(function () { st._redrawQueued = false; st.size(); });
+                }
+              });
+            })(layer, z, tx, ty, t[0] - W / 2 + tx * ts, t[1] - W / 2 + ty * ts, ts);
+          }
+        }
+      });
+    };
     return st;
   }
 
@@ -276,240 +313,22 @@
     parent.appendChild(d);
   }
 
-  /* ---------------- 01 segmentation map ---------------- */
+  /* ---------------- 01 segmentation map (embedded slum.html) ---------------- */
   function buildSeg(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="mapctl" id="segctl"></div><div id="segmap" style="margin-top:0"></div>' +
-      '<div class="maplegend" id="segleg"></div><div class="hint">hover a roof · hull blobs = accepted settlement candidates</div>';
+    wrap.innerHTML = '<div class="embedbox" id="segmap"><iframe src="/slum.html" title="NHA low-income communities map (slum.html)" loading="lazy"></iframe></div>' +
+      '<div class="hint">full NHA slum map — communities, plan zones, red / pink AI roofs, congestion blobs (slum.html)</div>';
     body.appendChild(wrap);
-    var ctl = wrap.querySelector("#segctl");
-    var mapDiv = wrap.querySelector("#segmap");
-    var leg = wrap.querySelector("#segleg");
-    leg.innerHTML = "<div><span class='sw' style='background:#3fd2f0'></span>segmented roof</div>" +
-      "<div><span class='sw' style='background:#ffb547'></span>accepted blob (hull)</div>" +
-      "<div><span class='sw' style='background:#2fd5a5'></span>raster10 · fill5 variants</div>";
-
-    var sites = DATA.roofs.sites;
-    var cur = 0, showHulls = true;
-    var siteChips = sites.map(function (s, i) {
-      var c = document.createElement("span");
-      c.className = "chip" + (i === 0 ? " on" : "");
-      c.textContent = s.name + " · " + s.n + " roofs";
-      c.onclick = function () {
-        cur = i;
-        siteChips.forEach(function (x, j) { x.classList.toggle("on", j === i); });
-        segMap.size();
-      };
-      ctl.appendChild(c);
-      return c;
-    });
-    var hc = document.createElement("span");
-    hc.className = "chip on"; hc.textContent = "blob hulls";
-    hc.onclick = function () { showHulls = !showHulls; hc.classList.toggle("on", showHulls); segMap.size(); };
-    ctl.appendChild(hc);
-
-    function siteFeats() {
-      return sites[cur].features.map(function (f) {
-        return { type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: f.g } };
-      });
-    }
-    var segMap = makeMap(mapDiv, 0.62, siteFeats().concat([{ type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: DATA.hulls.features[0].g } }]));
-
-    segMap.onresize({
-      name: "roofs",
-      draw: function (st) {
-        var ctx = st.canvas.getContext("2d");
-        ctx.clearRect(0, 0, st.w, st.h);
-        ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
-        var feats = sites[cur].features;
-        var hot = null;
-        ctx.lineWidth = 0.6;
-        ctx.strokeStyle = "rgba(63,210,240,.55)";
-        ctx.fillStyle = "rgba(63,210,240,.30)";
-        for (var i = 0; i < feats.length; i++) {
-          var f = feats[i];
-          var polys = f.g;
-          for (var pi = 0; pi < polys.length; pi++) {
-            var rings = polys[pi];
-            for (var j = 0; j < rings.length; j++) {
-              var ring = rings[j];
-              ctx.beginPath();
-              for (var k = 0; k < ring.length; k++) {
-                var p = st.proj(ring[k]);
-                k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
-              }
-              ctx.closePath();
-              if (j === 0) ctx.fill();
-              ctx.stroke();
-            }
-          }
-        }
-        if (showHulls) {
-          DATA.hulls.features.forEach(function (hf, hi) {
-            var col = hf.m === "hull" ? "255,181,71" : "47,213,165";
-            ctx.fillStyle = "rgba(" + col + ",.10)";
-            ctx.strokeStyle = "rgba(" + col + ",.85)";
-            ctx.lineWidth = 1.4;
-            ctx.setLineDash(hf.m === "hull" ? [] : [5, 4]);
-            tracePoly({ type: "MultiPolygon", coordinates: hf.g }, ctx, st.proj);
-            ctx.setLineDash([]);
-          });
-        }
-        st.svg.innerHTML = "";
-        var g = d3.select(st.svg).append("g");
-        // invisible hull hit areas
-        if (showHulls) {
-          g.selectAll("path.hullhit").data(DATA.hulls.features).enter().append("path")
-            .attr("d", function (hf) { return st.path({ type: "MultiPolygon", coordinates: hf.g }); })
-            .attr("fill", "transparent")
-            .on("mousemove", function (evt, hf) {
-              showTip("<b>" + hf.m + "</b> blob · " + (hf.ok ? "ACCEPTED" : "rejected") +
-                "<br>buildings " + hf.b + " · density " + hf.dha + "/ha" +
-                "<br>size CV " + hf.scv + " · orient conc " + hf.oc +
-                "<br>canal med " + hf.cm + " m · canal≤150m " + Math.round(hf.cs * 100) + "%", evt.clientX, evt.clientY);
-            })
-            .on("mouseleave", hideTip);
-        }
-        // roof hit-testing via voronoi-ish: sample every 12th roof bounding circle
-        var hits = [];
-        for (i = 0; i < feats.length; i += 6) {
-          var c0 = centroidOf({ type: "MultiPolygon", coordinates: feats[i].g });
-          var p0 = st.proj(c0);
-          hits.push({ i: i, p: p0 });
-        }
-        g.selectAll("circle.rhit").data(hits).enter().append("circle")
-          .attr("cx", function (d) { return d.p[0]; }).attr("cy", function (d) { return d.p[1]; })
-          .attr("r", 9).attr("fill", "transparent")
-          .on("mousemove", function (evt, d) {
-            var f = feats[d.i];
-            showTip("<b>roof</b> · conf " + (f.cf != null ? f.cf.toFixed(2) : "–") +
-              "<br>area " + (f.a != null ? Math.round(f.a) : "–") + " m²" +
-              "<br>neighbours≤20m " + (f.n != null ? f.n : "–") +
-              "<br>nearest " + (f.d != null ? f.d.toFixed(1) : "–") + " m", evt.clientX, evt.clientY);
-          })
-          .on("mouseleave", hideTip);
-      }
-    });
   }
 
-  /* ---------------- 02 matching map ---------------- */
+  /* ---------------- 02 matching map (embedded checkcadaster.html) ---------------- */
   function buildMatch(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML =
-      '<div class="mapctl" id="mtctl">' +
-        '<span class="chip on" id="mtZones">regular properties</span>' +
-        '<span class="chip on" id="mtIrreg">highlight irregular</span>' +
-        '<label class="chip">roof ≤ <input id="mtA" type="range" min="40" max="200" value="90" style="width:80px;vertical-align:middle"> <b id="mtAv" style="font-family:var(--mono)">90</b> m²</label>' +
-        '<label class="chip">neighbours ≥ <input id="mtN" type="range" min="2" max="14" value="6" style="width:70px;vertical-align:middle"> <b id="mtNv" style="font-family:var(--mono)">6</b></label>' +
-      "</div>" +
-      '<div id="mtmap"></div>' +
-      '<div class="maplegend" id="mtleg"></div><div class="hint">morphology sliders set the irregularity rule · hover roofs and zones</div>';
+    wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html" title="Check cadastre — slum houses vs Overture buildings" loading="lazy"></iframe></div>' +
+      '<div class="hint">check-cadastre map — red slum houses vs Overture footprints · orange = potentially irregular buildings (checkcadaster.html)</div>';
     body.appendChild(wrap);
-    var mapDiv = wrap.querySelector("#mtmap");
-    var leg = wrap.querySelector("#mtleg");
-    leg.innerHTML = "<div><span class='sw' style='background:#ff5a4e'></span>irregular (outside plan / dense small roofs)</div>" +
-      "<div><span class='sw' style='background:#3fd2f0'></span>conforming</div>" +
-      "<div><span class='sw' style='background:#4f8f8a'></span>plan zone (regular properties)</div>";
-
-    var site = DATA.roofs.sites[0].features;
-    var zones = DATA.zones.features;
-    var maxA = 90, minN = 6, showZones = true, hi = true;
-
-    var fit = site.slice(0, 400).map(function (f) { return { type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: f.g } }; });
-    var mtMap = makeMap(mapDiv, 0.62, fit);
-
-    function classify(f) {
-      var irregular = (f.a != null && f.a <= maxA && f.n != null && f.n >= minN);
-      return irregular;
-    }
-
-    mtMap.onresize({
-      name: "match",
-      draw: function (st) {
-        var ctx = st.canvas.getContext("2d");
-        ctx.clearRect(0, 0, st.w, st.h);
-        ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
-
-        // zone id raster for hit tests
-        var off = document.createElement("canvas");
-        off.width = st.w; off.height = st.h;
-        var octx = off.getContext("2d");
-        var idToFeat = [];
-        if (showZones) {
-          zones.forEach(function (z, zi) {
-            octx.fillStyle = "rgb(" + ((zi + 1) >> 8 & 255) + "," + ((zi + 1) & 255) + ",0)";
-            octx.strokeStyle = octx.fillStyle;
-            tracePoly({ type: "MultiPolygon", coordinates: z.g }, octx, st.proj);
-            // visible layer
-            var col = catColor(z.c || z.u);
-            ctx.fillStyle = col + "55";
-            ctx.strokeStyle = col;
-            ctx.lineWidth = 0.8;
-            ctx.setLineDash([3, 3]);
-            tracePoly({ type: "MultiPolygon", coordinates: z.g }, ctx, st.proj);
-            ctx.setLineDash([]);
-            idToFeat.push(z);
-          });
-        }
-        var px = null;
-        try { px = octx.getImageData(0, 0, st.w, st.h).data; } catch (e) { px = null; }
-
-        function zoneAt(p) {
-          if (!px) return null;
-          var xi = Math.max(0, Math.min(st.w - 1, p[0] | 0)), yi = Math.max(0, Math.min(st.h - 1, p[1] | 0));
-          var o = (yi * st.w + xi) * 4;
-          var id = (px[o] << 8) + px[o + 1];
-          return id > 0 ? idToFeat[id - 1] : null;
-        }
-
-        var counts = { ir: 0, reg: 0 };
-        var hits = [];
-        ctx.lineWidth = 0.6;
-        for (var i = 0; i < site.length; i++) {
-          var f = site[i];
-          var geom = { type: "MultiPolygon", coordinates: f.g };
-          var c0 = centroidOf(geom);
-          var p0 = st.proj(c0);
-          var z = showZones ? zoneAt(p0) : null;
-          var irregular = hi ? (classify(f) || !z) : classify(f);
-          var col = irregular ? "255,90,78" : "63,210,240";
-          irregular ? counts.ir++ : counts.reg++;
-          ctx.fillStyle = "rgba(" + col + ",.42)";
-          ctx.strokeStyle = "rgba(" + col + ",.8)";
-          tracePoly(geom, ctx, st.proj);
-          if (i % 5 === 0) hits.push({ i: i, p: p0, z: z });
-        }
-        wrap.querySelector("#mtIrreg").textContent = "irregular: " + counts.ir + " / " + (counts.ir + counts.reg);
-
-        st.svg.innerHTML = "";
-        var g = d3.select(st.svg).append("g");
-        g.selectAll("circle").data(hits).enter().append("circle")
-          .attr("cx", function (d) { return d.p[0]; }).attr("cy", function (d) { return d.p[1]; })
-          .attr("r", 8).attr("fill", "transparent")
-          .on("mousemove", function (evt, d) {
-            var f = site[d.i];
-            var ir = hi ? (classify(f) || !d.z) : classify(f);
-            showTip((ir ? "<b>IRREGULAR</b>" : "<b>conforming</b>") + " roof" +
-              "<br>area " + Math.round(f.a || 0) + " m² · neighbours " + f.n +
-              "<br>zone: " + (d.z ? (d.z.c + " · " + d.z.u) : "none — outside plan") +
-              "<br>evidence: " + (d.z ? (classify(f) ? "dense small-roof fabric in " + d.z.c : "conforming use") : "no regular-property record"), evt.clientX, evt.clientY);
-          })
-          .on("mouseleave", hideTip);
-        // zone hits
-        g.selectAll("path.zhit").data(zones).enter().append("path")
-          .attr("d", function (z) { return st.path({ type: "MultiPolygon", coordinates: z.g }); })
-          .attr("fill", "transparent")
-          .on("mousemove", function (evt, z) { showTip("<b>plan zone</b><br>" + z.c + " · " + z.u + "<br>zone code " + z.z, evt.clientX, evt.clientY); })
-          .on("mouseleave", hideTip);
-      }
-    });
-
-    wrap.querySelector("#mtA").oninput = function () { maxA = +this.value; wrap.querySelector("#mtAv").textContent = maxA; mtMap.size(); };
-    wrap.querySelector("#mtN").oninput = function () { minN = +this.value; wrap.querySelector("#mtNv").textContent = minN; mtMap.size(); };
-    wrap.querySelector("#mtZones").onclick = function () { showZones = !showZones; this.classList.toggle("on", showZones); mtMap.size(); };
-    wrap.querySelector("#mtIrreg").onclick = function () { hi = !hi; this.classList.toggle("on", hi); mtMap.size(); };
   }
 
   /* ---------------- scores ---------------- */
@@ -535,84 +354,9 @@
     var wrap = document.createElement("div");
     wrap.className = "reveal";
     wrap.innerHTML =
-      '<div class="mapctl" id="soctl"><span class="chip on" data-d="score">cumulative score</span></div>' +
-      '<div id="somap"></div>' +
-      '<div class="maplegend" id="soleg"></div><div class="hint">domain layers: toggle a chip · hover a community for its pulse</div>';
+      '<div class="embedbox" id="somap"><iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Neighborhood category intensity map (category_intensity_map.html)" loading="lazy"></iframe></div>' +
+      '<div class="hint">neighborhood category intensity — event volumes per community category (category_intensity_map.html)</div>';
     body.appendChild(wrap);
-    var ctl = wrap.querySelector("#soctl");
-    var mapDiv = wrap.querySelector("#somap");
-    var leg = wrap.querySelector("#soleg");
-
-    var curDomain = "score";
-    var chips = [];
-    function setDomain(d) {
-      curDomain = d;
-      chips.forEach(function (c) { c.classList.toggle("on", c.dataset.d === d); });
-      soMap.size();
-    }
-    var all = [{ id: "score", name: "cumulative score", color: "score" }].concat(U.DOMAINS);
-    all.forEach(function (d) {
-      var c = document.createElement("span");
-      c.className = "chip"; c.dataset.d = d.id;
-      c.textContent = d.name.toLowerCase();
-      if (d.color && d.color !== "score") c.innerHTML = '<span class="dot" style="background:' + d.color + '"></span>' + d.name.toLowerCase();
-      c.onclick = function () { setDomain(d.id); };
-      ctl.appendChild(c);
-      chips.push(c);
-    });
-    chips[0].classList.add("on");
-
-    var feats = DATA.social.features.map(function (c) { return { type: "Feature", geometry: { type: "Point", coordinates: c.c } }; });
-    var soMap = makeMap(mapDiv, 0.66, DATA.khet.features.map(function (k) { return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: k.g } }; }));
-
-    function colorOf(c) {
-      if (curDomain === "score") {
-        var q = c.score / 60;
-        return q > .66 ? "#ff5a4e" : q > .33 ? "#ffb547" : "#3fd2f0";
-      }
-      var d = U.DOMAINS.filter(function (x) { return x.id === curDomain; })[0];
-      var v = c[d.id] || 0;
-      return v > 2 ? d.color : v > 0 ? d.color + "99" : "#2d3b45";
-    }
-
-    soMap.onresize({
-      name: "social",
-      draw: function (st) {
-        var ctx = st.canvas.getContext("2d");
-        ctx.clearRect(0, 0, st.w, st.h);
-        ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
-        // khet outlines
-        ctx.strokeStyle = "rgba(45,59,69,.9)"; ctx.lineWidth = 0.8;
-        DATA.khet.features.forEach(function (k) { tracePoly({ type: "MultiPolygon", coordinates: k.g }, ctx, st.proj); });
-        // points on svg
-        st.svg.innerHTML = "";
-        var g = d3.select(st.svg).append("g");
-        var cs = DATA.social.features;
-        g.selectAll("circle").data(cs).enter().append("circle")
-          .attr("cx", function (c) { return st.proj(c.c)[0]; })
-          .attr("cy", function (c) { return st.proj(c.c)[1]; })
-          .attr("r", function (c) { return 1.6 + 2.6 * Math.sqrt(c.score / 100); })
-          .attr("fill", function (c) { return colorOf(c); })
-          .attr("fill-opacity", .78)
-          .attr("stroke", "none")
-          .style("cursor", "crosshair")
-          .on("mousemove", function (evt, c) {
-            var rows = U.DOMAINS.map(function (d) {
-              return d.name + ": " + (c[d.id] || 0);
-            }).join("<br>");
-            showTip("<b>" + (c.nm || c.dn || "community") + "</b> · district " + c.dn +
-              "<br>rank #" + c.rank + " · score " + c.score + "/100" +
-              "<br>pop " + (c.pop || "–") + " · docs " + c.nd +
-              "<br><span style='color:#93a3ad'>" + rows + "</span>", evt.clientX, evt.clientY);
-          })
-          .on("mouseleave", hideTip);
-        leg.innerHTML = curDomain === "score"
-          ? "<div><span class='sw' style='background:#ff5a4e'></span>score &gt; 40</div><div><span class='sw' style='background:#ffb547'></span>20–40</div><div><span class='sw' style='background:#3fd2f0'></span>&lt; 20</div>"
-          : U.DOMAINS.filter(function (d) { return d.id === curDomain; }).map(function (d) {
-            return "<div><span class='sw' style='background:" + d.color + "'></span>" + d.name + " intensity</div>";
-          }).join("");
-      }
-    });
 
     /* ranking sub-block */
     var rk = document.createElement("div");
@@ -621,16 +365,13 @@
     rk.innerHTML =
       '<div class="s-head" style="margin-bottom:18px"><div><div class="k"><span class="label">block 04</span><span class="label">social sensing output</span></div>' +
       "<h2 class='sec' style='font-size:clamp(24px,3.4vw,44px)'>Ranked irregular neighborhoods</h2></div>" +
-      "<p class='lede' style='font-size:15px'>Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. Click a row to locate it; toggle solo / bivariate on the map.</p></div>";
+      "<p class='lede' style='font-size:15px'>Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded map shows the rankings panel only — pick a ranking, its top 30 light up.</p></div>";
 
-    var mapCtl = document.createElement("div");
-    mapCtl.className = "mapctl";
-    mapCtl.innerHTML = '<span class="chip on" id="rkSolo">solo score</span><span class="chip" id="rkBiv">bivariate: score × event volume</span>';
     var rkMapDiv = document.createElement("div");
+    rkMapDiv.className = "embedbox";
     rkMapDiv.id = "rkmap";
-    var rkLeg = document.createElement("div");
-    rkLeg.className = "maplegend";
-    rk.appendChild(mapCtl); rk.appendChild(rkMapDiv); rk.appendChild(rkLeg);
+    rkMapDiv.innerHTML = '<iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Ranked communities — category_intensity_map.html, rankings only" loading="lazy"></iframe>';
+    rk.appendChild(rkMapDiv);
     var rkTable = document.createElement("div");
     rkTable.className = "tblwrap";
     rkTable.innerHTML = "<table class='rank'><thead><tr><th>rank</th><th>community</th><th>district</th><th>pop</th><th>score</th><th style='width:120px'></th><th>ND</th><th>TD</th><th>CR</th><th>TI</th><th>SR</th><th>BH</th></tr></thead><tbody></tbody></table>";
@@ -650,59 +391,28 @@
       tr.onclick = function () {
         if (selRow) selRow.classList.remove("sel");
         selRow = tr; tr.classList.add("sel");
-        focusRk(c.c);
       };
+    /* ranking-only view inside the embedded category_intensity_map */
+    (function () {
+      var f = rkMapDiv.querySelector("iframe");
+      f.addEventListener("load", function () {
+        var doc;
+        try { doc = this.contentDocument; } catch (e) { return; }
+        if (!doc || !doc.getElementById("rankbtn")) return;
+        var st = doc.createElement("style");
+        st.textContent = "#cats,label:has(#khet),label:has(#slumonly),label:has(#risk),label:has(#floodwms),label:has(#zoning),label:has(#publands),#methbtn,#zonelegend{display:none!important}";
+        doc.head.appendChild(st);
+        doc.getElementById("rankbtn").click();          // open the rankings panel
+        var first = doc.querySelector("#rankopts input[name=rankset]");
+        if (first) first.click();                        // first ranking: Alkire-Foster composite
+        var t = doc.getElementById("top30");
+        if (t && !t.checked) t.click();                  // green top-30 rank numbers
+      });
+    })();
+
       tb.appendChild(tr);
     });
 
-    function bivColor(c) {
-      var x = c.score > 40 ? 2 : c.score > 20 ? 1 : 0;
-      var y = c.norm > .66 ? 2 : c.norm > .33 ? 1 : 0;
-      return BIV[y][x];
-    }
-    var focusRing = null;
-    function focusRk(c) {
-      focusRing = c;
-      rkMap.size();
-      var r = rkMapDiv.getBoundingClientRect();
-      window.scrollTo({ top: r.top + window.scrollY - 120, behavior: "smooth" });
-    }
-
-    var rkMap = makeMap(rkMapDiv, 0.6, DATA.khet.features.map(function (k) { return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: k.g } }; }));
-    rkMap.onresize({
-      name: "rank",
-      draw: function (st) {
-        var ctx = st.canvas.getContext("2d");
-        ctx.clearRect(0, 0, st.w, st.h);
-        ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
-        ctx.strokeStyle = "rgba(45,59,69,.9)"; ctx.lineWidth = 0.8;
-        DATA.khet.features.forEach(function (k) { tracePoly({ type: "MultiPolygon", coordinates: k.g }, ctx, st.proj); });
-        st.svg.innerHTML = "";
-        var g = d3.select(st.svg).append("g");
-        var cs = DATA.social.features;
-        g.selectAll("circle").data(cs).enter().append("circle")
-          .attr("cx", function (c) { return st.proj(c.c)[0]; })
-          .attr("cy", function (c) { return st.proj(c.c)[1]; })
-          .attr("r", function (c) { return 1.5 + (mode === "solo" ? 2.6 * Math.sqrt(c.score / 100) : 3.2 * Math.sqrt(c.norm)); })
-          .attr("fill", function (c) { return mode === "solo" ? (c.score > 40 ? "#ff5a4e" : c.score > 20 ? "#ffb547" : "#3fd2f0") : bivColor(c); })
-          .attr("fill-opacity", .8)
-          .on("mousemove", function (evt, c) { showTip("<b>#" + c.rank + " " + (c.nm || c.dn) + "</b><br>score " + c.score + " · events " + c.tot, evt.clientX, evt.clientY); })
-          .on("mouseleave", hideTip);
-        if (focusRing) {
-          g.append("circle")
-            .attr("cx", st.proj(focusRing)[0]).attr("cy", st.proj(focusRing)[1])
-            .attr("r", 12).attr("fill", "none").attr("stroke", "#e8eef2").attr("stroke-width", 1.4)
-            .attr("stroke-dasharray", "3 3");
-        }
-      }
-    });
-    mapCtl.querySelector("#rkSolo").onclick = function () { mode = "solo"; this.classList.add("on"); mapCtl.querySelector("#rkBiv").classList.remove("on"); rkLeg.innerHTML = "<div><span class='sw' style='background:#ff5a4e'></span>score &gt; 40</div><div><span class='sw' style='background:#ffb547'></span>20–40</div><div><span class='sw' style='background:#3fd2f0'></span>&lt; 20</div>"; rkMap.size(); };
-    mapCtl.querySelector("#rkBiv").onclick = function () { mode = "biv"; this.classList.add("on"); mapCtl.querySelector("#rkSolo").classList.remove("on");
-      var h = "<div style='display:flex;gap:8px;align-items:center'><span style='width:44px'>volume ↑</span><span class='bilegend'>";
-      for (var y = 2; y >= 0; y--) for (var x = 0; x < 3; x++) h += "<i style='background:" + BIV[y][x] + "'></i>";
-      h += "</span></div><div><span style='margin-left:52px'>score →</span></div>";
-      rkLeg.innerHTML = h; rkMap.size(); };
-    mapCtl.querySelector("#rkSolo").click();
   }
 
   /* ---------------- 04 priorities ---------------- */
@@ -729,6 +439,7 @@
         var ctx = st.canvas.getContext("2d");
         ctx.clearRect(0, 0, st.w, st.h);
         ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
+        if (st.base) st.base(ctx);
 
         // id raster for khet assignment
         var off = document.createElement("canvas");
@@ -803,7 +514,7 @@
       var clsName = cl.n === 3 ? "Involve / co-produce" : cl.n === 4 ? "Collaborate / co-decide" : cl.name;
       gr.innerHTML =
         '<div class="ghead"><h3><span style="color:' + cl.color + '">class ' + cl.n + "</span> · " + clsName + "</h3>" +
-        '<span class="cnt">' + cards.length + " techniques · background: class imagery</span></div>" +
+        '<span class="cnt">' + cards.length + " techniques · background: per-technique imagery (Wikimedia Commons)</span></div>" +
         '<div class="caro-wrap"><button class="caro-btn prev">‹</button><div class="caro"></div><button class="caro-btn next">›</button></div>';
       var caro = gr.querySelector(".caro");
       cards.forEach(function (c) {
@@ -813,7 +524,7 @@
           var kit = /^KIT/.test(t), th = t === "TH";
           return '<span class="tag' + (kit ? " kit" : th ? " th" : "") + '">' + t + "</span>";
         }).join("");
-        d.innerHTML = '<div class="bg" style="background-image:url(' + cl.img + ')"></div>' +
+        d.innerHTML = '<div class="bg" style="background-image:url(' + (c.img || cl.img) + ')"></div>' +
           '<div class="in"><div style="display:flex;gap:8px;align-items:center"><span class="lvl">' + cl.n + '</span><span class="cls">' + clsName + "</span></div>" +
           "<h4>" + c.t + "</h4><p>" + c.d + '</p><div class="meta">' + tags + "</div></div>";
         caro.appendChild(d);
@@ -1008,6 +719,7 @@
         var ctx = st.canvas.getContext("2d");
         ctx.clearRect(0, 0, st.w, st.h);
         ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
+        if (st.base) st.base(ctx);
         // zones faded
         ctx.globalAlpha = .5;
         DATA.zones.features.forEach(function (z) {
@@ -1135,6 +847,61 @@
     buildDesign(de);
   }
 
+
+  /* ---------------- floating mini-pipeline nav ----------------
+     Appears once the user first scrolls below the hero pipeline; white blocks,
+     the block(s) of the section currently in view turn red. Click jumps to it. */
+  function buildPipeNav() {
+    var nav = document.createElement("nav");
+    nav.id = "pipenav";
+    nav.setAttribute("aria-label", "pipeline minimap");
+    var nodes = U.PIPE.map(function (blk) {
+      var b = document.createElement("a");
+      b.href = "#sec-" + blk.sec;
+      b.innerHTML = "<i>" + blk.no + "</i>" + blk.title;
+      b.addEventListener("click", function (e) {
+        e.preventDefault();
+        var sec = document.getElementById("sec-" + blk.sec);
+        if (!sec) return;
+        /* instant jump, then re-aim once lazy iframes above the target finish
+           loading and shift the layout (smooth scroll aborts on those shifts) */
+        window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - 70, behavior: "instant" });
+        setTimeout(function () {
+          window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - 70, behavior: "instant" });
+        }, 800);
+      });
+      nav.appendChild(b);
+      return { el: b, sec: blk.sec };
+    });
+    /* several pipeline blocks share one section (03+04+↺ → social, 08+→ → design);
+       only the first block of each section takes the red highlight */
+    var firstOfSec = {};
+    nodes.forEach(function (n) { n.first = !firstOfSec[n.sec]; firstOfSec[n.sec] = true; });
+    document.body.appendChild(nav);
+
+    var shown = false;
+    function onScroll() {
+      var pipe = document.getElementById("pipe");
+      if (!shown && pipe && window.scrollY > pipe.offsetTop + pipe.offsetHeight) {
+        shown = true;
+        nav.classList.add("on");
+      }
+      var cur = null, bestTop = -Infinity;
+      U.PIPE.forEach(function (blk) {
+        var el = document.getElementById("sec-" + blk.sec);
+        if (!el) return;
+        var t = el.getBoundingClientRect().top;
+        if (t <= window.innerHeight * 0.5 && t > bestTop) { bestTop = t; cur = blk.sec; }
+      });
+      nodes.forEach(function (n) { n.el.classList.toggle("here", n.sec === cur && n.first); });
+    }
+    /* embedded webviews here do not always deliver window scroll events (same quirk kickMaps works around) */
+    ["scroll", "mousewheel", "wheel", "mousemove", "touchstart", "pointerdown", "keydown"].forEach(function (ev) {
+      window.addEventListener(ev, onScroll, { passive: true });
+    });
+    onScroll();
+  }
+
   /* ---------------- reveal ---------------- */
   function wireReveal() {
     var io = new IntersectionObserver(function (es) {
@@ -1153,6 +920,7 @@
     buildPipeline();
     buildSections();
     wireReveal();
+    buildPipeNav();
   }).catch(function (e) {
     document.getElementById("sections").innerHTML =
       '<div class="wrap"><p style="color:var(--red);font-family:var(--mono);font-size:12px">data load failed: ' + e + "</p></div>";
