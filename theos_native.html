@@ -16,13 +16,6 @@
   #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
   #site-header nav a:hover { background: #1d4e79; color: #fff; }
   #site-header nav a.active { background: #2b6cb0; color: #fff; }
-  .title-box {
-    position: absolute; top: 48px; left: 10px; z-index: 1000;
-    background: rgba(255,255,255,.93); border-radius: 10px;
-    padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.4); max-width: 430px;
-  }
-  .title-box h1 { font-size: 14px; margin: 0 0 2px; }
-  .title-box p { font-size: 11px; margin: 0; color: #555; }
   #legend {
     position: absolute; bottom: 18px; left: 10px; z-index: 1000;
     background: rgba(255,255,255,.93); border-radius: 10px;
@@ -51,14 +44,6 @@
   </nav>
 </div>
 <div id="map"></div>
-
-<div class="title-box">
-  <h1>THEOS-2 block — native 0.5 m resolution</h1>
-  <p>Full-resolution 0.5 m true color (bands b3/b4/b2). Featured: WHU UNet++-B4
-     fine-tuned per approved recipe — 29,714 regularized roofs, QA crops at
-     theos_block/qa_ft_*.png. Older gens toggle for compare. Fetches are
-     cache-busted (?v=5).</p>
-</div>
 
 <div id="legend">
   <label class="row"><input type="checkbox" id="cb-whuft" checked><span class="swatch" style="background:#ff4081;opacity:.5"></span> YOUR-LABEL-trained roofs (15,841)</label>
