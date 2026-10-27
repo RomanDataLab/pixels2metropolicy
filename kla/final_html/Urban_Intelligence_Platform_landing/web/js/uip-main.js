@@ -365,12 +365,12 @@
     rk.innerHTML =
       '<div class="s-head" style="margin-bottom:18px"><div><div class="k"><span class="label">block 04</span><span class="label">social sensing output</span></div>' +
       "<h2 class='sec' style='font-size:clamp(24px,3.4vw,44px)'>Ranked irregular neighborhoods</h2></div>" +
-      "<p class='lede' style='font-size:15px'>Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded map shows the rankings panel only — pick a ranking, its top 30 light up.</p></div>";
+      "<p class='lede' style='font-size:15px'>Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded rankings-only map — pick a ranking, its top 30 light up.</p></div>";
 
     var rkMapDiv = document.createElement("div");
     rkMapDiv.className = "embedbox";
     rkMapDiv.id = "rkmap";
-    rkMapDiv.innerHTML = '<iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Ranked communities — category_intensity_map.html, rankings only" loading="lazy"></iframe>';
+    rkMapDiv.innerHTML = '<iframe src="/04_output/social_patterns/bangkok/rankings_map.html" title="Ranked communities — rankings_map.html, rankings only" loading="lazy"></iframe>';
     rk.appendChild(rkMapDiv);
     var rkTable = document.createElement("div");
     rkTable.className = "tblwrap";
@@ -392,23 +392,6 @@
         if (selRow) selRow.classList.remove("sel");
         selRow = tr; tr.classList.add("sel");
       };
-    /* ranking-only view inside the embedded category_intensity_map */
-    (function () {
-      var f = rkMapDiv.querySelector("iframe");
-      f.addEventListener("load", function () {
-        var doc;
-        try { doc = this.contentDocument; } catch (e) { return; }
-        if (!doc || !doc.getElementById("rankbtn")) return;
-        var st = doc.createElement("style");
-        st.textContent = "#cats,label:has(#khet),label:has(#slumonly),label:has(#risk),label:has(#floodwms),label:has(#zoning),label:has(#publands),#methbtn,#zonelegend{display:none!important}";
-        doc.head.appendChild(st);
-        doc.getElementById("rankbtn").click();          // open the rankings panel
-        var first = doc.querySelector("#rankopts input[name=rankset]");
-        if (first) first.click();                        // first ranking: Alkire-Foster composite
-        var t = doc.getElementById("top30");
-        if (t && !t.checked) t.click();                  // green top-30 rank numbers
-      });
-    })();
 
       tb.appendChild(tr);
     });
