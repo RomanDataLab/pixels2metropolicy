@@ -1,18 +1,15 @@
-# social-economic sensing of slums — event lexicon v3 (2026-10-15)
-# Taxonomy v4: 10 domains (<=10 rule); flooding and fire split out as
-# first-class hazard domains (team decision), storms grouped with flooding
-# (rain-flood chain); residual env_hazard = geo + accidents. (<=10 rule); flooding and fire split out as
-# first-class hazard domains (team decision 2026-10-24), storms grouped with
-# flooding (rain-flood chain); residual env_hazard = geo + accidents.
-#   UN-Habitat/SDG 11.1.1 five deprivations; Domains of Deprivation Framework
-#   (Abascal et al. 2022); Slum Severity Index (Roy et al. 2020; Patel et al. 2020);
-#   Alkire-Foster multidimensional counting (MPI/WFP MDDI); Moser/SLF (ULVI 2026).
-# primary_type chosen by priority: first matching domain below.
+# slum_pulse event lexicon v2 — Thai keyword → category
+# Segmentation taxonomy (team decision 2026-10-06):
+#   crime, natural_disaster, prostitution, street_retail_popup,
+#   traffic_incident, begging_homeless, technical_disaster
+# Matching = substring on raw text (Thai has no spaces). Bare generic words
+# (ตลาด alone, ร้านค้า) are deliberately excluded to avoid place-name false hits.
+# primary_type chosen by priority: first category below that matches.
 
-priority: [flooding, fire, env_hazard, contamination, basic_services, housing_tenure_risk, crime_security, destitution, informal_economy, social_support]
+priority: [natural_disaster, technical_disaster, traffic_incident, crime, street_retail_popup, begging_homeless]
 
 categories:
-  flooding:
+  natural_disaster:
     - น้ำท่วม
     - อุทกภัย
     - น้ำหลาก
@@ -23,19 +20,42 @@ categories:
     - พายุฝนฟ้าคะนอง
     - ลมกระโชก
     - วาตภัย
-    - น้ำท่า
-  fire:
-    - ไฟไหม้
-    - ไฟปะทุ
-    - อัคคีภัย
-    - ไฟคลอก
-    - ไฟลุก
-  env_hazard:
-    - แผ่นดินไหว
     - ดินถล่ม
     - ดินโคลนถล่ม
     - ถล่ม
-    - จมน้ำ
+    - แผ่นดินไหว
+    - สึนามิ
+    - ภัยแล้ง
+    - ไฟป่า
+    - คลื่นความร้อน
+  technical_disaster:
+    - ไฟฟ้าดับ
+    - ไฟดับ
+    - ไฟฟ้าลัดวงจร
+    - ลัดวงจร
+    - ไฟฟ้าสาธารณะ
+    - เสาไฟฟ้า
+    - สายไฟ
+    - ท่อรั่ว
+    - ท่อแตก
+    - น้ำรั่ว
+    - รั่วซึม
+    - ท่อระบายอุดตัน
+    - อุดตัน
+    - น้ำเสีย
+    - บ่อเน่า
+    - มลพิษ
+    - ฝุ่นละออง
+    - ฝุ่นจิ๋ว
+    - PM2.5
+    - หมอกควัน
+    - แก๊สรั่ว
+    - ขยะตกค้าง
+    - ขยะ
+    - เสียงดัง
+    - สะพานพัง
+    - ถนนพัง
+  traffic_incident:
     - อุบัติเหตุ
     - ชนกัน
     - รถชน
@@ -45,57 +65,11 @@ categories:
     - ชนรั้ว
     - พลิกคว่ำ
     - เสียหลัก
-  contamination:
-    - น้ำเสีย
-    - บ่อเน่า
-    - ขยะตกค้าง
-    - ขยะ
-    - มลพิษ
-    - ฝุ่นละออง
-    - ฝุ่นจิ๋ว
-    - PM2.5
-    - หมอกควัน
-    - กลิ่นเหม็น
-    - ไข้เลือดออก
-    - โรคระบาด
-    - เชื้อโรค
-  basic_services:
-    - ไฟฟ้าดับ
-    - ไฟดับ
-    - ไฟฟ้าลัดวงจร
-    - ลัดวงจร
-    - ไฟฟ้าสาธารณะ
-    - เสาไฟฟ้า
-    - หลอดไฟ
-    - สายไฟ
-    - ท่อรั่ว
-    - ท่อแตก
-    - น้ำรั่ว
-    - รั่วซึม
-    - ประปา
-    - ไม่มีน้ำ
-    - ท่อระบายอุดตัน
-    - อุดตัน
-    - สะพานพัง
-    - ถนนพัง
-    - ทางเท้าพัง
-    - หลุมบ่อ
     - จราจร
     - รถติด
     - จอดรถบนทางเท้า
-  housing_tenure_risk:
-    - รื้อย้าย
-    - รื้อถอน
-    - ไล่ที่
-    - ขับไล่
-    - ฟ้องขับไล่
-    - ที่ดินทับซ้อน
-    - ที่สาธารณะ
-    - เวนคืน
-    - อพยพ
-    - สลักหลุด
-    - ผังเมือง
-  crime_security:
+    - ทางแยกตัน
+  crime:
     - อาชญากรรม
     - ฆาตกรรม
     - ฆ่า
@@ -122,27 +96,7 @@ categories:
     - การพนัน
     - พนัน
     - วางระเบิด
-    - จุดเสี่ยง
-    - แหล่งมั่วสุม
-  destitution:
-    - ขอทาน
-    - คนไร้บ้าน
-    - ไร้บ้าน
-    - เร่ร่อน
-    - นอนข้างทาง
-    - นอนริมทาง
-    - นอนบนทางเท้า
-    - ขอเงิน
-    - เช็ดกระจกรถ
-    - หนี้นอกระบบ
-    - ดอกเบี้ยโหล
-    - ดอกเบี้ยแพง
-    - แชร์ล้ม
-    - แชร์
-    - โหล
-    - ว่างงาน
-    - ตกงาน
-  informal_economy:
+  street_retail_popup:
     - ตลาดนัด
     - ตลาดเช้า
     - ตลาดค่ำ
@@ -156,29 +110,21 @@ categories:
     - ค้าขาย
     - ก๋วยเตี๋ยว
     - ขายของ
-    - หางาน
-    - รับจ้าง
-    - จ้างงาน
-    - รับสมัคร
-    - รายได้
-    - ค่าจ้าง
-  social_support:
-    - มูลนิธิ
-    - บริจาค
-    - สวัสดิการ
-    - ช่วยเหลือ
-    - อาสาสมัคร
-    - บัตรสวัสดิการแห่งรัฐ
-    - พักพิง
-    - ผู้มีรายได้น้อย
-    - คนจน
-    - มาตรการช่วยเหลือ
+  begging_homeless:
+    - ขอทาน
+    - คนไร้บ้าน
+    - ไร้บ้าน
+    - เร่ร่อน
+    - นอนข้างทาง
+    - นอนริมทาง
+    - นอนบนทางเท้า
+    - ขอเงิน
+    - เช็ดกระจกรถ
 
-
-# Traffy Fondue complaint hashtags -> same domains (substring match)
+# Traffy Fondue complaint hashtags → same taxonomy (substring match on hashtag)
 traffy_map:
-  flooding: [น้ำท่วม, อุทกภัย, น้ำหลาก, พายุ, ฝน]
-  contamination: [น้ำเสีย, ขยะ, มลพิษ, ฝุ่น, เสียงดัง, กลิ่น, หนู]
-  basic_services: [ไฟ, ไฟฟ้า, รั่ว, ซึม, อุดตัน, สะพาน, ถนนพัง, ทางเท้า, หลอดไฟ, จราจร, รถติด, จอดรถ, จอด, ทางแยก]
-  crime_security: [ความปลอดภัย, จุดเสี่ยง, ยาเสพติด, การพนัน, โจร, มั่วสุม]
-  destitution: [ขอทาน, เช็ดกระจก, ไร้บ้าน]
+  natural_disaster: [น้ำท่วม, อุทกภัย, น้ำหลาก, พายุ, ฝน]
+  technical_disaster: [ไฟ, ไฟฟ้า, รั่ว, ซึม, อุดตัน, น้ำเสีย, ขยะ, มลพิษ, ฝุ่น, เสียงดัง, สะพาน, ถนนพัง, ทางเท้าพัง, หลอดไฟ]
+  traffic_incident: [จราจร, รถติด, จอดรถ, จอด, ทางแยก, อุบัติเหตุ]
+  crime: [ความปลอดภัย, จุดเสี่ยง, ยาเสพติด, การพนัน, โจร]
+  begging_homeless: [ขอทาน, เช็ดกระจก, ไร้บ้าน]

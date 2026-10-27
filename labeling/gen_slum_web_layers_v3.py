@@ -25,7 +25,7 @@ os.makedirs(ODIR, exist_ok=True)
 
 SITES = ["bkk_slum_1", "bkk_slum_3", "bkk_slum_5", "bkk_slum_6", "bkk_slum_7",
          "bkk_slum_8", "bkk_slum_9", "bkk_slum_10", "bkk_slum_11", "bkk_slum_12",
-         "bkk_slum_13", "bkk_slum_14", "bkk_slum_15", "bkk_slum_41",
+         "bkk_slum_13", "bkk_slum_14", "bkk_slum_15", "bkk_slum_16", "bkk_slum_41",
          "chm_slum_1", "chm_slum_2", "chm_slum_3",
          "hat_slum_1", "hat_slum_2",
          "patt_slum_1", "patt_slum_2",
