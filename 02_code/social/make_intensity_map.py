@@ -444,6 +444,8 @@ HTML = """<!DOCTYPE html>
   <div id="rankpanel" style="display:none;margin-top:8px;
        border-top:1px solid #ccc;padding-top:6px;font-size:12px">
     <div style="color:#555">pick a ranking — its top 30 light up on the map</div>
+    <label style="display:block;margin-top:4px;cursor:pointer"><input type="checkbox" id="rankonly" checked/>
+      rankings-only view (hide event choropleth)</label>
     <div id="rankopts" style="margin-top:4px"></div>
     <div id="rankdesc" style="display:none;margin-top:6px;border-top:1px solid #ccc;
          padding-top:5px;color:#333;line-height:1.4"></div>
@@ -665,6 +667,15 @@ document.getElementById('top30').onchange=e=>{
       .addTo(map);
   }
 };
+function applyRankOnly(){
+  const only=document.getElementById('rankonly').checked;
+  if(only && rankLayer){
+    if(layer){map.removeLayer(layer); layer=null;}   // rankings-only view: basemap + pins
+  } else if(!layer){
+    draw();
+  }
+}
+document.getElementById('rankonly').onchange=applyRankOnly;
 document.getElementById('rankbtn').onclick=()=>{
   const m=document.getElementById('rankpanel');
   const show=m.style.display==='none';
@@ -674,6 +685,7 @@ document.getElementById('rankbtn').onclick=()=>{
     document.querySelectorAll('input[name=rankset]').forEach(r=>r.checked=false);
     const d=document.getElementById('rankdesc');
     d.style.display='none'; d.innerHTML='';
+    if(!layer) draw();                              // bring the choropleth back
   }
 };
 const RANKSETS = __RANKSETS__;
@@ -722,6 +734,7 @@ function showRank(key){
         :''));
   })).addTo(map);
   map.fitBounds(L.latLngBounds(feats.map(it=>it.ctr)).pad(0.15));
+  applyRankOnly();
 }
 document.getElementById('methbtn').onclick=()=>{
   const m=document.getElementById('meth');
