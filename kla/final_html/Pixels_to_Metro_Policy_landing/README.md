@@ -1,6 +1,6 @@
-# Pixels to Metro Policy · Landing page
+# Pixels to METRO Policy · Landing page
 
-Scroll-driven opening page for the Pixels to Metro Policy website: a population-bar
+Scroll-driven opening page for the Pixels to METRO Policy website: a population-bar
 globe that descends to Asia, Thailand's provinces and Bangkok's 50 districts, then an
 interactive bird's-eye evidence scene, data analytics, policy, pipeline, methodology
 and a "next page" link into the platform.
@@ -121,7 +121,7 @@ hover card are in `bkk.ext` = [flood69 level, hazard class, metres to canal, met
 
 - BMA Community FeatureServer/14 (downloaded 16 Oct 2026), NHA, CODI Baan Mankong,
   fire-risk assessments 2568, flood-wall list Nov 2568, citywide screening and audit
-  figures: Pixels to Metro Policy GeoHackathon 2026 deck.
+  figures: Pixels to METRO Policy GeoHackathon 2026 deck.
 - UN SDG Report 2023 and 2024 (Goal 11); CODI, Sept 2025; World Bank EN.POP.SLUM.UR.ZS.
 - Province and district boundaries: OpenGISData-Thailand, CC BY 4.0 (keep attribution).
 - World geometry: Natural Earth (public domain) via world-atlas.

@@ -1,6 +1,6 @@
 # Urban Intelligence Platform — landing
 
-Second landing of the Pixels to Metro Policy pair. The first longread
+Second landing of the Pixels to METRO Policy pair. The first longread
 (`../Pixels_to_Metro_Policy_landing`) ends with the "Open the Urban Intelligence
 Platform" button; this page is its target. Same visual system (Archivo + IBM Plex,
 dark HUD theme, d3), built as one self-contained folder — no CDN dependencies.

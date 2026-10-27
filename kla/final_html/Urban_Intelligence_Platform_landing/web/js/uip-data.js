@@ -19,10 +19,11 @@ window.UIP = (function () {
     social: { src: "media/clip-street.mp4", tag: "datalake · street", note: "Street life is a signal: vending and popup markets feed the informal-economy domain." },
     rank: { src: "media/clip-fire.mp4", tag: "datalake · fire", note: "Fire events are a ranking input — technical-disaster domain, weighted into the cumulative score." },
     priority: { src: "media/p2m-flood-lat-krabang.mp4", tag: "priority · lat krabang", note: "Repeated flooding on the east bank pushes an area up the priority classes." },
-    participate: { src: "media/clip-street.mp4", tag: "participation · street", note: "Participation starts where people already are — the street economy the platform senses daily." },
-    kits: { src: "media/clip-flood.mp4", tag: "kits · flood retrofit", note: "Kit choice follows the score signature — flood signal first, kit 4 risk-first retrofit." },
-    design: { src: "media/walkthrough.mp4", tag: "strategy walkthrough", note: "The full walkthrough: from pixels to a designed, approved intervention strategy.", poster: "media/p2m-flood-poster.jpg" },
-    program: null, assess: null,
+    participate: { src: "media/participate.mp4", tag: "participation · 4 projects", note: "Four projects from the 49-case review, 5s each: Bang Bua canal (Bangkok), Medellín, Orangi (Karachi), Mukuru (Nairobi) — residents meet, show, build, map." },
+    kits: { src: "media/kits.mp4", tag: "kits · upgrading works", note: "Indonesia's national slum upgrading project: the kit's action list lands on the ground — roads, drainage, drone verification." },
+    design: { src: "media/design.mp4", tag: "design · co-design table", note: "Co-design in a Cape Town informal settlement: residents and designers shape the strategy over shared plans." },
+    program: { src: "media/program.mp4", tag: "program · half-houses", note: "Chile's built half-houses (Aravena / ELEMENTAL) — families complete the intervention themselves. Guardian, 787K views." },
+    assess: { src: "media/assess.mp4", tag: "assess · new housing", note: "The outcome check: happy Bangkok residents after upgrading into new housing — results feed back into the datalake." },
   };
 
   // process steps per section
