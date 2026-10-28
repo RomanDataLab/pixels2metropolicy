@@ -39,6 +39,20 @@ DESCS = {
                  "water 6 m, railway 30 m, road 6 m, industrial 100 m. "
                  "Click a pin for the exact norms breached.",
 }
+# popup "main dangerous events": domains ordered by the severity weights of
+# rank_danger (fire 1.0, flooding/crime 0.9, accidents 0.8, contamination/tenure
+# 0.6, services 0.5, destitution 0.4, informal economy 0.2, support 0.1);
+# env_hazard sits with the 0.8 band (industrial/pollution hazard).
+EV_ORDER = [("fire", "Fire"),
+            ("flooding", "Flooding"),
+            ("crime_security", "Crime & security"),
+            ("env_hazard", "Environmental hazard"),
+            ("contamination", "Contamination"),
+            ("housing_tenure_risk", "Housing / tenure risk"),
+            ("basic_services", "Basic services"),
+            ("destitution", "Destitution"),
+            ("informal_economy", "Informal economy"),
+            ("social_support", "Social support")]
 NORMS = [("water", "public waterway", 6.0,
           "Ministerial Regulation No. 55 (B.E. 2543) ข้อ 40: 3-6 m bank setback"),
          ("rail", "railway", 30.0,
@@ -54,6 +68,16 @@ def main() -> int:
     rk = pd.read_csv(SOCIAL_OUT / "slum_rankings.csv", dtype={"cmt_id": str}).fillna("")
     cr = pd.read_csv(SOCIAL_OUT / "code_risk.csv", dtype={"cmt_id": str})
     cr = cr[~cr["cmt_id"].duplicated()].set_index("cmt_id")
+    cc = pd.read_csv(SOCIAL_OUT / "neighborhood_category_counts.csv",
+                     dtype={"cmt_id": str}).set_index("cmt_id")
+
+    def main_events(cid: str) -> list[dict]:
+        """Non-zero event domains, most dangerous first (severity order)."""
+        if cid not in cc.index:
+            return []
+        row = cc.loc[cid]
+        return [{"d": label, "n": int(row[col])}
+                for col, label in EV_ORDER if int(row[col]) > 0]
 
     poly = gpd.read_parquet(GAZETTEER_DIR / "slum_polygons.parquet")
     poly["cmt_id"] = poly["CMT_ID"].astype(str)
@@ -93,11 +117,14 @@ def main() -> int:
             cid = str(r["cmt_id"])
             if cid not in xy:
                 continue
+            evs = main_events(cid)
             it = {"rank": int(r[rk_col]), "id": cid,
                   "th": str(r["CMT_NAME"])[:34], "en": str(r.get("name_en", ""))[:44],
                   "sname": str(r["SNAME"]), "dname": str(r["DNAME"]),
                   "lat": xy[cid][0], "lon": xy[cid][1],
-                  "v": round(float(r[v_col]), 2)}
+                  "v": round(float(r[v_col]), 2),
+                  "ev": evs[:4], "ev_more": max(0, len(evs) - 4),
+                  "total": int(cc.loc[cid, "total"]) if cid in cc.index else 0}
             if rk_col == "rank_code":
                 it["vlist"] = code_vlist(cid)
             items.append(it)
@@ -150,6 +177,12 @@ const RANKSETS = __RANKSETS__;
 const POLYS = __POLYS__;
 const BKK = L.latLngBounds([13.47, 100.28], [14.02, 100.98]);
 const map = L.map('map', {zoomControl: true}).fitBounds(BKK, {animate: false});
+window.addEventListener("message", function (e) {
+  var d = e.data;
+  if (d && d.type === "uipZoom" && Array.isArray(d.bb)) {
+    map.fitBounds([[d.bb[1], d.bb[0]], [d.bb[3], d.bb[2]]], { padding: [18, 18], maxZoom: 17 });
+  }
+});
 (function refit(){
   if (map.getZoom() >= 9) return;
   map.invalidateSize(); map.fitBounds(BKK, {animate: false});
@@ -186,6 +219,12 @@ function showRank(key){
       `<div style="color:#0a5f73;font-size:11px">${it.th}</div>` +
       `${it.sname} · ${it.dname}<br>` +
       `${set.label}: <b>${it.v}</b>` +
+      (it.ev && it.ev.length
+        ? `<div style="margin-top:4px;text-align:left"><b>main dangerous events:</b>` +
+          it.ev.map(e => `<div style="margin-top:2px">&bull; ${e.d}: <b>${e.n}</b></div>`).join('') +
+          (it.ev_more ? `<div style="color:#666">+${it.ev_more} more event type${it.ev_more > 1 ? 's' : ''}</div>` : '') +
+          `<div style="margin-top:2px;color:#666">total events (92 days): ${it.total}</div></div>`
+        : `<div style="margin-top:4px;color:#666">no events in the 92-day window</div>`) +
       (it.vlist && it.vlist.length
         ? `<div style="margin-top:4px;text-align:left"><b>norms breached:</b>` +
           it.vlist.map(v => `<div style="margin-top:2px">&bull; ${v}</div>`).join('') +

@@ -170,16 +170,51 @@ if not m:
 else:
     fc = json.loads(m.group(1))
 feats = []
+
+# district romanization: community centroid -> geoBoundaries khet shapeName (English)
+_kh = json.load(open(os.path.join(QGIS, "bkk_khet_wgs84.geojson"), encoding="utf-8"))
+_kh_polys = []
+for ft in _kh["features"]:
+    g = ft["geometry"]
+    coords = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
+    _kh_polys.append((ft["properties"].get("shapeName", ""), coords))
+
+def _pt_in_ring(x, y, ring):
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i][0], ring[i][1]
+        xj, yj = ring[j][0], ring[j][1]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
+
+def khet_en(x, y):
+    for name, polys in _kh_polys:
+        for poly in polys:
+            if _pt_in_ring(x, y, poly[0]):
+                return name
+    return ""
+
+# geoBoundaries layer covers 46 of 50 khet; spell the rest by hand
+KHET_EN_FALLBACK = {"หนองจอก": "Nong Chok", "คลองสามวา": "Khlong Sam Wa",
+                    "ทวีวัฒนา": "Thawi Watthana", "สัมพันธวงศ์": "Samphanthawong"}
+
 for ft in fc["features"]:
     p = ft["properties"]
     c = p.get("counts", {}) or {}
+    cen = centroid(ft["geometry"])
     feats.append({
-        "nm": p.get("sname", ""), "dn": p.get("dname", ""), "pop": p.get("pop"),
+        "nm": p.get("sname", ""), "ne": p.get("name_en", ""),
+        "dn": p.get("dname", ""),
+        "de": khet_en(cen[0], cen[1]) or KHET_EN_FALLBACK.get(p.get("dname", ""), ""),
+        "pop": p.get("pop"),
         "tot": p.get("total", 0), "nd": p.get("n_docs", 0),
         "nd_": c.get("natural_disaster", 0), "td_": c.get("technical_disaster", 0),
         "ti": c.get("traffic_incident", 0), "cr": c.get("crime", 0),
         "sr": c.get("street_retail_popup", 0), "bh": c.get("begging_homeless", 0),
-        "c": centroid(ft["geometry"]),
+        "c": cen,
         "bb": bbox(ft["geometry"]),
     })
 print("social communities:", len(feats))

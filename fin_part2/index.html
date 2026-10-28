@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>METROPOLITAN PLANNING INTELLIGENCE PLATFORM — Pixels to METRO Policy</title>
+<meta name="description" content="From segmented rooftops to approved urban interventions: the platform pipeline — satellite segmentation, property matching, social sensing, ranking, prioritization, participation, governance toolkits, design and approval.">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/uip.css?v=22">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../Pixels_to_Metro_Policy_landing/web/index.html"><i></i>PIXELS&nbsp;TO&nbsp;METRO&nbsp;POLICY · METROPOLITAN&nbsp;PLANNING&nbsp;INTELLIGENCE&nbsp;PLATFORM</a>
+    <a class="back" href="#pipe">Pipeline ↓</a>
+  </div>
+</header>
+
+<section id="hero">
+  <div class="wrap">
+    <div class="kicker"><span class="label" style="color:var(--cyan)">Metropolitan Planning Intelligence Platform</span><span class="label">Thailand · 1,588 NHA slum communities (red dots) · 487,747 households · quarterly epochs</span></div>
+    <h1><span>METROPOLITAN PLANNING</span><span>INTELLIGENCE PLATFORM</span></h1>
+    <p class="sub">A platform that joins several engines to predict, plan and carry out urban interventions in Thailand's metropolitan areas, with irregular neighborhoods at the center. Public and corporate decision-makers need it to keep pace with fast-changing cities and suburbs. It reads renewed data from satellites, statistics, public records and social media, finds the irregular neighborhoods most at risk for sustainable city life, and ranks them.</p>
+  </div>
+  <div class="wrap" id="pipe" style="margin-top:clamp(30px,5vh,56px)">
+    <div style="display:flex;gap:14px;align-items:baseline;margin-bottom:14px">
+      <span class="label" style="color:var(--cyan)">The pipeline</span>
+      <span class="label">algorithm after «platform scheme» — hover any block</span>
+    </div>
+    <div class="pipewrap">
+      <div class="pipe-grid" id="pipegrid"></div>
+      <svg id="pipearrows" aria-hidden="true"></svg>
+    </div>
+  </div>
+</section>
+
+<main id="sections"></main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <span class="label" style="color:var(--cyan)">Metropolitan Planning Intelligence Platform</span>
+      <p style="margin-top:10px">Pipeline after «urban platform scheme» (Q4 2026). Evidence layers: THEOS-2 segmentation (this repo), BMA comprehensive-plan zones, cadastral register, urban datalake (news RSS, Traffy Fondue, traffic cameras, traffic events, official statistics), 1,993-community social sensing, 49-case participation review. Part of <a href="../Pixels_to_Metro_Policy_landing/web/index.html">Pixels to METRO Policy</a>.</p>
+    </div>
+    <div>
+      <span class="label">Interactive tabs this page extends</span>
+      <ul>
+        <li><a href="../../../../slum.html">Main map · slum map</a></li>
+        <li><a href="../../../../datamatch.html">Data match</a></li>
+        <li><a href="../../../../social.html">Social pulse</a></li>
+        <li><a href="../../../../participation.html">Participation</a></li>
+        <li><a href="../../../../proposal.html">Proposal · metro policy toolkits</a></li>
+      </ul>
+    </div>
+    <div>
+      <span class="label">Image &amp; video credits</span>
+      <p style="margin-top:10px">Participation class backgrounds and metro policy toolkit imagery: Wikimedia Commons contributors and this project's own segmentation outputs — per-file attribution in <span style="font-family:var(--mono);font-size:11px">img/part/SOURCES.md</span>.</p>
+      <p style="margin-top:6px">Pipeline hover videos: Pexels contributors (free licence, no attribution required) and <a href="https://commons.wikimedia.org/wiki/File:Mae_Jo_Loy_Krathong_2010.webm" target="_blank" rel="noopener">Mae Jo Loy Krathong 2010</a> © Mike Griffiths, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</p>
+    </div>
+  </div>
+</footer>
+
+<div id="floatpanel">
+  <div class="fp-vid">
+    <video muted loop playsinline preload="none"></video>
+    <span class="tag"></span>
+  </div>
+  <div class="fp-head"><h4></h4><span class="label" id="fp-no"></span></div>
+  <div class="fp-body"></div>
+</div>
+<div id="tooltip"></div>
+
+<script src="js/vendor/d3.min.js"></script>
+<script src="js/uip-data.js?v=20"></script>
+<script src="js/blocks/seg.js"></script>
+<script src="js/blocks/match.js"></script>
+<script src="js/blocks/social.js"></script>
+<script src="js/blocks/rank.js"></script>
+<script src="js/blocks/priority.js"></script>
+<script src="js/blocks/participate.js"></script>
+<script src="js/blocks/toolkits.js?v=3"></script>
+<script src="js/blocks/design.js"></script>
+<script src="js/blocks/program.js"></script>
+<script src="js/blocks/assess.js"></script>
+<script src="js/uip-main.js?v=53"></script>
+</body>
+</html>

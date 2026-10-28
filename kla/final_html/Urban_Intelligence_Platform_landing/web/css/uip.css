@@ -1,4 +1,4 @@
-/* Urban Intelligence Platform landing — same visual system as Pixels to METRO Policy */
+/* Metropolitan Planning Intelligence Platform landing — same visual system as Pixels to METRO Policy */
 :root{
   --space:#030507; --obsidian:#06080b; --graphite:#0d1216; --graphite-2:#131a1f; --graphite-3:#1a2329;
   --line:#1f2a31; --line-2:#2d3b45; --fg:#e8eef2; --muted:#93a3ad; --dim:#5f6f79;
@@ -31,7 +31,8 @@ h1,h2,h3,h4{margin:0;font-family:var(--display);font-stretch:112%;text-wrap:bala
 #hero{position:relative;padding:calc(56px + clamp(40px,7vh,90px)) 0 clamp(30px,5vh,60px);background:
   radial-gradient(1200px 500px at 70% -10%,rgba(63,210,240,.07),transparent 60%),
   radial-gradient(900px 420px at 10% 110%,rgba(154,123,255,.06),transparent 60%),var(--space)}
-#hero h1{font-size:clamp(40px,6.4vw,96px);font-weight:820;font-stretch:120%;text-transform:uppercase;letter-spacing:-.015em}
+#hero h1{font-size:clamp(30px,5vw,63px);font-weight:820;font-stretch:120%;text-transform:uppercase;letter-spacing:-.015em}
+#hero h1 span{display:block}
 #hero h1 span+span{color:var(--violet)}
 #hero .sub{margin-top:16px;font-size:clamp(15px,1.3vw,18px);color:#c9d2d8;max-width:66ch}
 #hero .kicker{display:flex;gap:14px;margin-bottom:18px}
@@ -41,9 +42,12 @@ h1,h2,h3,h4{margin:0;font-family:var(--display);font-stretch:112%;text-wrap:bala
 .pipewrap{position:relative}
 .pipewrap #pipearrows{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:visible}
 .pipe-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:30px 34px}
-.pnode{grid-column:span 3;position:relative;z-index:2;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--graphite-2),var(--graphite));padding:12px 12px 10px;min-height:118px;cursor:pointer;transition:border-color .25s, transform .25s, box-shadow .25s}
+.pnode{grid-column:span 3;position:relative;z-index:2;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--graphite-2),var(--graphite));padding:12px 48px 10px 12px;min-height:118px;cursor:pointer;transition:border-color .25s, transform .25s, box-shadow .25s}
+.pnode .picto{position:absolute;top:10px;right:11px;pointer-events:none;opacity:.9;transition:opacity .25s}
+.pnode .picto svg{display:block;width:100%;height:100%}
+.pnode:hover .picto{opacity:1}
 .pnode:hover,.pnode.on{border-color:var(--cyan);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.45),0 0 0 1px rgba(63,210,240,.25) inset}
-.pnode .no{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em}
+.pnode .no{position:absolute;top:10px;right:48px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em}
 .pnode .tt{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
 .pnode .kind{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .pnode h3{font-size:15.5px;font-weight:700;text-transform:uppercase;margin-top:6px;font-stretch:110%}
@@ -155,7 +159,7 @@ tr.sel td{background:var(--graphite-3)!important}
 .pcard .meta{display:flex;gap:5px;flex-wrap:wrap}
 .pcard .tag{font-family:var(--mono);font-size:9.5px;padding:2px 8px;border:1px solid var(--line-2);color:var(--muted);letter-spacing:.06em}
 .pcard .tag.th{color:var(--amber);border-color:rgba(255,181,71,.4)}
-.pcard .tag.kit{color:var(--cyan);border-color:rgba(63,210,240,.4)}
+.pcard .tag.toolkit{color:var(--cyan);border-color:rgba(63,210,240,.4)}
 .g1 .pcard{border-top:3px solid var(--p1)} .g2 .pcard{border-top:3px solid var(--p2)}
 .g3 .pcard{border-top:3px solid var(--p3)} .g4 .pcard{border-top:3px solid var(--p4)}
 .g5 .pcard{border-top:3px solid var(--p5)} .g6 .pcard{border-top:3px solid var(--p6)}
@@ -164,23 +168,28 @@ tr.sel td{background:var(--graphite-3)!important}
 .g1 .cls{color:var(--p1)} .g2 .cls{color:var(--p2)} .g3 .cls{color:var(--p3)}
 .g4 .cls{color:var(--p4)} .g5 .cls{color:var(--p5)} .g6 .cls{color:var(--p6)}
 
-/* kit scroll picker */
-#kitsnap{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px calc(50% - 130px) 24px;scrollbar-width:none}
-#kitsnap::-webkit-scrollbar{display:none}
+/* toolkit scroll picker */
+#toolkitsnap{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px calc(50% - 130px) 24px 25px;scrollbar-width:none}
+#toolkitsnap::-webkit-scrollbar{display:none}
+/* toolkit detail: participation technique chips are links to section 06 */
+#toolkitdetail .teq-link{cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+#toolkitdetail .teq-link:hover{background:rgba(63,210,240,.14);border-color:var(--cyan);color:var(--fg)}
+.pcard{transition:outline-color .4s}
+.pcard.flash{outline:2px solid var(--cyan);outline-offset:3px}
 .kpick{flex:0 0 260px;scroll-snap-align:center;border:1px solid var(--line-2);background:var(--graphite-2);padding:0;cursor:pointer;transition:border-color .25s,transform .25s;position:relative;transform:scale(.94);opacity:.75}
 .kpick .im{height:130px;background-size:cover;background-position:center;filter:saturate(.85)}
 .kpick .nm{padding:10px 12px;font-family:var(--display);font-stretch:110%;font-weight:700;font-size:14px;text-transform:uppercase;line-height:1.2;min-height:66px}
 .kpick .no{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:10px;background:rgba(3,5,7,.85);border:1px solid var(--line-2);padding:3px 7px;letter-spacing:.1em;color:var(--cyan)}
 .kpick.sel{border-color:var(--cyan);transform:scale(1.04);opacity:1;box-shadow:0 14px 40px rgba(0,0,0,.5)}
-#kitdetail{border:1px solid var(--line-2);background:var(--graphite);padding:20px 22px;display:grid;gap:12px;margin-top:6px}
-#kitdetail .kd-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
-#kitdetail h3{font-size:22px;text-transform:uppercase;font-stretch:112%}
-#kitdetail .acts{display:flex;flex-wrap:wrap;gap:7px}
-#kitdetail .act{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--line-2);padding:5px 10px;color:#c4ccd1;background:var(--graphite-2)}
-#kitdetail .teq{color:var(--cyan);border-color:rgba(63,210,240,.45)}
+#toolkitdetail{border:1px solid var(--line-2);background:var(--graphite);padding:20px 22px;display:grid;gap:12px;margin-top:6px}
+#toolkitdetail .kd-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
+#toolkitdetail h3{font-size:22px;text-transform:uppercase;font-stretch:112%}
+#toolkitdetail .acts{display:flex;flex-wrap:wrap;gap:7px}
+#toolkitdetail .act{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;border:1px solid var(--line-2);padding:5px 10px;color:#c4ccd1;background:var(--graphite-2)}
+#toolkitdetail .teq{color:var(--cyan);border-color:rgba(63,210,240,.45)}
 
-/* kit flip cards rows */
-.kitrows{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:26px}
+/* toolkit flip cards rows */
+.toolkitrows{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:26px}
 .kflip{perspective:900px;height:330px;cursor:pointer}
 .kflip .inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
 .kflip.flip .inner{transform:rotateY(180deg)}
@@ -222,7 +231,7 @@ footer a{color:var(--cyan)}
 @media (prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}.pnode:hover{transform:none}}
 
 /* floating mini-pipeline nav: 70% transparent, 1/10 screen width, right under the header's Pipeline button */
-#pipenav{position:fixed;top:64px;left:auto;right:var(--gutr);width:10vw;min-width:96px;max-width:170px;z-index:60;display:none;flex-direction:column;gap:2px;padding:7px;background:rgba(3,5,7,.82);border:1px solid var(--line-2);opacity:.3;transition:opacity .25s}
+#pipenav{position:fixed;top:64px;left:auto;right:var(--gutr);width:auto;min-width:0;max-width:70vw;z-index:60;display:none;flex-direction:row;flex-wrap:wrap;justify-content:flex-end;gap:3px;padding:6px;background:rgba(3,5,7,.3);border:1px solid transparent;opacity:.3;transition:opacity .25s}
 #pipenav.on{display:flex}
 #pipenav:hover{opacity:.95}
 #pipenav a{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:#e8eef2;text-decoration:none;padding:4px 5px;border:1px solid rgba(232,238,242,.4);background:rgba(232,238,242,.07);display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -230,3 +239,27 @@ footer a{color:var(--cyan)}
 #pipenav a:hover{border-color:#fff}
 #pipenav a.here{background:#ff5a4e;border-color:#ff5a4e;color:#030507}
 #pipenav a.here i{color:#2b0000}
+/* icon links: number + pictogram; name appears as tooltip left of the nav on hover */
+#pipenav a{position:relative;display:flex;align-items:center;gap:6px;overflow:visible;text-overflow:clip}
+#pipenav a .pic{flex:0 0 14px;width:14px;height:14px}
+#pipenav a .pic svg{display:block;width:100%;height:100%}
+#pipenav a .tip{position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%);background:rgba(3,5,7,.95);border:1px solid rgba(232,238,242,.4);padding:4px 8px;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:#e8eef2;white-space:nowrap;display:none;pointer-events:none;z-index:5}
+#pipenav a:hover .tip{display:none}
+#pipenav #pipenavname{position:absolute;top:100%;left:0;right:0;margin-top:3px;text-align:right;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#93a3ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#pipenav:hover #pipenavname{color:#e8eef2}
+/* clean chips: no white border boxes; hover = cyan tint, icons slightly larger */
+#pipenav a{border-color:transparent;background:rgba(232,238,242,.05);padding:4px 6px}
+#pipenav a:hover{border-color:transparent;background:rgba(63,210,240,.25)}
+#pipenav a .pic{flex:0 0 17px;width:17px;height:17px}
+
+/* rank table: Thai name + english sub-line */
+table.rank td.nm2{white-space:normal;min-width:190px}
+#rkdet{margin-top:18px;border:1px solid var(--line-2);background:var(--graphite);padding:16px 18px}
+#rkdet h3{margin:6px 0 2px;font-size:19px;color:var(--fg)}
+#rkdet h3 .en{font-size:13px;color:var(--muted);font-weight:400}
+#rkdet .meta{margin:0 0 12px;font-size:12.5px;color:#9aa5ab}
+#rkdet .drow{display:flex;align-items:center;gap:12px;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+#rkdet .drow span{flex:0 0 190px;color:#c4ccd1}
+#rkdet .drow b{flex:0 0 34px;font-family:var(--mono);color:var(--fg);text-align:right}
+#rkdet .drow .bar{display:inline-block;height:8px;border-radius:2px}
+table.rank td.nm2 .sep{color:var(--muted);font-size:11px;padding:0 1px}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formal matching — irregular houses vs cadastre buildings (Bangkok)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  #map { height: 100%; }
+  .panel { position: absolute; top: 46px; right: 10px; z-index: 1000; background: rgba(18,49,78,.5); color: #fff;
+           padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.3);
+           font-family: sans-serif; font-size: 13px; max-width: 300px; max-height: calc(100vh - 60px); overflow-y: auto; }
+  .panel h1 { font-size: 14px; margin: 0 0 6px; padding-right: 27px; }
+  .panel .rollbtn { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px;
+                    display: flex; align-items: center; justify-content: center;
+                    border: 1px solid #fff; border-radius: 5px; background: transparent; color: #fff;
+                    cursor: pointer; font-size: 11px; line-height: 1; padding: 0; z-index: 5; }
+  .panel .rollbtn:hover { background: rgba(255,255,255,.15); }
+  .panel.rolled > *:not(.rollbtn) { display: none; }
+  .panel.rolled { padding: 30px 14px 12px; max-width: none; }
+  .panel p { margin: 6px 0; }
+  .panel .btns button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer;
+           background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; }
+  .panel .btns button:hover { background: rgba(255,255,255,.15); }
+  .panel select { font-size: 12px; padding: 2px 4px; max-width: 100%; background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; }
+  .panel select option { background: #12314e; color: #fff; }
+  .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .note { font-size: 11px; color: #b8c8d8; line-height: 1.4; }
+  #stats { font-family: monospace; font-size: 12px; }
+  #stats b { color: #9fc3e8; }
+
+  /* ---- shared site header nav ---- */
+  #site-header {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+  /* ---- embed mode (?embed=1): hide site nav header ---- */
+  html.embed #site-header { display: none; }
+  html.embed .panel { top: 10px; }
+</style>
+<script>
+  if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embed');
+</script>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="index.html">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_policies.html">Slum policies review</a>
+    <a href="participation.html">Participation</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="gen3_yolo.html">Gen 3: YOLO roofs</a>
+    <a href="theos_native.html">THEOS native</a>
+    <a href="social.html">Social pulse</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="proposal.html">Proposal</a>
+    <a href="fin_part1/">fin_part1</a>
+    <a href="sources.html">Sources</a>
+    <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
+  </nav>
+</div>
+
+<div id="map"></div>
+<div class="panel">
+  <button class="rollbtn" type="button" title="Roll panel up" aria-label="Roll panel up" onclick="rollPanel(this)">▾</button>
+  <h1>Formal matching — irregular houses vs cadastre buildings</h1>
+  <p>AI-detected red irregular houses matched against cadastre building footprints.</p>
+  <p style="margin:8px 0 2px"><span class="legend-dot" style="background:#ff0000"></span>irregular house on a cadastre footprint<br>
+     <span class="legend-dot" style="background:#ff8c00"></span><b>potentially irregular buildings</b> — no cadastre overlap<br>
+     <span class="legend-dot" style="background:#8fa3ad"></span>cadastre building footprints (partly)</p>
+  <p id="stats">loading…</p>
+  <p style="margin:6px 0 2px"><b>Zoom to site:</b></p>
+  <p style="margin:2px 0"><select id="sitesel" onchange="flySite(this.value)"></select></p>
+  <div class="btns">
+    <button onclick="flyAll()">All Bangkok sites</button>
+  </div>
+  <p class="note">A detected irregular house with no overlapping cadastre footprint is missing
+     from registers — flag it as a potentially irregular building for the detail check.
+     Houses that do overlap are drawn red (they exist in the reference data).</p>
+  <p class="note">Cadastre buildings are simulated in this example and do not represent the
+     official Thailand cadastre. In the future - repeatedly updated cadastre could be connected
+     via API engine to this matching tool</p>
+</div>
+
+<script>
+const map = L.map('map').setView([13.72, 100.55], 11);
+const satNoLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19, attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics' });
+const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
+// gray basemap — Carto dark tiles (keyless)
+const mapboxLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19, subdomains: 'abcd',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' });
+const googleSat = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20, subdomains: '0123', attribution: 'Imagery &copy; Google' });
+satNoLabels.addTo(map);
+
+map.createPane('ovPane');
+map.getPane('ovPane').style.zIndex = 440;
+const ovCanvas = L.canvas({ pane: 'ovPane', padding: 0.3 });
+map.createPane('roofsPane');
+map.getPane('roofsPane').style.zIndex = 450;
+const roofsCanvas = L.canvas({ pane: 'roofsPane', padding: 0.3 });
+
+const overtureLayer = (function () {
+  const group = L.layerGroup();
+  fetch('labeling/qgis_project/overture_bkk_sites.geojson')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(g => {
+      L.geoJSON(g, {
+        renderer: ovCanvas,
+        style: { color: '#5d707c', weight: 0.5, fillColor: '#8fa3ad', fillOpacity: 0.30 }
+      }).bindPopup(l => { const p = l.feature.properties;
+        return '<b>Cadastre building</b><br>height: ' + (p.height_m != null ? p.height_m + ' m' : '–'); })
+        .addTo(group);
+    })
+    .catch(err => console.warn('failed to load overture_bkk_sites.geojson', err));
+  return group;
+})();
+
+const roofsLayer = (function () {
+  const group = L.layerGroup();
+  fetch('labeling/qgis_project/checkcadaster_roofs.geojson')
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(g => {
+      L.geoJSON(g, {
+        renderer: roofsCanvas,
+        style: f => f.properties.ov
+          ? { color: '#9b0000', weight: 0.6, fillColor: '#ff0000', fillOpacity: 0.65 }
+          : { color: '#a34f00', weight: 0.6, fillColor: '#ff8c00', fillOpacity: 0.75 }
+      }).bindPopup(l => { const p = l.feature.properties;
+        return '<b>' + (p.ov ? 'On cadastre footprint' : 'Potentially irregular') + '</b>' +
+          '<br>site: ' + (p.site || '-') +
+          '<br>area: ' + Math.round(p.area_m2 || 0) + ' m² · nbrs/20m: ' + (p.nb_20 ?? '-'); })
+        .addTo(group);
+      const fs = g.features;
+      const ov = fs.filter(f => f.properties.ov).length;
+      document.getElementById('stats').innerHTML =
+        '<b>' + fs.length.toLocaleString() + '</b> irregular houses · ' +
+        '<b>' + (fs.length - ov).toLocaleString() + '</b> (' + Math.round(100 * (fs.length - ov) / fs.length) +
+        '%) potentially irregular · ' + ov.toLocaleString() + ' on cadastre';
+    })
+    .catch(err => console.warn('failed to load checkcadaster_roofs.geojson', err));
+  return group;
+})();
+overtureLayer.addTo(map); roofsLayer.addTo(map);
+
+let SITES = [];
+fetch('labeling/qgis_project/checkcadaster_sites.json')
+  .then(r => r.json())
+  .then(list => {
+    SITES = list;
+    const sel = document.getElementById('sitesel');
+    list.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.site;
+      o.textContent = s.site + ' · ' + s.roofs + ' houses · ' + Math.round(100 * (s.roofs - s.ov) / s.roofs) + '% irregular';
+      sel.appendChild(o);
+    });
+  })
+  .catch(err => console.warn('failed to load checkcadaster_sites.json', err));
+
+function flySite(name) {
+  const s = SITES.find(x => x.site === name);
+  if (!s) return;
+  const b = s.bbox;
+  map.flyToBounds([[b[1], b[0]], [b[3], b[2]]], { padding: [30, 30] });
+}
+function flyAll() {
+  if (!SITES.length) return;
+  let minx = 180, miny = 90, maxx = -180, maxy = -90;
+  SITES.forEach(s => {
+    minx = Math.min(minx, s.bbox[0]); miny = Math.min(miny, s.bbox[1]);
+    maxx = Math.max(maxx, s.bbox[2]); maxy = Math.max(maxy, s.bbox[3]);
+  });
+  map.flyToBounds([[miny, minx], [maxy, maxx]], { padding: [30, 30] });
+}
+
+function rollPanel(btn) {
+  const p = btn.closest('.panel');
+  p.classList.toggle('rolled');
+  const rolled = p.classList.contains('rolled');
+  btn.textContent = rolled ? '▴' : '▾';
+  btn.title = rolled ? 'Roll panel down' : 'Roll panel up';
+  btn.setAttribute('aria-label', btn.title);
+}
+
+L.control.layers(
+  { 'Satellite': satNoLabels, 'Google satellite': googleSat, 'OpenStreetMap': osmBase, 'Dark': mapboxLight },
+  { 'Irregular houses': roofsLayer, 'Cadastre buildings': overtureLayer },
+  { collapsed: true, position: 'bottomleft' }).addTo(map);
+</script>
+</body>
+</html>

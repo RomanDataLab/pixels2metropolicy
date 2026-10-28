@@ -1,4 +1,4 @@
-/* Urban Intelligence Platform — main assembly */
+/* Metropolitan Planning Intelligence Platform — main assembly */
 (function () {
   "use strict";
   var U = window.UIP;
@@ -42,11 +42,8 @@
         tx = Math.round(a.r + (gap - S) / 2);
         ty = Math.round(a.cy - S / 2);
       } else {
-        var vgap = b.t - a.b;
-        if (vgap < S + 6) continue;
-        rot = 90;
-        tx = Math.round(b.cx - S / 2);                // point down into the next row's first block
-        ty = Math.round(a.b + (vgap - S) / 2);
+        /* vertical row-wrap arrows removed — only horizontal arrows are drawn */
+        continue;
       }
       body += '<g transform="translate(' + tx + "," + ty + ")" + (rot ? " rotate(90)" : "") + '">' + ARROW_PATHS + "</g>";
     }
@@ -65,7 +62,7 @@
   }
   function hideTip() { tooltip.style.opacity = 0; }
 
-  var DATAV = "2";
+  var DATAV = "3";
   function loadJSON(p) { return fetch(p + (p.indexOf("?") < 0 ? "?" : "&") + "v=" + DATAV).then(function (r) { return r.json(); }); }
 
   /* ---------------- map factory: canvas under svg ---------------- */
@@ -224,10 +221,15 @@
     var vid = fp.querySelector(".fp-vid");
     if (v) {
       vid.style.display = "block";
+      fpVideo.pause();
       fpVideo.src = v.src;
       fpVideo.poster = v.poster || "";
       fp.querySelector(".tag").textContent = v.tag;
-      fpVideo.play().catch(function () {});
+      fpVideo.oncanplay = function () {
+        fpVideo.oncanplay = null;
+        fpVideo.play().catch(function () {});
+      };
+      fpVideo.load();
     } else {
       vid.style.display = "none";
       fpVideo.pause();
@@ -244,12 +246,28 @@
     fpVideo.pause();
   }
 
+    /* white-outline pictograms (transparent bg), one per pipeline block */
+  var PS = 'fill="none" stroke="rgba(232,238,242,.92)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"';
+  var PICTOS = {
+    seg: '<svg viewBox="0 0 24 24" ' + PS + '><rect x="9" y="2" width="6" height="4"/><rect x="2.5" y="2.5" width="4.5" height="3"/><rect x="17" y="2.5" width="4.5" height="3"/><path d="M12 6v3"/><path d="M2.5 21l3.5-4.5L9.5 21M9 21l3.5-4.5L16 21M15.5 21l3.5-4.5L22.5 21"/></svg>',
+    match: '<svg viewBox="0 0 24 24" ' + PS + '><rect x="3.5" y="3.5" width="11" height="11"/><rect x="9.5" y="9.5" width="11" height="11" stroke-dasharray="2.5 2"/></svg>',
+    social: '<svg viewBox="0 0 24 24" ' + PS + '><path d="M8 7.5a6 6 0 0 1 8 0"/><path d="M5.2 4.6a10 10 0 0 1 13.6 0"/><path d="M12 10.5c-2.5 0-4.5 2-4.5 4.5 0 3.3 4.5 8 4.5 8s4.5-4.7 4.5-8c0-2.5-2-4.5-4.5-4.5z"/><circle cx="12" cy="15" r="1.6"/></svg>',
+    rank: '<svg viewBox="0 0 24 24" ' + PS + '><rect x="3" y="4" width="4" height="16"/><rect x="10" y="9" width="4" height="11"/><rect x="17" y="14" width="4" height="6"/></svg>',
+    priority: '<svg viewBox="0 0 24 24" ' + PS + '><path d="M3.5 4h17l-6.5 7.5v5.5l-4 2.5v-8z"/></svg>',
+    participate: '<svg viewBox="0 0 24 24" ' + PS + '><rect x="9" y="1.5" width="11" height="6" rx="1.2"/><path d="M12.5 7.5l-1.5 2.5"/><circle cx="6" cy="13" r="2"/><circle cx="12" cy="12.5" r="2"/><circle cx="18" cy="13" r="2"/><path d="M2.5 20a3.5 3.5 0 0 1 7 0M8.5 20a3.5 3.5 0 0 1 7 0M14.5 20a3.5 3.5 0 0 1 7 0"/></svg>',
+    toolkits: '<svg viewBox="0 0 24 24" ' + PS + '><path d="M9 8a3 3 0 0 1 6 0"/><rect x="3" y="8" width="18" height="12" rx="1"/><rect x="5.5" y="10.5" width="3.4" height="3.4"/><rect x="10.3" y="10.5" width="3.4" height="3.4"/><rect x="15.1" y="10.5" width="3.4" height="3.4"/><rect x="5.5" y="15.3" width="3.4" height="3.4"/><rect x="10.3" y="15.3" width="3.4" height="3.4"/><rect x="15.1" y="15.3" width="3.4" height="3.4"/></svg>',
+    design: '<svg viewBox="0 0 24 24" ' + PS + '><circle cx="12" cy="4" r="1.7"/><path d="M12 5.7L6 20M12 5.7L18 20M8.7 12h6.6M16.6 17.6l2.4 2.4"/></svg>',
+    program: '<svg viewBox="0 0 24 24" ' + PS + '><circle cx="12" cy="12" r="4.6"/><path d="M12 3.2v2.6M12 18.2v2.6M3.2 12h2.6M18.2 12h2.6M5.8 5.8l1.8 1.8M16.4 16.4l1.8 1.8M18.2 5.8l-1.8 1.8M7.6 16.4l-1.8 1.8"/></svg>',
+    assess: '<svg viewBox="0 0 24 24" ' + PS + '><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.2v3.8h-3.8"/><path d="M4.5 12a7.5 7.5 0 1 1 2.2 5.3" opacity=".45"/><path d="M4.5 20.8V17h3.8" opacity=".45"/></svg>'
+  };
+  var PSIZE = { seg: 28, match: 24, social: 26, rank: 22, priority: 24, participate: 28, toolkits: 26, design: 28, program: 24, assess: 26 };
   function buildPipeline() {
     var grid = document.getElementById("pipegrid");
     U.PIPE.forEach(function (blk) {
       var d = document.createElement("div");
       d.className = "pnode " + (blk.kind === "src" ? "src" : blk.kind === "out" ? "out" : blk.kind === "feed" ? "feed" : "tool");
-      d.innerHTML = '<span class="no">' + blk.no + '</span>' +
+      var picto = PICTOS[blk.id] ? '<span class="picto" style="width:' + PSIZE[blk.id] + 'px;height:' + PSIZE[blk.id] + 'px">' + PICTOS[blk.id] + "</span>" : "";
+      d.innerHTML = '<span class="no">' + blk.no + '</span>' + picto +
         '<div class="tt">' + (blk.kind === "feed" ? "assessment" : blk.kind === "out" ? "output" : "tool") + '</div>' +
         '<h3>' + blk.title + '</h3><p>' + blk.brief + '</p><canvas></canvas>';
       d.addEventListener("mouseenter", function () {
@@ -317,7 +335,7 @@
   function buildSeg(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="embedbox" id="segmap"><iframe src="/slum.html" title="NHA low-income communities map (slum.html)" loading="lazy"></iframe></div>' +
+    wrap.innerHTML = '<div class="embedbox" id="segmap"><iframe src="/slum.html?embed=1" title="NHA low-income communities map (slum.html)" loading="lazy"></iframe></div>' +
       '<div class="hint">full NHA slum map — communities, plan zones, red / pink AI roofs, congestion blobs (slum.html)</div>';
     body.appendChild(wrap);
   }
@@ -326,8 +344,8 @@
   function buildMatch(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html" title="Check cadastre — slum houses vs Overture buildings" loading="lazy"></iframe></div>' +
-      '<div class="hint">check-cadastre map — red slum houses vs Overture footprints · orange = potentially irregular buildings (checkcadaster.html)</div>';
+    wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html?embed=1" title="Formal matching — irregular houses vs cadastre buildings" loading="lazy"></iframe></div>' +
+      '<div class="hint">check-cadastre map — red irregular houses vs cadastre footprints · orange = potentially irregular buildings (checkcadaster.html)</div>';
     body.appendChild(wrap);
   }
 
@@ -347,6 +365,7 @@
     f.forEach(function (c, i) { c.rank = i + 1; });
     DATA.scoreMax = 100;
     DATA.totMax = max.tot;
+    DATA.domMax = max;
   }
 
   /* ---------------- 03 social map + ranking ---------------- */
@@ -357,135 +376,74 @@
       '<div class="embedbox" id="somap"><iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Neighborhood category intensity map (category_intensity_map.html)" loading="lazy"></iframe></div>' +
       '<div class="hint">neighborhood category intensity — event volumes per community category (category_intensity_map.html)</div>';
     body.appendChild(wrap);
+  }
 
-    /* ranking sub-block */
+  /* ---------------- 04 ranked irregular neighborhoods ---------------- */
+  function buildRank(body) {
     var rk = document.createElement("div");
     rk.className = "reveal";
-    rk.style.marginTop = "44px";
     rk.innerHTML =
-      '<div class="s-head" style="margin-bottom:18px"><div><div class="k"><span class="label">block 04</span><span class="label">social sensing output</span></div>' +
-      "<h2 class='sec' style='font-size:clamp(24px,3.4vw,44px)'>Ranked irregular neighborhoods</h2></div>" +
-      "<p class='lede' style='font-size:15px'>Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded rankings-only map — pick a ranking, its top 30 light up.</p></div>";
-
-    var rkMapDiv = document.createElement("div");
-    rkMapDiv.className = "embedbox";
-    rkMapDiv.id = "rkmap";
-    rkMapDiv.innerHTML = '<iframe src="/04_output/social_patterns/bangkok/rankings_map.html" title="Ranked communities — rankings_map.html, rankings only" loading="lazy"></iframe>';
-    rk.appendChild(rkMapDiv);
-    var rkTable = document.createElement("div");
-    rkTable.className = "tblwrap";
-    rkTable.innerHTML = "<table class='rank'><thead><tr><th>rank</th><th>community</th><th>district</th><th>pop</th><th>score</th><th style='width:120px'></th><th>ND</th><th>TD</th><th>CR</th><th>TI</th><th>SR</th><th>BH</th></tr></thead><tbody></tbody></table>";
-    rk.appendChild(rkTable);
+      '<div class="embedbox" id="rkmap"><iframe src="/04_output/social_patterns/bangkok/rankings_map.html" title="Ranked communities — rankings_map.html, rankings only" loading="lazy"></iframe></div>';
     body.appendChild(rk);
 
+    var rkTable = document.createElement("div");
+    rkTable.className = "tblwrap";
+    rkTable.innerHTML = "<table class='rank'><thead><tr><th>rank</th><th>community</th><th>district</th><th>pop</th></tr></thead><tbody></tbody></table>";
+    body.appendChild(rkTable);
+
+    var rkDet = document.createElement("div");
+    rkDet.id = "rkdet";
+    rkDet.style.display = "none";
+    body.appendChild(rkDet);
+
     var selRow = null;
-    var mode = "solo";
     var top = DATA.social.features.slice(0, 15);
     var tb = rkTable.querySelector("tbody");
     top.forEach(function (c) {
       var tr = document.createElement("tr");
-      tr.innerHTML = "<td class='rk'>#" + c.rank + "</td><td>" + (c.nm || "–") + "</td><td>" + (c.dn || "–") + "</td><td>" + (c.pop || "–") + "</td>" +
-        "<td style='color:var(--fg)'>" + c.score + "</td>" +
-        "<td><span class='bar' style='width:" + Math.round(c.score * 0.9) + "px'></span></td>" +
-        "<td>" + c.nd_ + "</td><td>" + c.td_ + "</td><td>" + c.cr + "</td><td>" + c.ti + "</td><td>" + c.sr + "</td><td>" + c.bh + "</td>";
-      tr.onclick = function () {
-        if (selRow) selRow.classList.remove("sel");
-        selRow = tr; tr.classList.add("sel");
-      };
+      tr.innerHTML = "<td class='rk'>#" + c.rank + "</td>" +
+        "<td class='nm2'>" + (c.nm || "–") + (c.ne ? " <span class='sep'>/</span> " + c.ne : "") + "</td>" +
+        "<td class='nm2'>" + (c.dn || "–") + (c.de ? " <span class='sep'>/</span> " + c.de : "") + "</td>" +
+        "<td>" + (c.pop || "–") + "</td>";
+      tr.onclick = function () { selectCommunity(c, tr); };
 
       tb.appendChild(tr);
     });
 
+    function selectCommunity(c, tr) {
+      if (selRow) selRow.classList.remove("sel");
+      selRow = tr; tr.classList.add("sel");
+
+      /* detail panel: full ranked-element data for the clicked neighborhood */
+      var doms = U.DOMAINS.map(function (d) {
+        var v = c[d.id] || 0;
+        var w = Math.round(v / (DATA.domMax[d.id] || 1) * 120);
+        return "<div class='drow'><span>" + d.name + "</span><b>" + v + "</b>" +
+          "<i class='bar' style='width:" + w + "px;background:linear-gradient(90deg," + d.color + "," + d.color + ")'></i></div>";
+      }).join("");
+      rkDet.innerHTML =
+        "<div class='k'><span class='label'>selected neighborhood</span><span class='label'>rank #" + c.rank + " · score " + c.score + "/100</span></div>" +
+        "<h3>" + (c.nm || "–") + (c.ne ? " <span class='en'>" + c.ne + "</span>" : "") + "</h3>" +
+        "<p class='meta'>" + (c.dn || "–") + (c.de ? " district · " + c.de : "") + " · population " + (c.pop || "–") +
+        " · " + c.tot + " events · " + c.nd + " documents</p>" +
+        "<div class='doms'>" + doms + "</div>";
+      rkDet.style.display = "block";
+
+      /* zoom the embedded rankings map to the neighborhood extents */
+      var fr = document.querySelector("#rkmap iframe");
+      if (fr && c.bb) fr.contentWindow.postMessage({ type: "uipZoom", bb: c.bb }, "*");
+      document.getElementById("rkmap").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
   }
 
-  /* ---------------- 04 priorities ---------------- */
+  /* ---------------- 05 priorities ---------------- */
   function buildPriority(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="mapctl" id="prctl"></div><div id="prmap"></div><div class="maplegend" id="prleg"></div><div class="hint">P1 = act now · P2 = program · P3 = monitor · P4 = watch — hover a district</div>';
+    wrap.innerHTML =
+      '<div class="embedbox" id="prmap"><iframe src="/04_output/social_patterns/bangkok/prioritiesmap.html" title="Combined priorities — prioritiesmap.html, mean of the four rankings" loading="lazy"></iframe></div>' +
+      '<div class="hint">combined priority = mean of the four rankings (deprivation · danger · flood · build-code) — hover a pin for the pulse rings, click a pin for the full neighborhood profile and its main problems</div>';
     body.appendChild(wrap);
-
-    // aggregate community scores per khet via raster hit test
-    var prMap = makeMap(wrap.querySelector("#prmap"), 0.62, DATA.khet.features.map(function (k) { return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: k.g } }; }));
-    var PRIO = [
-      { name: "P1 · act now", color: "#ff5a4e" },
-      { name: "P2 · program", color: "#ffb547" },
-      { name: "P3 · monitor", color: "#3fd2f0" },
-      { name: "P4 · watch", color: "#2fd5a5" }
-    ];
-
-    var khAgg = DATA.khet.features.map(function (k) { return { n: k.n, g: k.g, sum: 0, cnt: 0, top: [] }; });
-
-    prMap.onresize({
-      name: "priority",
-      draw: function (st) {
-        var ctx = st.canvas.getContext("2d");
-        ctx.clearRect(0, 0, st.w, st.h);
-        ctx.fillStyle = "#0d1216"; ctx.fillRect(0, 0, st.w, st.h);
-        if (st.base) st.base(ctx);
-
-        // id raster for khet assignment
-        var off = document.createElement("canvas");
-        off.width = Math.max(2, st.w >> 1); off.height = Math.max(2, st.h >> 1);
-        var octx = off.getContext("2d");
-        khAgg.forEach(function (k, ki) {
-          k.sum = 0; k.cnt = 0; k.top = [];
-          octx.fillStyle = "rgb(" + ((ki + 1) >> 8 & 255) + "," + ((ki + 1) & 255) + ",0)";
-          octx.strokeStyle = octx.fillStyle;
-          tracePoly({ type: "MultiPolygon", coordinates: k.g }, octx, function (c) {
-            var p = st.proj(c); return [p[0] / 2, p[1] / 2];
-          });
-        });
-        var px;
-        try { px = octx.getImageData(0, 0, off.width, off.height).data; } catch (e) { px = null; }
-        if (px) {
-          DATA.social.features.forEach(function (c) {
-            var p = st.proj(c.c);
-            var xi = Math.max(0, Math.min(off.width - 1, (p[0] / 2) | 0)), yi = Math.max(0, Math.min(off.height - 1, (p[1] / 2) | 0));
-            var o = (yi * off.width + xi) * 4;
-            var id = (px[o] << 8) + px[o + 1];
-            if (id > 0 && id <= khAgg.length) {
-              var k = khAgg[id - 1];
-              k.sum += c.score; k.cnt++;
-              if (k.top.length < 3 && c.score > 15) k.top.push(c);
-            }
-          });
-        }
-        // classify quantiles by mean
-        var means = khAgg.filter(function (k) { return k.cnt > 0; }).map(function (k) { return k.sum / k.cnt; }).sort(d3.ascending);
-        function q(v) {
-          if (v >= d3.quantile(means, .875)) return 0;
-          if (v >= d3.quantile(means, .625)) return 1;
-          if (v >= d3.quantile(means, .375)) return 2;
-          return 3;
-        }
-        st.svg.innerHTML = "";
-        var g = d3.select(st.svg).append("g");
-        khAgg.forEach(function (k, ki) {
-          if (!k.cnt) return;
-          var cls = q(k.sum / k.cnt);
-          ctx.fillStyle = PRIO[cls].color + "44";
-          ctx.strokeStyle = PRIO[cls].color;
-          ctx.lineWidth = 1;
-          tracePoly({ type: "MultiPolygon", coordinates: k.g }, ctx, st.proj);
-          g.append("path")
-            .attr("d", st.path({ type: "MultiPolygon", coordinates: k.g }))
-            .attr("fill", "transparent")
-            .style("cursor", "crosshair")
-            .on("mousemove", function (evt) {
-              var topTxt = k.top.length ? k.top.map(function (c) { return "#" + c.rank + " " + (c.nm || c.dn) + " (" + c.score + ")"; }).join("<br>") : "—";
-              showTip("<b>" + k.n + "</b> · " + PRIO[cls].name +
-                "<br>communities sensed: " + k.cnt +
-                "<br>mean score " + Math.round(k.sum / k.cnt) +
-                "<br>top irregular:<br><span style='color:#93a3ad'>" + topTxt + "</span>", evt.clientX, evt.clientY);
-            })
-            .on("mouseleave", hideTip);
-        });
-      }
-    });
-    wrap.querySelector("#prleg").innerHTML = PRIO.map(function (p) {
-      return "<div><span class='sw' style='background:" + p.color + "'></span>" + p.name + "</div>";
-    }).join("");
   }
 
   /* ---------------- 05 participation ---------------- */
@@ -504,8 +462,8 @@
         var d = document.createElement("div");
         d.className = "pcard";
         var tags = c.tags.map(function (t) {
-          var kit = /^KIT/.test(t), th = t === "TH";
-          return '<span class="tag' + (kit ? " kit" : th ? " th" : "") + '">' + t + "</span>";
+          var toolkit = /^(METRO POLICY )?TOOLKIT/.test(t), th = t === "TH";
+          return '<span class="tag' + (toolkit ? " toolkit" : th ? " th" : "") + '">' + t + "</span>";
         }).join("");
         d.innerHTML = '<div class="bg" style="background-image:url(' + (c.img || cl.img) + ')"></div>' +
           '<div class="in"><div style="display:flex;gap:8px;align-items:center"><span class="lvl">' + cl.n + '</span><span class="cls">' + clsName + "</span></div>" +
@@ -523,22 +481,43 @@
     body.appendChild(note);
   }
 
-  /* ---------------- 06 kits ---------------- */
-  function buildKits(body) {
+  /* scroll to a participation technique card by title; flash it */
+  function goToTechnique(title) {
+    var cards = document.querySelectorAll(".pcard");
+    for (var i = 0; i < cards.length; i++) {
+      var h = cards[i].querySelector("h4");
+      if (h && (h.textContent === title || h.textContent.indexOf(title) > -1)) {
+        cards[i].scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        cards[i].classList.remove("flash");
+        void cards[i].offsetWidth; /* restart transition */
+        cards[i].classList.add("flash");
+        setTimeout((function (c) { return function () { c.classList.remove("flash"); }; })(cards[i]), 2400);
+        return;
+      }
+    }
+  }
+
+  /* ---------------- 06 toolkits ---------------- */
+  function buildToolkits(body) {
     var snap = document.createElement("div");
-    snap.id = "kitsnap";
+    snap.id = "toolkitsnap";
     snap.className = "reveal";
     body.appendChild(snap);
     var detail = document.createElement("div");
-    detail.id = "kitdetail";
+    detail.id = "toolkitdetail";
     detail.className = "reveal";
     body.appendChild(detail);
+    detail.addEventListener("click", function (e) {
+      var el = e.target.closest(".teq-link");
+      if (!el) return;
+      goToTechnique(el.getAttribute("data-tech"));
+    });
 
     var sel = 0;
-    var cards = U.KITS.map(function (k, i) {
+    var cards = U.TOOLKITS.map(function (k, i) {
       var d = document.createElement("div");
       d.className = "kpick" + (i === 0 ? " sel" : "");
-      d.innerHTML = '<span class="no">KIT ' + k.n + "</span>" +
+      d.innerHTML = '<span class="no">METRO POLICY TOOLKIT ' + k.n + "</span>" +
         '<div class="im" style="background-image:url(' + k.img + ')"></div>' +
         '<div class="nm">' + k.name + (k.thai ? '<br><span style="font-size:11px;color:var(--muted)">' + k.thai + "</span>" : "") + "</div>";
       snap.appendChild(d);
@@ -548,15 +527,15 @@
     function select(i, scroll) {
       sel = i;
       cards.forEach(function (c, j) { c.classList.toggle("sel", j === i); });
-      var k = U.KITS[i];
+      var k = U.TOOLKITS[i];
       detail.innerHTML =
-        '<div class="kd-head"><h3><span style="color:var(--cyan)">KIT ' + k.n + "</span> · " + k.name + (k.thai ? ' <span style="font-size:13px;color:var(--muted)">' + k.thai + "</span>" : "") + "</h3>" +
+        '<div class="kd-head"><h3><span style="color:var(--cyan)">METRO POLICY TOOLKIT ' + k.n + "</span> · " + k.name + (k.thai ? ' <span style="font-size:13px;color:var(--muted)">' + k.thai + "</span>" : "") + "</h3>" +
         '<span class="label">selected by scroll</span></div>' +
         '<p style="font-size:13.5px;color:#c4ccd1">' + k.prec + "</p>" +
         '<div><h5 style="margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--amber);text-transform:uppercase">actions</h5><div class="acts">' +
         k.actions.map(function (a) { return '<span class="act">' + a + "</span>"; }).join("") + "</div></div>" +
-        '<div><h5 style="margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--cyan);text-transform:uppercase">participatory techniques</h5><div class="acts">' +
-        k.teqs.map(function (a) { return '<span class="act teq">' + a + "</span>"; }).join("") + "</div></div>" +
+        '<div><h5 style="margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--cyan);text-transform:uppercase">participatory techniques · click to locate</h5><div class="acts">' +
+        k.teqs.map(function (a) { return '<span class="act teq teq-link" data-tech="' + a + '" title="Show this technique in section 06">' + a + "</span>"; }).join("") + "</div></div>" +
         '<p class="label" style="color:var(--muted)">trigger · ' + k.trigger + "</p>" +
         '<p class="label">participation floor class ' + k.tmin + " → ceiling class " + k.tmax + "</p>";
       if (scroll) {
@@ -585,13 +564,13 @@
 
     /* flip card rows */
     var rows = document.createElement("div");
-    rows.className = "kitrows reveal";
-    U.KITS.forEach(function (k) {
+    rows.className = "toolkitrows reveal";
+    U.TOOLKITS.forEach(function (k) {
       var d = document.createElement("div");
       d.className = "kflip";
       d.innerHTML = '<div class="inner">' +
         '<div class="kface front"><div class="im" style="background-image:url(' + k.img + ')"></div><div class="in">' +
-        "<h4>KIT " + k.n + " · " + k.name + "</h4>" +
+        "<h4>METRO POLICY TOOLKIT " + k.n + " · " + k.name + "</h4>" +
         '<p class="prec">' + k.prec + '</p><span class="fliphint">hover / tap to flip → actions & techniques</span></div></div>' +
         '<div class="kface back"><h5>actions</h5><ul>' + k.actions.map(function (a) { return "<li>" + a + "</li>"; }).join("") + "</ul>" +
         "<h5>participatory techniques</h5><div class='teqs'>" + k.teqs.map(function (t) { return "<span class='teq'>" + t + "</span>"; }).join("") + "</div></div>" +
@@ -607,22 +586,22 @@
     var bz = document.createElement("div");
     bz.id = "bezier";
     bz.className = "reveal";
-    bz.innerHTML = '<svg></svg><span class="hint">kits ⇢ participation classes · solid = floor · dashed = ceiling · hover to trace</span>';
+    bz.innerHTML = '<svg></svg><span class="hint">metro policy toolkits ⇢ participation classes · solid = floor · dashed = ceiling · hover to trace</span>';
     body.appendChild(bz);
     function drawBezier() {
       var svg = bz.querySelector("svg");
       var W = 1000, H = 460;
       svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      var kitX = 190, clsX = 810;
-      var kitY = function (i) { return 70 + i * 66; };
+      var toolkitX = 190, clsX = 810;
+      var toolkitY = function (i) { return 70 + i * 66; };
       var clsY = function (i) { return 60 + i * 70; };
       var g = d3.select(svg);
       g.selectAll("*").remove();
       var links = g.append("g");
-      U.KITS.forEach(function (k, i) {
+      U.TOOLKITS.forEach(function (k, i) {
         [k.tmin, k.tmax].forEach(function (cl, ci) {
           links.append("path")
-            .attr("d", "M" + (kitX + 60) + " " + kitY(i) + " C " + (kitX + 260) + " " + kitY(i) + ", " + (clsX - 260) + " " + clsY(cl - 1) + ", " + (clsX - 60) + " " + clsY(cl - 1))
+            .attr("d", "M" + (toolkitX + 60) + " " + toolkitY(i) + " C " + (toolkitX + 260) + " " + toolkitY(i) + ", " + (clsX - 260) + " " + clsY(cl - 1) + ", " + (clsX - 60) + " " + clsY(cl - 1))
             .attr("stroke", ["#3fd2f0", "#9a7bff"][ci])
             .attr("stroke-width", ci ? 1.4 : 2.2)
             .attr("stroke-dasharray", ci ? "5 5" : "none")
@@ -631,14 +610,14 @@
             .attr("class", "ln k" + i + " c" + cl);
         });
       });
-      var kn = g.selectAll("g.kit").data(U.KITS).enter().append("g")
-        .attr("transform", function (k, i) { return "translate(" + kitX + "," + kitY(i) + ")"; })
+      var kn = g.selectAll("g.toolkit").data(U.TOOLKITS).enter().append("g")
+        .attr("transform", function (k, i) { return "translate(" + toolkitX + "," + toolkitY(i) + ")"; })
         .style("cursor", "pointer");
       kn.append("rect").attr("x", -60).attr("y", -16).attr("width", 120).attr("height", 32)
         .attr("fill", "#131a1f").attr("stroke", "#3fd2f0");
       kn.append("text").attr("text-anchor", "middle").attr("dy", 4)
         .attr("fill", "#e8eef2").attr("style", "font:600 11px 'IBM Plex Mono',monospace")
-        .text(function (k) { return "KIT " + k.n; });
+        .text(function (k) { return "METRO POLICY TOOLKIT " + k.n; });
       var cn = g.selectAll("g.cls").data(U.PART_CLASSES).enter().append("g")
         .attr("transform", function (c, i) { return "translate(" + clsX + "," + clsY(i) + ")"; })
         .style("cursor", "pointer");
@@ -674,17 +653,17 @@
     var c0 = top.c;
     var d = 0.004;
     var INTV = [
-      { l: "fire", name: "Fire lane", color: "#ff5a4e", img: "img/kits/kit2-roofs.jpg",
-        desc: "KIT 2 action: a 6 m fire lane cut through the densest fabric, voted by residents (works notice + layout vote). Connects the two existing temple accesses; drainage and water points run along it.",
+      { l: "fire", name: "Fire lane", color: "#ff5a4e", img: "img/toolkits/toolkit2-roofs.jpg",
+        desc: "METRO POLICY TOOLKIT 2 action: a 6 m fire lane cut through the densest fabric, voted by residents (works notice + layout vote). Connects the two existing temple accesses; drainage and water points run along it.",
         geom: { type: "LineString", coordinates: [[c0[0] - d, c0[1] + d * .7], [c0[0] - d * .3, c0[1] + d * .1], [c0[0] + d * .2, c0[1] - d * .2], [c0[0] + d, c0[1] - d * .6]] } },
-      { l: "plots", name: "Re-blocked plots", color: "#3fd2f0", img: "img/kits/kit1-seggoogle.jpg",
+      { l: "plots", name: "Re-blocked plots", color: "#3fd2f0", img: "img/toolkits/toolkit1-seggoogle.jpg",
         desc: "Re-blocking: plots re-laid around the fire lane so every unit keeps its area and gains road access. Housing stays resident-built; the community committee co-decides the works sequence.",
         geom: { type: "MultiPolygon", coordinates: [[[[c0[0] - d * .9, c0[1] - d * .9], [c0[0] - d * .2, c0[1] - d * .8], [c0[0] - d * .3, c0[1] - d * .3], [c0[0] - d, c0[1] - d * .4]]]] } },
-      { l: "common", name: "Common-use area", color: "#2fd5a5", img: "img/kits/kit6-heat.webp",
-        desc: "On vacated land after re-blocking: a common-use area owned by the community cooperative (KIT 6 dividend logic) — playground, meeting hall, and the revenue that funds maintenance.",
+      { l: "common", name: "Common-use area", color: "#2fd5a5", img: "img/toolkits/toolkit6-heat.webp",
+        desc: "On vacated land after re-blocking: a common-use area owned by the community cooperative (METRO POLICY TOOLKIT 6 dividend logic) — playground, meeting hall, and the revenue that funds maintenance.",
         geom: { type: "MultiPolygon", coordinates: [[[[c0[0] + d * .3, c0[1] + d * .2], [c0[0] + d, c0[1] + d * .5], [c0[0] + d * .7, c0[1] + d], [c0[0], c0[1] + d * .7]]]] } },
-      { l: "market", name: "Market zone", color: "#ffb547", img: "img/kits/kit5-density.webp",
-        desc: "KIT 5 action: vending permits + market days along the main road edge. The street-economy signal that ranked this area becomes taxable, serviced activity — vendors co-manage the rules.",
+      { l: "market", name: "Market zone", color: "#ffb547", img: "img/toolkits/toolkit5-density.webp",
+        desc: "METRO POLICY TOOLKIT 5 action: vending permits + market days along the main road edge. The street-economy signal that ranked this area becomes taxable, serviced activity — vendors co-manage the rules.",
         geom: { type: "MultiPolygon", coordinates: [[[[c0[0] - d, c0[1]], [c0[0] - d * .4, c0[1] - d * .3], [c0[0] + d * .1, c0[1] + d * .1], [c0[0] - d * .5, c0[1] + d * .4]]]] } },
     ];
     var curLayer = "all";
@@ -790,43 +769,50 @@
 
   /* ---------------- sections wiring ---------------- */
   function buildSections() {
-    var seg = sectionEl("seg", "01", "Satellite segmentation tool",
-      "Quarterly THEOS-2 epochs are segmented rooftop by rooftop; morphology accepts settlement-candidate blobs. Hover roofs and hulls — every polygon carries its evidence.",
+    var seg = sectionEl("seg", "01", "Satellite segmentation",
+      "All 1,588 registered low-income communities as red dots over plan zones and AI roofs. Hover a dot for households and people; zoom a region — the fabric THEOS-2 measures rooftop by rooftop.",
       "tool · imagery → candidates");
     buildSeg(seg);
     addVid(seg, "seg");
+    addVid(seg, "seg2");
 
-    var mt = sectionEl("match", "02", "Match to regular properties",
-      "Candidates meet the formal city: parcels, comprehensive-plan zones, regulation. Move the sliders — the irregularity rule is live, and every mismatch is flagged with its evidence.",
-      "tool · candidates → irregular blocks");
+    var mt = sectionEl("match", "02", "Formal matching",
+      "Segmented blocks are checked against the official cadastre and zoning — the first filter layer for irregular neighborhoods.",
+      "tool · segmented blocks → irregular neighborhoods");
     buildMatch(mt);
     addVid(mt, "match");
 
-    var so = sectionEl("social", "03–04", "Social sensing tool",
-      "A datalake updated daily — news, complaints, cameras, traffic — filtered into ten domains, quality-checked, and scored per community. Below: the cumulative ranking of irregular neighborhoods, solo or bivariate.",
-      "tool · irregular blocks → ranked");
+    var so = sectionEl("social", "03", "Social sensing",
+      "A datalake updated daily — news, complaints, cameras, traffic — filtered into ten domains, quality-checked, and scored per community.",
+      "tool · daily feeds → community scores");
     buildSocial(so);
     addVid(so, "social");
 
+    var rk = sectionEl("rank", "04", "Ranked irregular neighborhoods",
+      "Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded rankings-only map: pick a ranking, its top 30 light up.",
+      "tool · scores → ranked irregular blocks");
+    buildRank(rk);
+    addVid(rk, "rank");
+
     var pr = sectionEl("priority", "05", "Priorities & selection of areas",
-      "Severity from the ranking, feasibility from land status and capacity: districts take priority classes P1–P4. Selected areas proceed to participation and a governance kit; the rest keep their trend line.",
+      "The four rankings combined into one priority score — the mean position across deprivation, dangerous events, flood exposure and build-code risk. The combined top 30 carry the selection weight; hover a pin for the pulse rings, click for the full neighborhood profile and its main problems.",
       "tool · ranked → selected areas");
     buildPriority(pr);
     addVid(pr, "priority");
 
     var pa = sectionEl("participate", "06", "Selection of participation techniques",
-      "The card deck behind every intervention: techniques from a 49-case review, grouped by Arnstein/IAP2 class, each group on its own class imagery. Carousels per class; KIT tags bind techniques to kits.",
+      "The card deck behind every intervention: techniques from a 49-case review, grouped by Arnstein/IAP2 class, each group on its own class imagery. Carousels per class; METRO POLICY TOOLKIT tags bind techniques to metro policy toolkits.",
       "tool · techniques per area");
     buildParticipate(pa);
 
-    var ki = sectionEl("kits", "07", "Selection of a kit of urban governance",
-      "Scroll the picker — the centered kit is selected. Below: all six kits as flip cards (front: precedent and image; back: action list + participatory techniques), and the interactive scheme wiring kits to participation classes.",
-      "tool · one kit per intervention");
-    buildKits(ki);
+    var ki = sectionEl("toolkits", "07", "Metro policy toolkits",
+      "Scroll the picker — the centered metro policy toolkit is selected. Below: all six metro policy toolkits as flip cards (front: precedent and image; back: action list + participatory techniques), and the interactive scheme wiring metro policy toolkits to participation classes.",
+      "tool · one metro policy toolkit per intervention");
+    buildToolkits(ki);
 
     var de = sectionEl("design", "08→", "Design & approval of urban intervention",
-      "The selected kit becomes a strategy: layers of change on the map of the #1 ranked area, each location connected to a component card that flips to its description. The walkthrough video shows the full journey; approval passes through the participation gate.",
-      "tool · kit → approved strategy");
+      "The selected metro policy toolkit becomes a strategy: layers of change on the map of the #1 ranked area, each location connected to a component card that flips to its description. The walkthrough video shows the full journey; approval passes through the participation gate.",
+      "tool · metro policy toolkit → approved strategy");
     buildDesign(de);
   }
 
@@ -838,10 +824,12 @@
     var nav = document.createElement("nav");
     nav.id = "pipenav";
     nav.setAttribute("aria-label", "pipeline minimap");
+    var nameEl = document.createElement("span");
+    nameEl.id = "pipenavname";
     var nodes = U.PIPE.map(function (blk) {
       var b = document.createElement("a");
       b.href = "#sec-" + blk.sec;
-      b.innerHTML = "<i>" + blk.no + "</i>" + blk.title;
+      b.innerHTML = "<i>" + blk.no + "</i>" + '<span class="pic">' + PICTOS[blk.id] + "</span>" + '<span class="tip">' + blk.title + "</span>";
       b.addEventListener("click", function (e) {
         e.preventDefault();
         var sec = document.getElementById("sec-" + blk.sec);
@@ -854,12 +842,21 @@
         }, 800);
       });
       nav.appendChild(b);
-      return { el: b, sec: blk.sec };
+      b.setAttribute("data-name", blk.no + " · " + blk.title);
+      return { el: b, sec: blk.sec, blk: blk };
     });
-    /* several pipeline blocks share one section (03+04+↺ → social, 08+→ → design);
-       only the first block of each section takes the red highlight */
-    var firstOfSec = {};
-    nodes.forEach(function (n) { n.first = !firstOfSec[n.sec]; firstOfSec[n.sec] = true; });
+    /* hovered block name shows in a strip below the icons (delegated, event-flake-proof) */
+    nav.appendChild(nameEl);
+    function nameFromEvent(e) {
+      var a = e.target && e.target.closest ? e.target.closest("a") : null;
+      nameEl.textContent = a ? a.getAttribute("data-name") : "";
+    }
+    ["mousemove", "mouseover", "mouseenter"].forEach(function (ev) {
+      nav.addEventListener(ev, nameFromEvent);
+    });
+    nav.addEventListener("mouseleave", function () { nameEl.textContent = ""; });
+    /* some pipeline blocks share one section (↺ → social, → → design);
+       each block anchors at the section its sec id names */
     document.body.appendChild(nav);
 
     var shown = false;
@@ -869,14 +866,16 @@
         shown = true;
         nav.classList.add("on");
       }
-      var cur = null, bestTop = -Infinity;
-      U.PIPE.forEach(function (blk) {
-        var el = document.getElementById("sec-" + blk.sec);
+      /* block-level current: the red highlight steps block by block
+         as each block's own section crosses mid-viewport */
+      var curNode = null, bestTop = -Infinity;
+      nodes.forEach(function (n) {
+        var el = document.getElementById("sec-" + n.blk.sec);
         if (!el) return;
         var t = el.getBoundingClientRect().top;
-        if (t <= window.innerHeight * 0.5 && t > bestTop) { bestTop = t; cur = blk.sec; }
+        if (t <= window.innerHeight * 0.5 && t > bestTop) { bestTop = t; curNode = n; }
       });
-      nodes.forEach(function (n) { n.el.classList.toggle("here", n.sec === cur && n.first); });
+      nodes.forEach(function (n) { n.el.classList.toggle("here", n === curNode); });
     }
     /* embedded webviews here do not always deliver window scroll events (same quirk kickMaps works around) */
     ["scroll", "mousewheel", "wheel", "mousemove", "touchstart", "pointerdown", "keydown"].forEach(function (ev) {
