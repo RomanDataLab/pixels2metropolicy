@@ -57,9 +57,25 @@ def main() -> int:
 
     poly = gpd.read_parquet(GAZETTEER_DIR / "slum_polygons.parquet")
     poly["cmt_id"] = poly["CMT_ID"].astype(str)
-    poly = poly.to_crs(32647)
-    ctr = poly.geometry.representative_point().to_crs(4326)
+    ctr_src = poly.to_crs(32647)
+    ctr = ctr_src.geometry.representative_point().to_crs(4326)
     xy = {c: (p.y, p.x) for c, p in zip(poly["cmt_id"], ctr)}
+
+    def _round5(c):
+        if isinstance(c[0], (int, float)):
+            return [round(c[0], 5), round(c[1], 5)]
+        return [_round5(x) for x in c]
+
+    feats = []
+    for cid, geom in zip(poly["cmt_id"], poly.geometry.to_crs(4326)):
+        if geom is None or geom.is_empty:
+            continue
+        gj = json.loads(json.dumps(geom.__geo_interface__))
+        if gj.get("coordinates"):
+            gj["coordinates"] = _round5(gj["coordinates"])
+        feats.append({"type": "Feature", "id": cid, "geometry": gj})
+    polys_geojson = {"type": "FeatureCollection", "features": feats}
+    print("community outlines:", len(feats))
 
     def code_vlist(cid: str) -> list[str]:
         if cid not in cr.index:
@@ -90,6 +106,7 @@ def main() -> int:
 
     html = (HTML
             .replace("__RANKSETS__", json.dumps(rank_sets, ensure_ascii=False))
+            .replace("__POLYS__", json.dumps(polys_geojson, ensure_ascii=False, separators=(",", ":")))
             .replace("__TITLE__", "social-economic sensing of irregular neighborhoods — rankings"))
     (SOCIAL_OUT / "rankings_map.html").write_text(html, encoding="utf-8")
     print(f"output: {SOCIAL_OUT}\\rankings_map.html")
@@ -124,11 +141,13 @@ HTML = """<!DOCTYPE html>
   <div id="rankdesc"></div>
   <div class="scale" id="scale"></div>
   <div class="note">Pin color = rank: #1 darkest red &rarr; #30 lightest.
-  Click a pin for name and value. 92-day sensing window.</div>
+  Click a pin for name and value. 92-day sensing window.<br>
+  Outlines = irregular neighborhoods: colored = current top 30, white = rest (50% transparent).</div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const RANKSETS = __RANKSETS__;
+const POLYS = __POLYS__;
 const BKK = L.latLngBounds([13.47, 100.28], [14.02, 100.98]);
 const map = L.map('map', {zoomControl: true}).fitBounds(BKK, {animate: false});
 (function refit(){
@@ -142,6 +161,10 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_D
   {maxZoom: 19, maxNativeZoom: 16, opacity: 0.8, attribution: ''}).addTo(map);
 
 let pinLayer = null;
+const polyLayer = L.geoJSON(POLYS, {
+  style: () => ({color: '#fff', weight: 1.5, opacity: 0.5, fill: false}),
+  interactive: false
+}).addTo(map);
 function pinColor(rank){
   const t = Math.min(1, (rank - 1) / 29);
   return `hsl(8,78%,${Math.round(22 + 40 * t)}%)`;   // rank 1 dark red -> rank 30 light
@@ -169,6 +192,10 @@ function showRank(key){
           `<div style="margin-top:3px;color:#666">community-level proxy — not per-building compliance</div></div>`
         : ''));
   })).addTo(map);
+  const byId = Object.fromEntries(set.items.map(it => [it.id, it.rank]));
+  polyLayer.setStyle(f => byId[f.id] !== undefined
+    ? {color: pinColor(byId[f.id]), weight: 1.5, opacity: 0.5, fill: false}
+    : {color: '#fff', weight: 1.5, opacity: 0.5, fill: false});
   map.fitBounds(L.latLngBounds(set.items.map(it => [it.lat, it.lon])).pad(0.15));
 }
 const box = document.getElementById('rankopts');
