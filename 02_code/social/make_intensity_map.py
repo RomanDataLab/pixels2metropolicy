@@ -406,26 +406,25 @@ HTML = """<!DOCTYPE html>
 <title>social-economic sensing of irregular neighborhoods — neighborhood category intensity</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-  body{margin:0;font-family:sans-serif}
-  .leaflet-tile-pane{filter:grayscale(1)}
-  .ranknum{background:transparent;font:700 11px sans-serif;color:#1b5e20;text-shadow:0 0 3px #fff;}   /* grey-tone OSM background */
+  body{margin:0;font-family:sans-serif;background:#0d1216}
+  .ranknum{background:transparent;font:700 11px sans-serif;color:#ffca28;text-shadow:0 0 3px #000;}   /* dark basemap */
   #map{position:absolute;top:0;bottom:0;right:0;left:0}
-  .panel{position:absolute;top:10px;right:10px;z-index:1000;background:rgba(255,255,255,0.70);
-         padding:10px 14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.3);max-width:320px;
+  .panel{position:absolute;top:10px;right:10px;z-index:1000;background:rgba(13,18,22,0.88);
+         color:#cfd8dd;padding:10px 14px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.5);max-width:320px;
          max-height:92vh;overflow-y:auto}
-  h1{font-size:15px;margin:0 0 8px}
-  .note{font-size:11px;color:#555;margin-top:6px}
+  h1{font-size:15px;margin:0 0 8px;color:#fff}
+  .note{font-size:11px;color:#8a979e;margin-top:6px}
   label{display:block;font-size:13px;margin-top:4px}
   .cats label{display:flex;align-items:center;gap:8px;font-size:13px;padding:2px 0;cursor:pointer}
-  .sw{width:16px;height:12px;border:1px solid #666;flex:none}
+  .sw{width:16px;height:12px;border:1px solid #8899a0;flex:none}
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div class="panel" id="legend">
   <button id="legendbtn" type="button"
-    style="position:absolute;top:6px;right:8px;border:1px solid #888;border-radius:5px;
-           background:#eee;cursor:pointer;font-size:12px;padding:1px 7px">&#9650;</button>
+    style="position:absolute;top:6px;right:8px;border:1px solid #55606a;border-radius:5px;
+           background:#1d2830;color:#cfd8dd;cursor:pointer;font-size:12px;padding:1px 7px">&#9650;</button>
   <div id="legendbody">
   <h1>social-economic sensing of irregular neighborhoods — events per neighborhood (ชุมชน)</h1>
   <div class="cats" id="cats"></div>
@@ -437,25 +436,25 @@ HTML = """<!DOCTYPE html>
   <label><input type="checkbox" id="zoning"/> Zoning of Bangkok (ผังเมืองรวม กทม.)</label>
   <label><input type="checkbox" id="publands"/> irregular neighborhoods on public land / infrastructure — red 50% (<span id="npub"></span>)</label>
   <div id="zonelegend" style="display:none;max-height:40vh;overflow:auto;margin-top:8px;
-       border-top:1px solid #ccc;padding-top:6px;font-size:12px"></div>
+       border-top:1px solid #33424a;padding-top:6px;font-size:12px"></div>
   <button id="rankbtn" type="button"
     style="margin-top:8px;width:100%;padding:4px 8px;border:1px solid #1b5e20;border-radius:6px;
            background:#2e7d32;color:#fff;cursor:pointer;font-size:13px">Rankings (top 30)</button>
   <div id="rankpanel" style="display:none;margin-top:8px;
-       border-top:1px solid #ccc;padding-top:6px;font-size:12px">
-    <div style="color:#555">pick a ranking — its top 30 light up on the map</div>
+       border-top:1px solid #33424a;padding-top:6px;font-size:12px">
+    <div style="color:#8a979e">pick a ranking — its top 30 light up on the map</div>
     <label style="display:block;margin-top:4px;cursor:pointer"><input type="checkbox" id="rankonly" checked/>
       rankings-only view (hide event choropleth)</label>
     <div id="rankopts" style="margin-top:4px"></div>
-    <div id="rankdesc" style="display:none;margin-top:6px;border-top:1px solid #ccc;
-         padding-top:5px;color:#333;line-height:1.4"></div>
-    <div style="color:#555;margin-top:4px">click a highlighted neighborhood for its value</div>
+    <div id="rankdesc" style="display:none;margin-top:6px;border-top:1px solid #33424a;
+         padding-top:5px;color:#b9c6cc;line-height:1.4"></div>
+    <div style="color:#8a979e;margin-top:4px">click a highlighted neighborhood for its value</div>
   </div>
   <button id="methbtn" type="button"
     style="margin-top:8px;width:100%;padding:4px 8px;border:1px solid #2b6cb0;border-radius:6px;
            background:#2b6cb0;color:#fff;cursor:pointer;font-size:13px">Methodology</button>
   <div id="meth" style="display:none;max-height:56vh;overflow:auto;margin-top:8px;
-       border-top:1px solid #ccc;padding-top:6px;font-size:12px;line-height:1.45;text-align:left">
+       border-top:1px solid #33424a;padding-top:6px;font-size:12px;line-height:1.45;text-align:left">
 __METHOD__
   </div>
   <div class="note">Light-to-dark shade = more events; lightest shade = no events.
