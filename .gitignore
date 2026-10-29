@@ -1,38 +1,51 @@
 desktop.ini
+Thumbs.db
 *.part
 __pycache__/
 .zcode/
-01_data/
-04_output/
-05_models/
-05_scratch/
-theos_block/
-*.part
 *.pdf
 *.parquet
 *.pptx
 *.docx
 *.xlsx
 
-# >100MB — exceeds GitHub hard limit, cannot be pushed
-kla/Pixels_to_Metro_Policy_walkthrough_v8.mp4
-kla/final_html/Urban_Intelligence_Platform_landing/web/media/walkthrough.mp4
-video_thailand_disasters/bin/ffmpeg.exe
-video_thailand_disasters/bin/ffprobe.exe
-video_thailand_disasters/dl/0sxHHPnSIsI.mp4
-video_thailand_disasters/dl/5DjO6OXkW6k.mp4
-video_thailand_disasters/dl/hcBfFghrBuw.mp4
-video_thailand_disasters/dl/yKj538hcPGU.mp4
+# ---- not part of the deployed frontend (kept locally, untracked) ----
+01_data/
+02_code/
+05_models/
+05_scratch/
+labeling/*
+!labeling/qgis_project/
+labeling/qgis_project/*
+# fetched by checkcadaster.html
+!labeling/qgis_project/checkcadaster_sites.json
+october_pres/
+video_thailand_disasters/
+kla/
+judge2.md
+graph.md
+
+# theos_block: only the two page background images are served
+theos_block/*
+!theos_block/theos_block.png
+!theos_block/theos_native.png
+
+# 04_output: only the three map pages iframed by fin_part2 are served
+04_output/*
+!04_output/social_patterns/
+04_output/social_patterns/*
+!04_output/social_patterns/bangkok/
+04_output/social_patterns/bangkok/*
+!04_output/social_patterns/bangkok/category_intensity_map.html
+!04_output/social_patterns/bangkok/rankings_map.html
+!04_output/social_patterns/bangkok/prioritiesmap.html
 
 # transient GeoPackage WAL sidecars
 *.gpkg-shm
 *.gpkg-wal
-# >100MB video downloads, exceeds GitHub hard limit
-video_thailand_disasters/uipdl/
 
 # >100MB video, exceeds GitHub hard limit
 fin_part2/media/walkthrough.mp4
-labeling/qgis_project/bkk_parcels_2.geojson
 
-# geojsons live in R2 (02_code/geo/upload_geojsons_r2.py); repo keeps none
+# geojsons live in R2; repo keeps none
 *.geojson
