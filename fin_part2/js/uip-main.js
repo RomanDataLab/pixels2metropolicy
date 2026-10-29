@@ -391,7 +391,7 @@
 
     var rkTable = document.createElement("div");
     rkTable.className = "tblwrap";
-    rkTable.innerHTML = "<table class='rank'><thead><tr><th>rank</th><th>community</th><th>district</th><th>pop</th></tr></thead><tbody></tbody></table>";
+    rkTable.innerHTML = "<table class='rank'><thead><tr><th>rank</th><th>community</th><th>district</th><th>pop</th><th class='valh'>value</th></tr></thead><tbody></tbody></table>";
     body.appendChild(rkTable);
 
     var rkDet = document.createElement("div");
@@ -400,17 +400,66 @@
     body.appendChild(rkDet);
 
     var selRow = null;
-    var top = DATA.social.features.slice(0, 15);
     var tb = rkTable.querySelector("tbody");
-    top.forEach(function (c) {
-      var tr = document.createElement("tr");
-      tr.innerHTML = "<td class='rk'>#" + c.rank + "</td>" +
-        "<td class='nm2'>" + (c.nm || "–") + (c.ne ? " <span class='sep'>/</span> " + c.ne : "") + "</td>" +
-        "<td class='nm2'>" + (c.dn || "–") + (c.de ? " <span class='sep'>/</span> " + c.de : "") + "</td>" +
-        "<td>" + (c.pop || "–") + "</td>";
-      tr.onclick = function () { selectCommunity(c, tr); };
+    var valHead = rkTable.querySelector("th.valh");
 
-      tb.appendChild(tr);
+    /* ranking item id (cmt_id) -> social feature; name match first, nearest coords fallback */
+    var MATCH = {};
+    function matchFeat(it) {
+      if (!(it.id in MATCH)) {
+        var best = null, bd = Infinity;
+        var en = (it.en || "").replace(/\s+$/, "");
+        DATA.social.features.forEach(function (f) {
+          if (!f.c) return;
+          var d = Math.hypot(f.c[0] - it.lon, f.c[1] - it.lat);
+          if (en && f.ne && (f.ne === en || f.ne.indexOf(en) === 0 || en.indexOf(f.ne) === 0)) d -= 1;
+          if (d < bd) { bd = d; best = f; }
+        });
+        MATCH[it.id] = best || null;
+      }
+      return MATCH[it.id];
+    }
+
+    function rowFor(o) {   /* o: {rank, feat, it} — it present for ranking-driven rows */
+      var f = o.feat, it = o.it;
+      var tr = document.createElement("tr");
+      if (it) tr.setAttribute("data-id", it.id);
+      tr.innerHTML = "<td class='rk'>#" + o.rank + "</td>" +
+        "<td class='nm2'>" + (f ? (f.nm || "–") + (f.ne ? " <span class='sep'>/</span> " + f.ne : "") : (it ? (it.th || it.en || "–") : "–")) + "</td>" +
+        "<td class='nm2'>" + (f ? (f.dn || "–") + (f.de ? " <span class='sep'>/</span> " + f.de : "") : (it ? it.dname || "–" : "–")) + "</td>" +
+        "<td>" + (f && f.pop ? f.pop : "–") + "</td>" +
+        "<td>" + (it ? it.v : (f ? f.score : "–")) + "</td>";
+      if (f) tr.onclick = function () { selectCommunity(f, tr); };
+      return tr;
+    }
+
+    /* initial table: top 15 by composite score, until the map posts its first ranking */
+    DATA.social.features.slice(0, 15).forEach(function (c) {
+      tb.appendChild(rowFor({ rank: c.rank, feat: c }));
+    });
+
+    /* table follows the ranking picked inside the embedded map (uipRank);
+       clicking a pin on the map flags the matching row with a red overlay (uipPin) */
+    window.addEventListener("message", function (e) {
+      var d = e.data;
+      if (!d) return;
+      if (d.type === "uipRank" && d.items) {
+        valHead.textContent = "value · " + (d.label || d.key);
+        tb.innerHTML = "";
+        selRow = null;
+        rkDet.style.display = "none";
+        d.items.forEach(function (it) {
+          tb.appendChild(rowFor({ rank: it.rank, feat: matchFeat(it), it: it }));
+        });
+      } else if (d.type === "uipPin") {
+        var prev = tb.querySelector("tr.pinhit");
+        if (prev) prev.classList.remove("pinhit");
+        var row = d.id != null ? tb.querySelector('tr[data-id="' + d.id + '"]') : null;
+        if (row) {
+          row.classList.add("pinhit");
+          row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
     });
 
     function selectCommunity(c, tr) {
@@ -852,7 +901,7 @@
     addVid(seg, "seg3");
 
     var mt = sectionEl("match", "02", "Formal matching",
-      "Segmented candidates are checked against Overture building footprints standing in for the cadastral registers — about 85% of roofs drop out as formal, the ~15% that pop out are flagged potentially irregular; a live connection to the official Thai cadastre is proposed.",
+      "Formal matching checks every settlement candidate against the official city registers — cadastral parcels, comprehensive-plan zones, municipal regulation. A candidate that conforms to the plan and sits on registered land drops out as regular; one that violates the plan, sits on unregistered land or lacks any record is flagged as an irregular block.",
       "tool · segmented blocks → irregular neighborhoods");
     buildMatch(mt);
     addVid(mt, "match");
