@@ -34,7 +34,7 @@ h1,h2,h3,h4{margin:0;font-family:var(--display);font-stretch:112%;text-wrap:bala
 #hero h1{font-size:clamp(30px,5vw,63px);font-weight:820;font-stretch:120%;text-transform:uppercase;letter-spacing:-.015em}
 #hero h1 span{display:block}
 #hero h1 span+span{color:var(--violet)}
-#hero .sub{margin-top:16px;font-size:clamp(15px,1.3vw,18px);color:#c9d2d8;max-width:66ch}
+#hero .sub{margin-top:16px;font-size:clamp(15px,1.3vw,18px);color:#c9d2d8;max-width:none}
 #hero .kicker{display:flex;gap:14px;margin-bottom:18px}
 
 /* pipeline */
