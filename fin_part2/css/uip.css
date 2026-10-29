@@ -295,3 +295,6 @@ table.rank td.nm2 .sep{color:var(--muted);font-size:11px;padding:0 1px}
 /* toolkit grid: 3x2 on desktop, 2 cols tablet, 1 col phone */
 @media (max-width:980px){.toolkitrows{grid-template-columns:repeat(2,1fr)}.kflip{height:410px}.kface.front .im{height:195px}}
 @media (max-width:640px){.toolkitrows{grid-template-columns:1fr;gap:14px}.kflip{height:400px}.kface.front .im{height:185px}}
+/* participation technique names in the bezier scheme: bold + brighten on hover */
+#bezier text.teqline{font:400 9.5px 'IBM Plex Mono',monospace;fill:#b9c6cc;cursor:pointer;transition:fill .15s}
+#bezier text.teqline:hover{font:700 9.5px 'IBM Plex Mono',monospace;fill:#e8eef2}

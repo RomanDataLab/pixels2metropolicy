@@ -682,9 +682,8 @@
       groups.forEach(function (grp) {
         grp.cards.forEach(function (c) {
           var tn = g.append("text")
+            .attr("class", "teqline")
             .attr("x", clsX - 70).attr("y", grp.cardY[c.t] + 3.5)
-            .attr("fill", "#b9c6cc").attr("style", "font:400 9.5px 'IBM Plex Mono',monospace")
-            .style("cursor", "pointer")
             .text(c.t);
           tnodes.push({ el: tn, t: c.t });
         });
