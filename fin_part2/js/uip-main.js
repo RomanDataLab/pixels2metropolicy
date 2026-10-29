@@ -844,7 +844,7 @@
   /* ---------------- sections wiring ---------------- */
   function buildSections() {
     var seg = sectionEl("seg", "01", "Satellite segmentation",
-      "TerraLab GeoAI in QGIS finishes what NHA centers teach via SAM, U-Net and YOLO tries; roofs hugging grey infrastructure blob into fabric the register misses.",
+      "Satellite segmentation draws a boundary around every rooftop; around officially listed low-income communities, dense small roofs are clustered by morphological closing into settlement-candidate blobs — informal neighborhoods clinging to canals, roads and railways, including ones the official list misses.",
       "tool · imagery → candidates");
     buildSeg(seg);
     addVid(seg, "seg");
