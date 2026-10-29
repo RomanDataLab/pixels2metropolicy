@@ -132,6 +132,8 @@ table.rank tr:hover td{background:var(--graphite-2);cursor:pointer}
 table.rank td.rk{font-family:var(--mono);color:var(--fg)}
 table.rank .bar{display:inline-block;height:8px;background:linear-gradient(90deg,var(--cyan),var(--violet));vertical-align:middle;margin-right:8px}
 tr.sel td{background:var(--graphite-3)!important}
+/* pin clicked on the embedded rankings map (block 04): red overlay, 70% transparent */
+tr.pinhit td{background:rgba(255,90,78,.7)!important}
 
 /* bivariate legend */
 .bilegend{display:grid;grid-template-columns:26px 26px 26px;grid-auto-rows:18px;gap:2px}

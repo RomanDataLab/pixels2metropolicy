@@ -52,6 +52,7 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_D
   {maxZoom: 19, maxNativeZoom: 16, opacity: 0.8, attribution: ''}).addTo(map);
 
 let pinLayer = null;
+let curKey = null;
 const polyLayer = L.geoJSON(POLYS, {
   style: () => ({color: '#fff', weight: 1.5, opacity: 0.5, fill: false}),
   interactive: false
@@ -62,6 +63,7 @@ function pinColor(rank){
 }
 function showRank(key){
   if (pinLayer) { map.removeLayer(pinLayer); pinLayer = null; }
+  curKey = key;
   const set = RANKSETS[key];
   pinLayer = L.layerGroup(set.items.map(it => {
     const col = pinColor(it.rank);
@@ -72,7 +74,10 @@ function showRank(key){
             `<circle cx="15" cy="13" r="6.5" fill="#fff"/>` +
             `<text x="15" y="16.8" text-anchor="middle" font-family="sans-serif"` +
             ` font-weight="700" font-size="10" fill="${col}">${it.rank}</text></svg>`});
-    return L.marker([it.lat, it.lon], {icon}).bindPopup(
+    return L.marker([it.lat, it.lon], {icon}).on('click', () => {
+      /* tell the embedding page (fin_part2 block 04) which pin was clicked */
+      window.parent.postMessage({type: 'uipPin', key: curKey, id: it.id}, '*');
+    }).bindPopup(
       `<b>#${it.rank} · ${it.en}</b>` +
       `<div style="color:#0a5f73;font-size:11px">${it.th}</div>` +
       `${it.sname} · ${it.dname}<br>` +
@@ -107,6 +112,11 @@ Object.entries(RANKSETS).forEach(([key, set], i) => {
     const d = document.getElementById('rankdesc');
     d.innerHTML = `<b>${set.label}</b> — ${set.desc}`;
     d.style.display = 'block';
+    /* tell the embedding page (fin_part2 block 04) to re-render its table for this ranking */
+    window.parent.postMessage({type: 'uipRank', key: key, label: set.label,
+                               items: set.items.map(it => ({rank: it.rank, id: it.id, th: it.th, en: it.en,
+                                                            sname: it.sname, dname: it.dname,
+                                                            lat: it.lat, lon: it.lon, v: it.v, total: it.total}))}, '*');
   };
 });
 (function boot(){                      // default selection on load
