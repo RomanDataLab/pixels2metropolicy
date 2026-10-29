@@ -18,6 +18,7 @@ window.UIP = (function () {
   const VIDEOS = {
     seg: { src: R2V + "/uip/seg.mp4", tag: "theos-2 · segmentation", note: "Rooftop segmentation at work: THEOS-2 chips run through the roof-outline model, dense small-roof fabric becomes settlement candidates." },
     seg2: { src: "media/seg_tries.mp4", tag: "satellite segmentation methodologies", note: "From the lab notebook: the prompt, training and inference tries behind the roof-outline model lineage." },
+    seg3: { src: R2V + "/uip/thailand_review_60s.mp4", tag: "disasters in Thailand slums", note: "A 60-second review of the disaster record — floods and fires hitting Thailand's low-income communities; the footage base behind the datalake's hazard domains (Thai news clips)." },
     match: { src: "media/formal_map.mp4", tag: "matching · cadastre overlay", note: "Formal matching on the map: candidate roofs over cadastre footprints — a house with no overlapping parcel record turns orange, flagged potentially irregular." },
     social: { src: "media/sea.mp4", tag: "social sensing · datalake", note: "Social sensing at work: daily feeds filtered into domains, attached to communities, scored into the ranking." },
     rank: { src: "media/sea_ranking.mp4", tag: "ranking · irregular neighborhoods", note: "The cumulative ranking emerges: irregular neighborhoods graded by score — the agenda for the rest of the pipeline." },

@@ -849,6 +849,7 @@
     buildSeg(seg);
     addVid(seg, "seg");
     addVid(seg, "seg2");
+    addVid(seg, "seg3");
 
     var mt = sectionEl("match", "02", "Formal matching",
       "Segmented blocks are checked against the official cadastre and zoning — the first filter layer for irregular neighborhoods.",
