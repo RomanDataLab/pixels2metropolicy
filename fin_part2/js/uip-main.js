@@ -316,7 +316,7 @@
         }).join("") + "</div>" +
         '<div class="sec-body"></div>' +
         '<details class="rollup reveal"><summary>Full description & data sources</summary><div class="body">' +
-          '<div class="cols"><div><h5>Full description</h5><p>' + U.ROLLUP[sec][0] + '</p></div>' +
+          '<div class="cols"><div><h5>Full description</h5>' + U.ROLLUP[sec][0].split("\n\n").map(function (p) { return "<p>" + p + "</p>"; }).join("") + '</div>' +
           "<div><h5>Data sources</h5><ul>" + U.ROLLUP[sec][1].map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul></div></div>" +
         "</div></details>" +
       "</div>";
@@ -348,7 +348,7 @@
     var wrap = document.createElement("div");
     wrap.className = "reveal";
     wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html?embed=1" title="Formal matching — irregular houses vs cadastre buildings" loading="lazy"></iframe></div>' +
-      '<div class="hint">check-cadastre map — red irregular houses vs cadastre footprints · orange = potentially irregular buildings (checkcadaster.html)</div>';
+      '<div class="hint">check-cadastre map — red irregular houses vs Overture footprints standing in for the cadastre · orange = potentially irregular buildings (checkcadaster.html)</div>';
     body.appendChild(wrap);
   }
 
@@ -844,7 +844,7 @@
   /* ---------------- sections wiring ---------------- */
   function buildSections() {
     var seg = sectionEl("seg", "01", "Satellite segmentation",
-      "All 1,588 registered low-income communities as red dots over plan zones and AI roofs. Hover a dot for households and people; zoom a region — the fabric THEOS-2 measures rooftop by rooftop.",
+      "TerraLab GeoAI in QGIS finishes what NHA centers teach via SAM, U-Net and YOLO tries; roofs hugging grey infrastructure blob into fabric the register misses.",
       "tool · imagery → candidates");
     buildSeg(seg);
     addVid(seg, "seg");
