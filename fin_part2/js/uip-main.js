@@ -270,9 +270,12 @@
       d.innerHTML = '<span class="no">' + blk.no + '</span>' + picto +
         '<div class="tt">' + (blk.kind === "feed" ? "assessment" : blk.kind === "out" ? "output" : "tool") + '</div>' +
         '<h3>' + blk.title + '</h3><p>' + blk.brief + '</p><canvas></canvas>';
+      /* hover panel + canvas anim are pointer-device features; on touch a tap just scrolls to the section */
+      var HOVEROK = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
       d.addEventListener("mouseenter", function () {
         d.classList.add("on");
         startAnim(d, blk.id);
+        if (!HOVEROK) return;
         clearTimeout(fpTimer);
         fpTimer = setTimeout(function () { showFloat(d, blk); }, 240);
       });
@@ -586,7 +589,7 @@
     var bz = document.createElement("div");
     bz.id = "bezier";
     bz.className = "reveal";
-    bz.innerHTML = '<svg></svg><span class="hint">metro policy toolkits ⇢ participation techniques (grouped by class) · hover to trace</span>';
+    bz.innerHTML = '<div class="bzscroll"><svg></svg></div><span class="hint">metro policy toolkits ⇢ participation techniques (grouped by class) · hover to trace · swipe the scheme sideways on small screens</span>';
     body.appendChild(bz);
     function drawBezier() {
       var svg = bz.querySelector("svg");

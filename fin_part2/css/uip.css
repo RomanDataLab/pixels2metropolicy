@@ -263,3 +263,31 @@ table.rank td.nm2{white-space:normal;min-width:190px}
 #rkdet .drow b{flex:0 0 34px;font-family:var(--mono);color:var(--fg);text-align:right}
 #rkdet .drow .bar{display:inline-block;height:8px;border-radius:2px}
 table.rank td.nm2 .sep{color:var(--muted);font-size:11px;padding:0 1px}
+
+/* ---------------- mobile ---------------- */
+/* bezier scheme stays readable: horizontal scroll instead of shrinking */
+.bzscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.bzscroll svg{display:block;min-width:880px}
+/* touch has no hover: pipeline minimap always readable, bigger tap targets */
+@media (hover:none){
+  #pipenav{opacity:.95;background:rgba(3,5,7,.75);max-width:60vw}
+  #pipenav a{padding:6px 8px;font-size:9.5px}
+}
+@media (max-width:640px){
+  .pipe-grid{gap:16px 14px}
+  .pnode{padding:10px 42px 9px 11px;min-height:92px}
+  .pnode h3{font-size:13.5px}
+  .pnode p{font-size:11px}
+  .top .back{padding:6px 9px;font-size:10px}
+  .top .wrap{height:50px}
+  /* maps and embeds get more vertical room */
+  .embedbox{padding-bottom:88%}
+  .vidbox video{max-height:300px}
+  table.rank{min-width:640px}
+  /* detail panel rows wrap instead of overflowing */
+  #rkdet .drow{flex-wrap:wrap;gap:8px}
+  #rkdet .drow span{flex:0 0 auto;min-width:130px}
+  .caro-btn{top:34%}
+  .s-head .label{font-size:10px;letter-spacing:.08em}
+  #pipenavname{display:none}
+}
