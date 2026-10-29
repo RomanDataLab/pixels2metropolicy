@@ -39,6 +39,10 @@ window.addEventListener("message", function (e) {
   var d = e.data;
   if (d && d.type === "uipZoom" && Array.isArray(d.bb)) {
     map.fitBounds([[d.bb[1], d.bb[0]], [d.bb[3], d.bb[2]]], { padding: [18, 18], maxZoom: 17 });
+  } else if (d && d.type === "uipZoomId" && d.id != null) {
+    /* zoom to the community's own outline — exact, independent of any parent-side matching */
+    var pl = polyById[d.id];
+    if (pl) map.fitBounds(pl.getBounds(), { padding: [40, 40], maxZoom: 18, animate: false });
   }
 });
 (function refit(){
@@ -57,6 +61,9 @@ const polyLayer = L.geoJSON(POLYS, {
   style: () => ({color: '#fff', weight: 1.5, opacity: 0.5, fill: false}),
   interactive: false
 }).addTo(map);
+/* cmt_id -> outline layer, so the embedding page can zoom to the exact community polygon */
+const polyById = {};
+polyLayer.eachLayer(l => { if (l.feature && l.feature.id != null) polyById[l.feature.id] = l; });
 function pinColor(rank){
   const t = Math.min(1, (rank - 1) / 29);
   return `hsl(8,78%,${Math.round(22 + 40 * t)}%)`;   // rank 1 dark red -> rank 30 light

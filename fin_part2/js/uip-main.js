@@ -481,9 +481,12 @@
         "<div class='doms'>" + doms + "</div>";
       rkDet.style.display = "block";
 
-      /* zoom the embedded rankings map to the neighborhood extents */
+      /* zoom the embedded rankings map to the neighborhood's own outline by its map id
+         (exact); the bb path remains for the pre-ranking initial rows, which carry no id */
       var fr = document.querySelector("#rkmap iframe");
-      if (fr && c.bb) fr.contentWindow.postMessage({ type: "uipZoom", bb: c.bb }, "*");
+      var rid = tr ? tr.getAttribute("data-id") : null;
+      if (fr && rid) fr.contentWindow.postMessage({ type: "uipZoomId", id: rid }, "*");
+      else if (fr && c.bb) fr.contentWindow.postMessage({ type: "uipZoom", bb: c.bb }, "*");
       document.getElementById("rkmap").scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }
