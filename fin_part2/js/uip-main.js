@@ -852,7 +852,7 @@
     addVid(seg, "seg3");
 
     var mt = sectionEl("match", "02", "Formal matching",
-      "Segmented blocks are checked against the official cadastre and zoning — the first filter layer for irregular neighborhoods.",
+      "Segmented candidates are checked against Overture building footprints standing in for the cadastral registers — about 85% of roofs drop out as formal, the ~15% that pop out are flagged potentially irregular; a live connection to the official Thai cadastre is proposed.",
       "tool · segmented blocks → irregular neighborhoods");
     buildMatch(mt);
     addVid(mt, "match");
