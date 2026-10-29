@@ -907,7 +907,7 @@
     addVid(mt, "match");
 
     var so = sectionEl("social", "03", "Social sensing",
-      "A datalake updated daily or weekly — news, complaints, cameras, traffic, social media — filtered into ten domains that split sudden shocks from chronic pressures, quality-checked and scored per community; verified channels and continuously tested AI classifiers are proposed to read the feeds more thoroughly.",
+      "Social sensing listens to the everyday city — news, complaints, cameras, traffic, social media — and turns the chatter into evidence: which irregular neighborhoods struggle with fires, floods, crime or missing services, and how the pressures compare. Per-domain intensities and a cumulative rank keep the platform alive between satellite epochs.",
       "tool · daily feeds → community scores");
     buildSocial(so);
     addVid(so, "social");
