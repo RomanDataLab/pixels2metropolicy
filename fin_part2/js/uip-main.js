@@ -858,7 +858,7 @@
     addVid(mt, "match");
 
     var so = sectionEl("social", "03", "Social sensing",
-      "A datalake updated daily — news, complaints, cameras, traffic — filtered into ten domains, quality-checked, and scored per community.",
+      "A datalake updated daily or weekly — news, complaints, cameras, traffic, social media — filtered into ten domains that split sudden shocks from chronic pressures, quality-checked and scored per community; verified channels and continuously tested AI classifiers are proposed to read the feeds more thoroughly.",
       "tool · daily feeds → community scores");
     buildSocial(so);
     addVid(so, "social");
