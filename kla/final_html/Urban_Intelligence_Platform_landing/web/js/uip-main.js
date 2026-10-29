@@ -270,9 +270,12 @@
       d.innerHTML = '<span class="no">' + blk.no + '</span>' + picto +
         '<div class="tt">' + (blk.kind === "feed" ? "assessment" : blk.kind === "out" ? "output" : "tool") + '</div>' +
         '<h3>' + blk.title + '</h3><p>' + blk.brief + '</p><canvas></canvas>';
+      /* hover panel + canvas anim are pointer-device features; on touch a tap just scrolls to the section */
+      var HOVEROK = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
       d.addEventListener("mouseenter", function () {
         d.classList.add("on");
         startAnim(d, blk.id);
+        if (!HOVEROK) return;
         clearTimeout(fpTimer);
         fpTimer = setTimeout(function () { showFloat(d, blk); }, 240);
       });
@@ -586,54 +589,125 @@
     var bz = document.createElement("div");
     bz.id = "bezier";
     bz.className = "reveal";
-    bz.innerHTML = '<svg></svg><span class="hint">metro policy toolkits ⇢ participation classes · solid = floor · dashed = ceiling · hover to trace</span>';
+    bz.innerHTML = '<div class="bzscroll"><svg></svg></div><span class="hint">metro policy toolkits ⇢ participation techniques (grouped by class) · hover to trace · swipe the scheme sideways on small screens</span>';
     body.appendChild(bz);
     function drawBezier() {
       var svg = bz.querySelector("svg");
-      var W = 1000, H = 460;
+      var W = 1000, toolkitX = 200, clsX = 800;
+      var headH = 24, lineH = 15, gap = 26;
+      /* right column: one group per participation class — header + its technique names below */
+      var groups = U.PART_CLASSES.map(function (pc) {
+        return { pc: pc, cards: U.PART_CARDS.filter(function (c) { return c.c === pc.n; }) };
+      });
+      var y = 20;
+      groups.forEach(function (grp) {
+        grp.y = y; y += headH;
+        grp.cardY = {};
+        grp.cards.forEach(function (c) { grp.cardY[c.t] = y + lineH / 2; y += lineH; });
+        y += gap;
+      });
+      var H = y + 6;
       svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      var toolkitX = 190, clsX = 810;
-      var toolkitY = function (i) { return 70 + i * 66; };
-      var clsY = function (i) { return 60 + i * 70; };
       var g = d3.select(svg);
       g.selectAll("*").remove();
+
+      /* technique name -> {y, classN} lookup for link endpoints */
+      var teqY = {};
+      groups.forEach(function (grp) {
+        Object.keys(grp.cardY).forEach(function (t) { teqY[t] = { y: grp.cardY[t], c: grp.pc.n }; });
+      });
+
+      /* toolkit nodes sit at the mean height of their techniques, min 42px apart */
+      U.TOOLKITS.forEach(function (k) {
+        var ys = k.teqs.map(function (t) { return teqY[t].y; });
+        k._y = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length;
+      });
+      var ord = U.TOOLKITS.slice().sort(function (a, b) { return a._y - b._y; });
+      for (var i = 1; i < ord.length; i++)
+        if (ord[i]._y - ord[i - 1]._y < 42) ord[i]._y = ord[i - 1]._y + 42;
+      for (var j = ord.length - 1; j >= 0; j--) {
+        var maxY = j === ord.length - 1 ? H - 24 : ord[j + 1]._y - 42;
+        if (ord[j]._y > maxY) ord[j]._y = maxY;
+      }
+
+      /* links: toolkit -> each related technique line (start at fitted box edge) */
+      U.TOOLKITS.forEach(function (k) { k._hw = Math.round(k.name.length * 3.3) + 10; });
       var links = g.append("g");
       U.TOOLKITS.forEach(function (k, i) {
-        [k.tmin, k.tmax].forEach(function (cl, ci) {
+        k.teqs.forEach(function (t) {
+          var ty = teqY[t];
           links.append("path")
-            .attr("d", "M" + (toolkitX + 60) + " " + toolkitY(i) + " C " + (toolkitX + 260) + " " + toolkitY(i) + ", " + (clsX - 260) + " " + clsY(cl - 1) + ", " + (clsX - 60) + " " + clsY(cl - 1))
-            .attr("stroke", ["#3fd2f0", "#9a7bff"][ci])
-            .attr("stroke-width", ci ? 1.4 : 2.2)
-            .attr("stroke-dasharray", ci ? "5 5" : "none")
+            .attr("d", "M" + (toolkitX + k._hw) + " " + k._y + " C " + (toolkitX + 260) + " " + k._y + ", " + (clsX - 280) + " " + ty.y + ", " + (clsX - 78) + " " + ty.y)
+            .attr("stroke", "#3fd2f0")
+            .attr("stroke-width", 1.4)
             .attr("fill", "none")
-            .attr("opacity", .5)
-            .attr("class", "ln k" + i + " c" + cl);
+            .attr("opacity", .38)
+            .attr("class", "ln k" + i + " c" + ty.c)
+            .attr("data-t", t);
         });
       });
+
+      /* toolkit nodes: rect fitted to the name text with margin */
       var kn = g.selectAll("g.toolkit").data(U.TOOLKITS).enter().append("g")
-        .attr("transform", function (k, i) { return "translate(" + toolkitX + "," + toolkitY(i) + ")"; })
+        .attr("transform", function (k) { return "translate(" + toolkitX + "," + k._y + ")"; })
         .style("cursor", "pointer");
-      kn.append("rect").attr("x", -60).attr("y", -16).attr("width", 120).attr("height", 32)
-        .attr("fill", "#131a1f").attr("stroke", "#3fd2f0");
-      kn.append("text").attr("text-anchor", "middle").attr("dy", 4)
-        .attr("fill", "#e8eef2").attr("style", "font:600 11px 'IBM Plex Mono',monospace")
-        .text(function (k) { return "METRO POLICY TOOLKIT " + k.n; });
-      var cn = g.selectAll("g.cls").data(U.PART_CLASSES).enter().append("g")
-        .attr("transform", function (c, i) { return "translate(" + clsX + "," + clsY(i) + ")"; })
+      kn.each(function (k, i) {
+        var n = d3.select(this);
+        var tx = n.append("text").attr("text-anchor", "middle").attr("dy", 4)
+          .attr("fill", "#e8eef2").attr("style", "font:600 11px 'IBM Plex Mono',monospace")
+          .text(k.name);
+        var bb = tx.node().getBBox();
+        n.insert("rect", "text")
+          .attr("x", bb.x - 8).attr("y", bb.y - 5).attr("width", bb.width + 16).attr("height", bb.height + 10)
+          .attr("fill", "#131a1f").attr("stroke", "#3fd2f0");
+      });
+
+      /* class group headers: rect fitted to text */
+      var hn = g.selectAll("g.grp").data(groups).enter().append("g")
+        .attr("transform", function (grp) { return "translate(" + clsX + "," + (grp.y + headH / 2) + ")"; })
         .style("cursor", "pointer");
-      cn.append("rect").attr("x", -70).attr("y", -16).attr("width", 140).attr("height", 32)
-        .attr("fill", "#131a1f").attr("stroke", function (c) { return c.color; });
-      cn.append("text").attr("text-anchor", "middle").attr("dy", 4)
-        .attr("fill", function (c) { return c.color; }).attr("style", "font:600 10px 'IBM Plex Mono',monospace")
-        .text(function (c) { return c.n + " · " + c.name.split(" ")[0].toUpperCase(); });
-      function dim(sel_) {
-        links.selectAll("path").attr("opacity", sel_ == null ? .5 : .12);
-        if (sel_ != null) links.selectAll("path." + sel_).attr("opacity", 1);
+      hn.each(function (grp) {
+        var n = d3.select(this);
+        var tx = n.append("text").attr("text-anchor", "middle").attr("dy", 4)
+          .attr("fill", grp.pc.color).attr("style", "font:600 10px 'IBM Plex Mono',monospace")
+          .text(grp.pc.n + " · " + grp.pc.name.toUpperCase());
+        var bb = tx.node().getBBox();
+        n.insert("rect", "text")
+          .attr("x", bb.x - 7).attr("y", bb.y - 4).attr("width", bb.width + 14).attr("height", bb.height + 8)
+          .attr("fill", "#131a1f").attr("stroke", grp.pc.color);
+      });
+
+      /* technique names below each group header */
+      var tnodes = [];
+      groups.forEach(function (grp) {
+        grp.cards.forEach(function (c) {
+          var tn = g.append("text")
+            .attr("class", "teqline")
+            .attr("x", clsX - 70).attr("y", grp.cardY[c.t] + 3.5)
+            .text(c.t);
+          tnodes.push({ el: tn, t: c.t });
+        });
+      });
+
+      function dim(cls_) {
+        links.selectAll("path").attr("opacity", cls_ == null ? .38 : .1);
+        if (cls_ != null) links.selectAll("path." + cls_).attr("opacity", 1);
       }
       kn.on("mouseenter", function (evt, k) { dim("k" + (k.n - 1)); })
+        .on("mouseleave", function () { dim(null); })
+        .on("click", function (evt, k) {
+          select(k.n - 1, true);
+          snap.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      hn.on("mouseenter", function (evt, grp) { dim("c" + grp.pc.n); })
         .on("mouseleave", function () { dim(null); });
-      cn.on("mouseenter", function (evt, c) { dim("c" + c.n); })
-        .on("mouseleave", function () { dim(null); });
+      tnodes.forEach(function (tn) {
+        tn.el.on("mouseenter", function () {
+          links.selectAll("path").attr("opacity", .1);
+          links.selectAll("path").filter(function () { return d3.select(this).attr("data-t") === tn.t; }).attr("opacity", 1);
+        }).on("mouseleave", function () { dim(null); })
+          .on("click", function () { goToTechnique(tn.t); });
+      });
     }
     drawBezier();
   }

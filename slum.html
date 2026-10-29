@@ -9,17 +9,20 @@
 <style>
   html, body { height: 100%; margin: 0; }
   #map { height: 100%; }
-  .panel { position: absolute; top: 46px; right: 10px; z-index: 1000; background: white;
+  .panel { position: absolute; top: 46px; right: 10px; z-index: 1000; background: rgba(18,49,78,.5); color: #fff;
            padding: 10px 12px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.3);
            font-family: sans-serif; font-size: 13px; max-width: 300px; }
   .panel h1 { font-size: 14px; margin: 0 0 6px; }
-  .panel .btns button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer; }
+  .panel .btns button { margin: 2px 2px 2px 0; padding: 3px 8px; font-size: 12px; cursor: pointer;
+           background: transparent; color: #fff; border: 1px solid #fff; border-radius: 4px; }
+  .panel .btns button:hover { background: rgba(255,255,255,.15); }
   .tabbar { display: flex; gap: 4px; margin: 0 0 8px; }
   .tabbar button { flex: 1; padding: 4px 6px; font-size: 12px; cursor: pointer;
-           border: 1px solid #ccc; border-radius: 6px; background: #f2f2f2; color: #333; }
-  .tabbar button.active { background: #2b6cb0; border-color: #2b6cb0; color: #fff; font-weight: bold; }
+           border: 1px solid #fff; border-radius: 6px; background: transparent; color: #fff; }
+  .tabbar button:hover { background: rgba(255,255,255,.15); }
+  .tabbar button.active { background: #fff; border-color: #fff; color: #12314e; font-weight: bold; }
   #tab-data { max-height: calc(100vh - 140px); overflow-y: auto; font-size: 12px; line-height: 1.45; }
-  #tab-data h4 { margin: 8px 0 3px; font-size: 12px; color: #12314e; }
+  #tab-data h4 { margin: 8px 0 3px; font-size: 12px; color: #9fc3e8; }
   #tab-data ul { margin: 2px 0 6px; padding-left: 16px; }
   #tab-data li { margin: 0 0 4px; }
   #slum_video { position: absolute; right: 10px; z-index: 1000; background: white; display: none;
@@ -56,12 +59,12 @@
   /* ---- embed mode (?embed=1): hide site nav header ---- */
   html.embed #site-header { display: none; }
   html.embed .panel { top: 10px; }
-  .panel .rollbtn { position: absolute; top: 5px; left: 5px; width: 22px; height: 22px;
+  .panel .rollbtn { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px;
                     display: flex; align-items: center; justify-content: center;
-                    border: 1px solid #1d4e79; border-radius: 5px; background: #fff; color: #1d4e79;
+                    border: 1px solid #fff; border-radius: 5px; background: transparent; color: #fff;
                     cursor: pointer; font-size: 11px; line-height: 1; padding: 0; z-index: 5; }
-  .panel .rollbtn:hover { background: #e8f1f8; }
-  .panel h1 { padding-left: 27px; }
+  .panel .rollbtn:hover { background: rgba(255,255,255,.15); }
+  .panel h1 { padding-right: 27px; }
   .panel.rolled > *:not(.rollbtn) { display: none; }
   .panel.rolled { padding: 30px 14px 12px; max-width: none; }
 
@@ -111,10 +114,10 @@
     <button onclick="fly(7.01,100.47,12)">Hat Yai</button>
   </div>
   <p style="margin:8px 0 2px"><span class="legend-dot" style="background:#d7191c"></span>NHA community — dot size = modeled population
-     <button id="dotsBtn" style="margin-left:6px;padding:2px 8px;font-size:11px;cursor:pointer" onclick="toggleDots(this)">Hide dots</button><br>
+     <button id="dotsBtn" style="margin-left:6px;padding:2px 8px;font-size:11px;cursor:pointer;background:transparent;color:#fff;border:1px solid #fff;border-radius:4px" onclick="toggleDots(this)">Hide centers</button><br>
      <span class="legend-dot" style="background:#333;opacity:.5"></span>Comprehensive-plan land-use zones<br>
-     <span style="font-size:11px;color:#555">Hover a dot: houses + population · Click: details</span></p>
-  <p style="font-size:11px;color:#555;margin:6px 0 0">Note: these official community locations exist only in NHA/BMA registers — slums are not a zoning category in the ผังเมืองรวม (comprehensive plans).</p>
+     <span style="font-size:11px;color:#b8c8d8">Hover a dot: houses + population · Click: details</span></p>
+  <p style="font-size:11px;color:#b8c8d8;margin:6px 0 0">Note: these official community locations exist only in NHA/BMA registers — slums are not a zoning category in the ผังเมืองรวม (comprehensive plans).</p>
   </div>
   <div id="tab-data" style="display:none">
     <h4>Data sources</h4>
@@ -171,7 +174,7 @@
         <a href="proposal.html#refs">Proposal references</a> tab and case review in
         <a href="slum_policies.html">Slum policies review</a>.</li>
     </ul>
-    <p style="font-size:11px;color:#555;margin:6px 0 0">Complete inventory on the
+    <p style="font-size:11px;color:#b8c8d8;margin:6px 0 0">Complete inventory on the
       <a href="sources.html">Sources</a> page · social-signal methodology and its full
       source list: <a href="social.html">Social pulse</a> (Methodology panel).</p>
   </div>
@@ -816,10 +819,9 @@ const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
-// gray-tone OSM basemap (CARTO light)
-const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  subdomains: 'abcd',
+// gray basemap — Carto dark tiles (keyless)
+const mapboxLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19, subdomains: 'abcd',
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 });
 // google satellite
@@ -965,18 +967,18 @@ map.on('overlayadd', e => { if (e.layer && e.layer.ensure) e.layer.ensure(); });
 amphoeLayer.addTo(map); tambonLayer.addTo(map);
 amphoeLayer.ensure(); tambonLayer.ensure();
 
-L.control.layers({ 'Google satellite': googleSat, 'OpenStreetMap': osmBase, 'Gray OSM (light)': cartoLight, 'Satellite (no labels)': satNoLabels },
+L.control.layers({ 'Google satellite': googleSat, 'OpenStreetMap': osmBase, 'Dark': mapboxLight, 'Satellite (no labels)': satNoLabels },
   { 'NHA low-income communities': comLayer, 'Comprehensive-plan zones (AOI)': zoneLayer,
     'Slum roofs (red)': redRoofLayer, 'Congestion blobs (orange)': blobLayer, 'Other roofs (pink)': pinkRoofLayer,
     'bkk_khet': khetLayer, 'bkk_slum_1': slum1Layer, 'slum_2': slum2Layer, 'bkk_slum_3': slum3Layer,
     'Districts (amphoe) outlines': amphoeLayer, 'Tambon (sub-district) outlines': tambonLayer },
-  { collapsed: true }).addTo(map);
+  { collapsed: true, position: 'bottomleft' }).addTo(map);
 
 document.getElementById('count').textContent = NHA.features.length;
 function fly(lat, lon, z) { map.flyTo([lat, lon], z); }
 function toggleDots(btn) {
-  if (map.hasLayer(comLayer)) { map.removeLayer(comLayer); btn.textContent = 'Show dots'; }
-  else { map.addLayer(comLayer); btn.textContent = 'Hide dots'; }
+  if (map.hasLayer(comLayer)) { map.removeLayer(comLayer); btn.textContent = 'Show centers'; }
+  else { map.addLayer(comLayer); btn.textContent = 'Hide centers'; }
 }
 
 // ---- panel tabs: map controls vs data sources + references ----
