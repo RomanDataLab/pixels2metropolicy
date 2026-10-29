@@ -694,14 +694,19 @@
         if (cls_ != null) links.selectAll("path." + cls_).attr("opacity", 1);
       }
       kn.on("mouseenter", function (evt, k) { dim("k" + (k.n - 1)); })
-        .on("mouseleave", function () { dim(null); });
+        .on("mouseleave", function () { dim(null); })
+        .on("click", function (evt, k) {
+          select(k.n - 1, true);
+          snap.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
       hn.on("mouseenter", function (evt, grp) { dim("c" + grp.pc.n); })
         .on("mouseleave", function () { dim(null); });
       tnodes.forEach(function (tn) {
         tn.el.on("mouseenter", function () {
           links.selectAll("path").attr("opacity", .1);
           links.selectAll("path").filter(function () { return d3.select(this).attr("data-t") === tn.t; }).attr("opacity", 1);
-        }).on("mouseleave", function () { dim(null); });
+        }).on("mouseleave", function () { dim(null); })
+          .on("click", function () { goToTechnique(tn.t); });
       });
     }
     drawBezier();
