@@ -934,13 +934,10 @@
        each block anchors at the section its sec id names */
     document.body.appendChild(nav);
 
-    var shown = false;
+    var hero = document.getElementById("hero");
     function onScroll() {
-      var pipe = document.getElementById("pipe");
-      if (!shown && pipe && window.scrollY > pipe.offsetTop + pipe.offsetHeight) {
-        shown = true;
-        nav.classList.add("on");
-      }
+      /* hidden while any part of the hero section is still in view */
+      nav.classList.toggle("on", !(hero && hero.getBoundingClientRect().bottom > 0));
       /* block-level current: the red highlight steps block by block
          as each block's own section crosses mid-viewport */
       var curNode = null, bestTop = -Infinity;
