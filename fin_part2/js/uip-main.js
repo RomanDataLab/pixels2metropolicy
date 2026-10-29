@@ -907,7 +907,7 @@
     addVid(mt, "match");
 
     var so = sectionEl("social", "03", "Social sensing",
-      "Social sensing listens to the everyday city — news, complaints, cameras, traffic, social media — and turns the chatter into evidence: which irregular neighborhoods struggle with fires, floods, crime or missing services, and how the pressures compare. Per-domain intensities and a cumulative rank keep the platform alive between satellite epochs.",
+      "Social sensing collects the city's everyday signals — news, complaints, cameras, traffic, social media — and geocodes them onto communities. An item that passes the quality check is filtered into its domain; each community receives per-domain intensities and a cumulative rank.",
       "tool · daily feeds → community scores");
     buildSocial(so);
     addVid(so, "social");
