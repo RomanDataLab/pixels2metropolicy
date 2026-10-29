@@ -33,3 +33,6 @@ video_thailand_disasters/uipdl/
 # >100MB video, exceeds GitHub hard limit
 fin_part2/media/walkthrough.mp4
 labeling/qgis_project/bkk_parcels_2.geojson
+
+# geojsons live in R2 (02_code/geo/upload_geojsons_r2.py); repo keeps none
+*.geojson

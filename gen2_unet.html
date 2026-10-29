@@ -77,18 +77,18 @@ L.tileLayer("https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
 const LYR = {};
 LYR.img = L.imageOverlay("theos_block/theos_block.png",
   [[B.south, B.west], [B.north, B.east]], { interactive: false }).addTo(map);
-fetch("theos_block/gen2_roofs.geojson").then(r => r.json()).then(gj => {
+fetch("https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/theos_block/gen2_roofs.geojson").then(r => r.json()).then(gj => {
   LYR.g2 = L.geoJSON(gj, {
     style: { color: "#ff4081", weight: 0.8, fillColor: "#ff4081", fillOpacity: 0.45 },
     onEachFeature: (f, layer) => layer.bindPopup(
       "<b>U-Net roof</b><br>area " + Math.round(f.properties.area_m2) + " m²")
   }).addTo(map);
 });
-fetch("theos_block/gen1_roofs.geojson").then(r => r.json()).then(gj => {
+fetch("https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/theos_block/gen1_roofs.geojson").then(r => r.json()).then(gj => {
   LYR.g1 = L.geoJSON(gj, { interactive: false,
     style: { color: "#00e5ff", weight: 0.6, fillColor: "#00e5ff", fillOpacity: 0.25 } });
 });
-fetch("theos_block/overture_buildings.geojson").then(r => r.json()).then(gj => {
+fetch("https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/theos_block/overture_buildings.geojson").then(r => r.json()).then(gj => {
   LYR.ov = L.geoJSON(gj, { interactive: false,
     style: { color: "#fdd835", weight: 0.7, fill: false } });
 });

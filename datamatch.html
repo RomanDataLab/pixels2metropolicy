@@ -184,7 +184,7 @@ const STYLE = {
   unknown: {color:'#ef6c00', fill:'#ef6c00'},
 };
 
-fetch('data/plan_boundary.geojson').then(r => r.json()).then(boundary => {
+fetch('https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/data/plan_boundary.geojson').then(r => r.json()).then(boundary => {
   const plan = L.geoJSON(boundary, {
     style: {color:'#f57f17', weight:2.5, fillColor:'#ffd54f', fillOpacity:.12}
   }).addTo(boundaryLayer);
@@ -253,7 +253,7 @@ document.getElementById('lyr-zones').onchange = e => {
         onEachFeature: (f, ly) => ly.bindTooltip(
           `${f.properties.cat_en || ''} (${f.properties.zone || ''})`, {sticky:true})
       });
-      fetch('data/plan_zones.geojson').then(r => r.json()).then(z => zonesLayer.addData(z));
+      fetch('https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/data/plan_zones.geojson').then(r => r.json()).then(z => zonesLayer.addData(z));
     }
     map.addLayer(zonesLayer);
   } else map.removeLayer(zonesLayer);

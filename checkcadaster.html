@@ -120,7 +120,7 @@ const roofsCanvas = L.canvas({ pane: 'roofsPane', padding: 0.3 });
 
 const overtureLayer = (function () {
   const group = L.layerGroup();
-  fetch('labeling/qgis_project/overture_bkk_sites.geojson')
+  fetch('https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/labeling/qgis_project/overture_bkk_sites.geojson')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(g => {
       L.geoJSON(g, {
@@ -136,7 +136,7 @@ const overtureLayer = (function () {
 
 const roofsLayer = (function () {
   const group = L.layerGroup();
-  fetch('labeling/qgis_project/checkcadaster_roofs.geojson')
+  fetch('https://pub-7a6f5c500e1448d5b50de5ded48d85da.r2.dev/geojson/labeling/qgis_project/checkcadaster_roofs.geojson')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(g => {
       L.geoJSON(g, {
