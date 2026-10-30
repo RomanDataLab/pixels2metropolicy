@@ -108,7 +108,8 @@ h2.sec{font-size:clamp(30px,4.6vw,60px);font-weight:760;text-transform:uppercase
 .embedbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .mapbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mapbox svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.mapbox .hint{position:absolute;left:10px;bottom:10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;pointer-events:none}
+/* captions: one shared overlay style (block 01 .cap) for every media box */
+.cap{position:absolute;left:0;right:0;bottom:0;z-index:5;pointer-events:none;padding:10px 14px;background:linear-gradient(transparent,rgba(3,5,7,.9));font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--fg);text-transform:uppercase;display:flex;justify-content:space-between;gap:10px}
 .mapctl{position:absolute;top:10px;left:10px;z-index:5;display:flex;flex-wrap:wrap;gap:6px;max-width:calc(100% - 20px)}
 .chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(3,5,7,.85);border:1px solid var(--line-2);padding:5px 9px;cursor:pointer;user-select:none}
 .chip.on{color:var(--fg);border-color:var(--cyan)}
@@ -135,7 +136,6 @@ h2.sec{font-size:clamp(30px,4.6vw,60px);font-weight:760;text-transform:uppercase
 /* video panel in section */
 .vidbox{margin-top:18px;border:1px solid var(--line-2);background:#000;position:relative}
 .vidbox video{width:100%;display:block;max-height:460px;object-fit:cover}
-.vidbox .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(transparent,rgba(3,5,7,.9));font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--fg);text-transform:uppercase;display:flex;justify-content:space-between;gap:10px}
 
 /* table */
 .tblwrap{overflow:auto;border:1px solid var(--line-2);margin-top:18px;background:var(--graphite)}
@@ -224,15 +224,14 @@ tr.pinhit td{background:rgba(255,90,78,.7)!important}
 /* bezier scheme */
 #bezier{margin-top:30px;border:1px solid var(--line-2);background:var(--graphite);position:relative}
 #bezier svg{display:block;width:100%;height:100%}
-#bezier .hint{position:absolute;left:10px;top:10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
 
 /* intervention map cards */
 .intv-card{position:absolute;width:210px;background:rgba(4,8,11,.95);border:1px solid var(--line-2);z-index:6;cursor:pointer;perspective:700px}
 .intv-card .inner{position:relative;transition:transform .55s;transform-style:preserve-3d;min-height:150px}
 .intv-card.flip .inner{transform:rotateY(180deg)}
 .intv-card .face{backface-visibility:hidden;position:relative}
-.intv-card .face.front img{width:100%;height:96px;object-fit:cover;display:block}
-.intv-card .face.front .t{padding:7px 9px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);line-height:1.45}
+.intv-card .face.front{position:absolute;inset:0}
+.intv-card .face.front img{width:100%;height:100%;object-fit:cover;display:block}
 .intv-card .face.back{position:absolute;inset:0;transform:rotateY(180deg);background:var(--graphite-2);padding:9px 10px;font-size:11px;color:#c4ccd1;line-height:1.5;overflow:auto}
 
 /* footer */

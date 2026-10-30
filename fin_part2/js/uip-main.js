@@ -383,8 +383,8 @@
   function buildSeg(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="embedbox" id="segmap"><iframe src="/slum.html?embed=1" title="NHA low-income communities map (slum.html)" loading="lazy"></iframe></div>' +
-      '<div class="hint">full NHA slum map — communities, plan zones, red / pink AI roofs, congestion blobs (slum.html)</div>';
+    wrap.innerHTML = '<div class="embedbox" id="segmap"><iframe src="/slum.html?embed=1" title="NHA low-income communities map (slum.html)" loading="lazy"></iframe>' +
+      '<div class="cap"><span>full NHA slum map</span><span>communities, plan zones, red / pink AI roofs, congestion blobs (slum.html)</span></div></div>';
     body.appendChild(wrap);
   }
 
@@ -392,8 +392,8 @@
   function buildMatch(body) {
     var wrap = document.createElement("div");
     wrap.className = "reveal";
-    wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html?embed=1" title="Formal matching — irregular houses vs cadastre buildings" loading="lazy"></iframe></div>' +
-      '<div class="hint">check-cadastre map — red irregular houses vs Overture footprints standing in for the cadastre · orange = potentially irregular buildings (checkcadaster.html)</div>';
+    wrap.innerHTML = '<div class="embedbox" id="mtmap"><iframe src="/checkcadaster.html?embed=1" title="Formal matching — irregular houses vs cadastre buildings" loading="lazy"></iframe>' +
+      '<div class="cap"><span>check-cadastre map</span><span>red irregular houses vs Overture footprints standing in for the cadastre · orange = potentially irregular buildings (checkcadaster.html)</span></div></div>';
     body.appendChild(wrap);
   }
 
@@ -421,8 +421,8 @@
     var wrap = document.createElement("div");
     wrap.className = "reveal";
     wrap.innerHTML =
-      '<div class="embedbox" id="somap"><iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Neighborhood category intensity map (category_intensity_map.html)" loading="lazy"></iframe></div>' +
-      '<div class="hint">neighborhood category intensity — event volumes per community category (category_intensity_map.html)</div>';
+      '<div class="embedbox" id="somap"><iframe src="/04_output/social_patterns/bangkok/category_intensity_map.html" title="Neighborhood category intensity map (category_intensity_map.html)" loading="lazy"></iframe>' +
+      '<div class="cap"><span>neighborhood category intensity</span><span>event volumes per community category (category_intensity_map.html)</span></div></div>';
     body.appendChild(wrap);
   }
 
@@ -541,8 +541,8 @@
     var wrap = document.createElement("div");
     wrap.className = "reveal";
     wrap.innerHTML =
-      '<div class="embedbox" id="prmap"><iframe src="/04_output/social_patterns/bangkok/prioritiesmap.html" title="Combined priorities — prioritiesmap.html, mean of the four rankings" loading="lazy"></iframe></div>' +
-      '<div class="hint">combined priority = mean of the four rankings (deprivation · danger · flood · build-code) — hover a pin for the pulse rings, click a pin for the full neighborhood profile and its main problems</div>';
+      '<div class="embedbox" id="prmap"><iframe src="/04_output/social_patterns/bangkok/prioritiesmap.html" title="Combined priorities — prioritiesmap.html, mean of the four rankings" loading="lazy"></iframe>' +
+      '<div class="cap"><span>combined priority = mean of the four rankings (deprivation · danger · flood · build-code)</span><span>hover a pin for the pulse rings, click a pin for the full neighborhood profile and its main problems</span></div></div>';
     body.appendChild(wrap);
   }
 
@@ -686,7 +686,7 @@
     var bz = document.createElement("div");
     bz.id = "bezier";
     bz.className = "reveal";
-    bz.innerHTML = '<div class="bzscroll"><svg></svg></div><span class="hint">metro policy toolkits ⇢ participation techniques (grouped by class) · hover to trace · swipe the scheme sideways on small screens</span>';
+    bz.innerHTML = '<div class="bzscroll"><svg></svg></div><div class="cap"><span>metro policy toolkits ⇢ participation techniques (grouped by class)</span><span>hover to trace · swipe the scheme sideways on small screens</span></div>';
     body.appendChild(bz);
     function drawBezier() {
       var svg = bz.querySelector("svg");
@@ -817,7 +817,7 @@
     wrap.className = "reveal";
     wrap.style.marginTop = "18px";
     wrap.innerHTML = '<div class="mapctl"><span class="chip on" data-l="all">all layers</span><span class="chip" data-l="fire">fire lane</span><span class="chip" data-l="plots">re-blocked plots</span><span class="chip" data-l="common">common-use area</span><span class="chip" data-l="market">market zone</span></div>' +
-      '<div id="dnmap"></div><div class="hint">illustrative strategy on the #1 ranked irregular area · flip a card for its description</div>';
+      '<div id="dnmap"><div class="cap"><span>illustrative strategy on the #1 ranked irregular area</span><span>flip a card for its description</span></div></div>';
     body.appendChild(wrap);
 
     var top = DATA.social.features[0];
@@ -916,7 +916,7 @@
       if (pos[i][1] === "auto") el.style.bottom = "6%";
       el.style.borderColor = iv.color;
       el.innerHTML = '<div class="inner">' +
-        '<div class="face front"><img src="' + iv.img + '" alt=""><div class="t">' + iv.name + '</div></div>' +
+        '<div class="face front"><img src="' + iv.img + '" alt=""><div class="cap"><span>' + iv.name + '</span></div></div>' +
         '<div class="face back">' + iv.desc + "</div></div>";
       el.addEventListener("click", function () { el.classList.toggle("flip"); });
       el.addEventListener("mouseenter", function () { el.classList.add("flip"); });
