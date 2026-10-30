@@ -264,7 +264,8 @@
     var v = U.VIDEOS[blk.id];
     fp.querySelector("h4").textContent = blk.title;
     document.getElementById("fp-no").textContent = "block " + blk.no;
-    fp.querySelector(".fp-body").textContent = blk.long ? blk.long.split(". ").slice(0, 2).join(". ") + "." : blk.brief;
+    var mb = blk.long ? blk.long.split(". ").slice(0, 2).join(". ") : blk.brief;
+    fp.querySelector(".fp-body").textContent = mb + (/[^.]$/.test(mb) ? "." : "");
     var vid = fp.querySelector(".fp-vid");
     if (v) {
       vid.style.display = "block";
