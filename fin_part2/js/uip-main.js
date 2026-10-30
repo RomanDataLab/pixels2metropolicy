@@ -839,10 +839,15 @@
     ];
     var curLayer = "all";
 
-    /* fit the whole Bangkok metropolis (khet layer), intervention cluster sits small on it */
-    var bkkFeats = DATA.khet.features.map(function (k) {
-      return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: k.g } };
+    /* fit the whole Bangkok metropolis (khet layer), intervention cluster sits small on it.
+       khet rings are RFC7946 counterclockwise — d3's spherical winding would read each
+       district as the world minus itself — so fit a plain lon/lat bbox as a two-point line */
+    var bx = [], by = [];
+    DATA.khet.features.forEach(function (k) {
+      k.g.forEach(function (p) { p.forEach(function (r) { r.forEach(function (c) { bx.push(c[0]); by.push(c[1]); }); }); });
     });
+    var bkkFeats = [{ type: "Feature", geometry: { type: "LineString",
+      coordinates: [[Math.min.apply(null, bx), Math.min.apply(null, by)], [Math.max.apply(null, bx), Math.max.apply(null, by)]] } }];
     var dnMap = makeMap(wrap.querySelector("#dnmap"), 0.66, bkkFeats);
 
     var cardEls = [];
