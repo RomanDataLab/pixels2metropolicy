@@ -577,7 +577,7 @@
     var note = document.createElement("p");
     note.className = "reveal";
     note.style.cssText = "margin-top:22px;font-size:13px;color:var(--muted);max-width:80ch";
-    note.innerHTML = "<b style='color:var(--fg)'>Design rule:</b> classes 3–5 are the operable pool; classes 1–2 are recorded as context; class 6 is monitored as a leading indicator that classes 1–2 failed. Failure modes tracked: voice without empowerment, participation cut mid-programme, token timing, elite capture, expectation debt. Every technique above is extracted from the <a href='https://pixels2metropolicy.vercel.app/slum_policies' style='color:var(--cyan)'>49-case slum policies review</a> — the full case table, verdicts and all 86 references.";
+    note.innerHTML = "<b style='color:var(--fg)'>Design rule:</b> classes 3–5 are the operable pool; classes 1–2 are recorded as context; class 6 is monitored as a leading indicator that classes 1–2 failed. Failure modes tracked: voice without empowerment, participation cut mid-programme, token timing, elite capture, expectation debt. Every technique above is extracted from <a href='https://pixels2metropolicy.vercel.app/slum_policies' style='color:var(--cyan)'>the world's slum policies review</a> — the full case table, verdicts and all 86 references.";
     body.appendChild(note);
   }
 
@@ -973,7 +973,7 @@
     addVid(pr, "priority");
 
     var pa = sectionEl("participate", "06", "Selection of participation techniques",
-      "The card deck behind every intervention: techniques from a 49-case review, grouped by Arnstein/IAP2 class, each group on its own class imagery. Carousels per class; METRO POLICY TOOLKIT tags bind techniques to metro policy toolkits.",
+      "The card deck behind every intervention: techniques from the world's slum policies review, grouped by Arnstein/IAP2 class, each group on its own class imagery. Carousels per class; METRO POLICY TOOLKIT tags bind techniques to metro policy toolkits.",
       "tool · techniques per area");
     buildParticipate(pa);
 
