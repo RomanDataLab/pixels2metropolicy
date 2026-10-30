@@ -25,6 +25,15 @@ kla/
 judge2.md
 graph.md
 
+# kla: only the Pixels landing web/ dist is served (7.8 MB); the rest stays local
+!kla/
+kla/*
+!kla/final_html/
+kla/final_html/*
+!kla/final_html/Pixels_to_Metro_Policy_landing/
+kla/final_html/Pixels_to_Metro_Policy_landing/*
+!kla/final_html/Pixels_to_Metro_Policy_landing/web/
+
 # theos_block: only the two page background images are served
 theos_block/*
 !theos_block/theos_block.png
