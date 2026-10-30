@@ -106,7 +106,7 @@ window.UIP = (function () {
     { c: 5, t: "Anti-eviction organizing", d: "Decades of organizing that forced the declaration of a Special Planning Area over 645 acres — power that predates and outlasts any single programme.", tags: ["Mukuru · Nairobi"], img: "img/part/cards/p32.jpg" },
     { c: 5, t: "Cooperative-managed common use", d: "The relocated community's cooperative owns and manages the common-use area and its dividend — the standing METRO POLICY TOOLKIT 6 component.", tags: ["METRO POLICY TOOLKIT 6"], img: "img/part/cards/p33.jpg" },
     { c: 6, t: "Protest as the de facto channel", d: "Where formal channels fail, protest becomes how settlements are heard. Tracked as a leading indicator that classes 1–2 participation failed — not a technique to plan on.", tags: ["South Africa"], img: "img/part/cards/p34.jpg" },
-    { c: 6, t: "Gang mediation", d: "Armed groups shaping which works happen and where. Recorded because it is real; never selected — its presence marks a governance failure to escalate.", tags: ["Rio de Janeiro"], img: "img/part/cards/p35.jpg?v=2" },
+    { c: 6, t: "Gang mediation", d: "Armed groups shaping which works happen and where. Recorded because it is real; never selected — its presence marks a governance failure to escalate.", tags: ["Rio de Janeiro"], img: "img/part/cards/p35.jpg?v=3" },
   ];
 
   const TOOLKITS = [
