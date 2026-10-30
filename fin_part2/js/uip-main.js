@@ -839,11 +839,11 @@
     ];
     var curLayer = "all";
 
-    var fitFeats = [{ type: "Feature", geometry: { type: "Point", coordinates: c0 } }];
-    fitFeats.push({ type: "Feature", geometry: INTV[1].geom });
-    var dnMap = makeMap(wrap.querySelector("#dnmap"), 0.66, [
-      { type: "Feature", geometry: { type: "MultiPolygon", coordinates: [[[[c0[0] - d * 2.2, c0[1] - d * 1.4], [c0[0] + d * 2.2, c0[1] - d * 1.4], [c0[0] + d * 2.2, c0[1] + d * 1.4], [c0[0] - d * 2.2, c0[1] + d * 1.4]]]] } }
-    ]);
+    /* fit the whole Bangkok metropolis (khet layer), intervention cluster sits small on it */
+    var bkkFeats = DATA.khet.features.map(function (k) {
+      return { type: "Feature", geometry: { type: "MultiPolygon", coordinates: k.g } };
+    });
+    var dnMap = makeMap(wrap.querySelector("#dnmap"), 0.66, bkkFeats);
 
     var cardEls = [];
     dnMap.onresize({
@@ -885,6 +885,12 @@
             tracePoly(iv.geom, ctx, st.proj);
           }
         });
+        // metropolis scale: the intervention cluster is tiny — screen-space rings mark the #1 area
+        var pc = st.proj(c0);
+        ctx.strokeStyle = "rgba(255,90,78,.9)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(pc[0], pc[1], 14, 0, 2 * Math.PI); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,90,78,.35)";
+        ctx.beginPath(); ctx.arc(pc[0], pc[1], 22, 0, 2 * Math.PI); ctx.stroke();
         st.svg.innerHTML = "";
         var g = d3.select(st.svg).append("g");
         // markers + connector lines to card anchors
