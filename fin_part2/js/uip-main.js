@@ -213,6 +213,53 @@
   var fp = document.getElementById("floatpanel");
   var fpVideo = fp.querySelector("video");
   var fpTimer = null;
+  var fpNode = null, fpLastSig = "";
+  /* place by the panel's real measured size: below the card when it fits, otherwise above —
+     never over the platform name (hero h1), never grazing the hovered card itself.
+     Re-run from the ResizeObserver below: the panel's height can settle after placement
+     (hover video box, late font metrics), and a stale one-shot placement is what let the
+     panel's brief dip into the hovered card's name. */
+  function placeFloat() {
+    if (!fpNode) return;
+    var r = fpNode.getBoundingClientRect();
+    var W = fp.offsetWidth;
+    fpVideo.style.maxHeight = "";
+    var H = fp.scrollHeight;                    /* natural content height, independent of our cap */
+    var left = Math.max(8, Math.min(window.innerWidth - W - 8, r.left));
+    var floorAbove = 8;
+    var h1 = document.querySelector("#hero h1");
+    if (h1) {
+      var nb = h1.getBoundingClientRect();
+      if (nb.bottom > 0 && nb.right > left && nb.left < left + W) floorAbove = nb.bottom + 10;
+    }
+    var availBelow = window.innerHeight - 8 - (r.bottom + 10);
+    var availAbove = (r.top - 10) - floorAbove;
+    var top, cap = null;
+    if (H <= availBelow) {
+      top = r.bottom + 10;
+    } else if (H <= availAbove) {
+      top = r.top - 10 - H;
+    } else {
+      /* no clean spot on either side: take the roomier side, cap the height, scroll inside;
+         shrink the hover video so the name + brief keep most of the capped height */
+      if (availBelow >= availAbove) { top = r.bottom + 10; cap = availBelow; }
+      else { top = floorAbove; cap = availAbove; }
+      cap = Math.max(140, cap);
+    }
+    var sig = Math.round(top) + "|" + Math.round(left) + "|" + (cap == null ? "" : Math.round(cap));
+    if (sig === fpLastSig) return;
+    fpLastSig = sig;
+    fp.style.maxHeight = cap == null ? "" : cap + "px";
+    fp.style.overflowY = cap == null ? "" : "auto";
+    if (cap != null) fpVideo.style.maxHeight = Math.max(80, Math.round(cap - 200)) + "px";
+    fp.style.top = top + "px";
+    fp.style.left = left + "px";
+  }
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () { if (fp.classList.contains("on")) placeFloat(); }).observe(fp);
+  }
+  window.addEventListener("resize", function () { if (fp.classList.contains("on")) placeFloat(); });
+
   function showFloat(node, blk) {
     var v = U.VIDEOS[blk.id];
     fp.querySelector("h4").textContent = blk.title;
@@ -234,12 +281,9 @@
       vid.style.display = "none";
       fpVideo.pause();
     }
+    fpNode = node;
     fp.classList.add("on");
-    var r = node.getBoundingClientRect();
-    var top = r.bottom + 8;
-    if (top + 340 > window.innerHeight) top = Math.max(8, r.top - 350);
-    fp.style.top = top + "px";
-    fp.style.left = Math.max(8, Math.min(window.innerWidth - 420, r.left)) + "px";
+    placeFloat();
   }
   function hideFloat() {
     fp.classList.remove("on");
@@ -532,7 +576,7 @@
     var note = document.createElement("p");
     note.className = "reveal";
     note.style.cssText = "margin-top:22px;font-size:13px;color:var(--muted);max-width:80ch";
-    note.innerHTML = "<b style='color:var(--fg)'>Design rule:</b> classes 3–5 are the operable pool; classes 1–2 are recorded as context; class 6 is monitored as a leading indicator that classes 1–2 failed. Failure modes tracked: voice without empowerment, participation cut mid-programme, token timing, elite capture, expectation debt.";
+    note.innerHTML = "<b style='color:var(--fg)'>Design rule:</b> classes 3–5 are the operable pool; classes 1–2 are recorded as context; class 6 is monitored as a leading indicator that classes 1–2 failed. Failure modes tracked: voice without empowerment, participation cut mid-programme, token timing, elite capture, expectation debt. Every technique above is extracted from the <a href='https://pixels2metropolicy.vercel.app/slum_policies' style='color:var(--cyan)'>49-case slum policies review</a> — the full case table, verdicts and all 86 references.";
     body.appendChild(note);
   }
 
@@ -922,7 +966,7 @@
     addVid(rk, "rank");
 
     var pr = sectionEl("priority", "05", "Priorities & selection of areas",
-      "The four rankings combined into one priority score — the mean position across deprivation, dangerous events, flood exposure and build-code risk. The combined top 30 carry the selection weight; hover a pin for the pulse rings, click for the full neighborhood profile and its main problems.",
+      "Priority AI combines the four rankings into one priority score — the mean position across deprivation, dangerous events, flood exposure and build-code risk; it only suggests, the urban governor decides. The combined top 30 carry the selection weight; hover a pin for the pulse rings, click for the full neighborhood profile and its main problems.",
       "tool · ranked → selected areas");
     buildPriority(pr);
     addVid(pr, "priority");
@@ -1007,6 +1051,34 @@
     });
     onScroll();
   }
+
+  /* ---------------- roll up / roll down corner buttons ---------------- */
+  (function () {
+    var ctl = document.getElementById("rollctl");
+    if (!ctl) return;
+    var up = ctl.querySelector(".up"), down = ctl.querySelector(".down");
+    /* lazy iframes load mid-flight and shift the page, which aborts smooth scrolling —
+       instant jump, then re-aim once (same trick as the pipenav clicks) */
+    function jump(target) {
+      window.scrollTo({ top: target, behavior: "instant" });
+      setTimeout(function () { window.scrollTo({ top: target, behavior: "instant" }); }, 800);
+    }
+    up.addEventListener("click", function () { jump(0); });
+    down.addEventListener("click", function () {
+      jump(Math.max(0, document.documentElement.scrollHeight - window.innerHeight));
+    });
+    function state() {
+      var y = window.scrollY;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      up.classList.toggle("dim", y < 4);
+      down.classList.toggle("dim", max - y < 4);
+    }
+    /* embedded webviews do not always deliver window scroll events (same quirk kickMaps works around) */
+    ["scroll", "mousewheel", "wheel", "mousemove", "touchstart", "pointerdown", "keydown", "resize"].forEach(function (ev) {
+      window.addEventListener(ev, state, { passive: true });
+    });
+    state();
+  })();
 
   /* ---------------- reveal ---------------- */
   function wireReveal() {

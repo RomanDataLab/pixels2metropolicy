@@ -26,6 +26,14 @@ h1,h2,h3,h4{margin:0;font-family:var(--display);font-stretch:112%;text-wrap:bala
 .brand i{width:13px;height:13px;display:inline-block;background:conic-gradient(var(--cyan) 0 25%,transparent 0 50%,var(--violet) 0 75%,transparent 0);border:1px solid var(--line-2)}
 .top .back{pointer-events:auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg);text-decoration:none;border:1px solid var(--line-2);padding:8px 12px;background:rgba(3,5,7,.8)}
 .top .back:hover{border-color:var(--cyan)}
+/* roll up / roll down corner buttons, left of the Pipeline link in the fixed top bar */
+.hright{display:flex;gap:8px;align-items:center}
+#rollctl{display:flex;gap:4px;pointer-events:auto}
+#rollctl button{width:24px;height:24px;padding:0;font-family:var(--mono);font-size:13px;line-height:1;color:#cfd8dd;background:rgba(3,5,7,.8);border:1px solid var(--line-2);cursor:pointer;transition:color .2s,border-color .2s,opacity .2s}
+#rollctl button:hover{color:var(--cyan);border-color:var(--cyan)}
+#rollctl button.dim{opacity:.25;cursor:default}
+#rollctl button.dim:hover{color:#cfd8dd;border-color:var(--line-2)}
+@media (max-width:620px){#rollctl{display:none}}
 
 /* hero */
 #hero{position:relative;padding:calc(56px + clamp(40px,7vh,90px)) 0 clamp(30px,5vh,60px);background:
@@ -68,7 +76,9 @@ h1,h2,h3,h4{margin:0;font-family:var(--display);font-stretch:112%;text-wrap:bala
 #floatpanel .fp-head{display:flex;justify-content:space-between;gap:10px;padding:10px 14px 0}
 #floatpanel h4{font-size:14px;text-transform:uppercase;font-stretch:112%}
 #floatpanel .fp-body{padding:8px 14px 12px;font-size:12.5px;color:#c9d3d9;line-height:1.55}
-#floatpanel video{width:100%;display:block;background:#000;max-height:200px;object-fit:cover}
+/* fixed box height: the video element's intrinsic size flips between src switches (default
+   300×150 before metadata, native aspect after), which resized the panel after placement */
+#floatpanel video{width:100%;height:200px;display:block;background:#000;max-height:200px;object-fit:cover}
 #floatpanel .fp-vid{position:relative}
 #floatpanel .fp-vid .tag{position:absolute;left:8px;top:8px;background:rgba(3,5,7,.8);border:1px solid var(--line-2);color:var(--cyan);font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:3px 7px;text-transform:uppercase}
 
@@ -79,7 +89,11 @@ section.s:nth-of-type(even){background:var(--space)}
 @media (max-width:860px){.s-head{grid-template-columns:1fr}}
 .s-head .k{display:flex;gap:14px;margin-bottom:14px}
 .s-head .k .label:first-child{color:var(--cyan)}
+/* the title column is content-blind (minmax(0,5fr)), so one unbreakable word — NEIGHBORHOODS —
+   can overflow it into the lede; cap the h2 by its own column width via container query units */
+.s-head>div:first-child{container-type:inline-size}
 h2.sec{font-size:clamp(30px,4.6vw,60px);font-weight:760;text-transform:uppercase}
+@supports (font-size:1cqw){h2.sec{font-size:clamp(30px,min(4.6vw,9.8cqw),60px)}}
 .lede{font-size:clamp(15.5px,1.4vw,19px);color:#c9d2d8;max-width:62ch}
 
 /* process strip */
