@@ -1100,6 +1100,109 @@
     document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
   }
 
+  /* ---------------- embed maps isolate mode ----------------
+     Every .embedbox map: click the embedded html = it expands to a fullscreen
+     overlay showing only that map; double-click inside it (or Esc / × button)
+     returns to the page. The iframe is never reparented, so the map keeps its
+     state — it only switches to position:fixed while ancestors that would
+     trap a fixed element (transform, filter, contain…) are neutralized.
+     Embedded pages are same-origin, so their documents are hooked directly;
+     a drag (mousedown→mouseup moved >6px) does not count as a click, so
+     panning the embedded map still works. */
+  function wireEmbedExpand() {
+    var active = null;
+
+    function onEsc(e) { if (e.key === "Escape") collapse(); }
+
+    function expand(iframe) {
+      if (active) return;
+      var box = document.createElement("div");
+      box.id = "embedfs";
+      box.innerHTML = '<span class="hint">double-click the map or press Esc to return</span>' +
+        '<button type="button" aria-label="Return to the page">&#215;</button>';
+      box.querySelector("button").addEventListener("click", collapse);
+      document.body.appendChild(box);
+
+      var saved = { iframe: {}, root: document.documentElement.style.overflow,
+        body: document.body.style.overflow, anc: [] };
+      var el = iframe.parentElement;
+      while (el && el !== document.documentElement) {
+        saved.anc.push({ el: el, transform: el.style.transform, perspective: el.style.perspective,
+          filter: el.style.filter, backdropFilter: el.style.backdropFilter, willChange: el.style.willChange,
+          contain: el.style.contain, containerType: el.style.containerType });
+        el.style.transform = el.style.perspective = el.style.filter = el.style.backdropFilter = "none";
+        el.style.willChange = "auto";
+        el.style.contain = "none";
+        el.style.containerType = "normal";
+        el = el.parentElement;
+      }
+      ["position", "top", "left", "width", "height", "zIndex", "background", "borderRadius"].forEach(function (p) {
+        saved.iframe[p] = iframe.style[p];
+      });
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      iframe.style.position = "fixed";
+      iframe.style.top = "0";
+      iframe.style.left = "0";
+      iframe.style.width = "100vw";
+      iframe.style.height = "100vh";
+      iframe.style.zIndex = "100002";
+      iframe.style.background = "#06080b";
+      iframe.style.borderRadius = "0";
+      active = { iframe: iframe, saved: saved, box: box };
+      document.addEventListener("keydown", onEsc);
+    }
+
+    function collapse() {
+      if (!active) return;
+      var a = active; active = null;
+      document.removeEventListener("keydown", onEsc);
+      a.box.remove();
+      var s = a.saved;
+      Object.keys(s.iframe).forEach(function (p) { a.iframe.style[p] = s.iframe[p]; });
+      s.anc.forEach(function (r) {
+        r.el.style.transform = r.transform; r.el.style.perspective = r.perspective;
+        r.el.style.filter = r.filter; r.el.style.backdropFilter = r.backdropFilter;
+        r.el.style.willChange = r.willChange; r.el.style.contain = r.contain;
+        r.el.style.containerType = r.containerType;
+      });
+      document.documentElement.style.overflow = s.root;
+      document.body.style.overflow = s.body;
+    }
+
+    function hookIframe(iframe) {
+      var downX = 0, downY = 0;
+      function attach() {
+        var doc;
+        try { doc = iframe.contentDocument; } catch (err) { doc = null; }
+        if (!doc) return;
+        doc.addEventListener("mousedown", function (e) { downX = e.clientX; downY = e.clientY; }, true);
+        doc.addEventListener("click", function (e) {
+          if (active) return; /* fullscreen: single clicks belong to the map itself */
+          if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) return; /* pan, not click */
+          expand(iframe);
+        }, true);
+        doc.addEventListener("dblclick", function () {
+          if (active && active.iframe === iframe) collapse();
+        }, true);
+      }
+      iframe.addEventListener("load", attach);
+      attach();
+    }
+
+    document.querySelectorAll(".embedbox").forEach(function (box) {
+      var iframe = box.querySelector("iframe");
+      if (!iframe) return;
+      hookIframe(iframe);
+      /* clicks on the caption/border (parent page, not iframe) also expand */
+      box.addEventListener("click", function () { if (!active) expand(iframe); });
+      var h = document.createElement("div");
+      h.className = "embed-hint";
+      h.textContent = "click map to enlarge · double-click to return";
+      box.appendChild(h);
+    });
+  }
+
   /* ---------------- boot ---------------- */
   Promise.all([
     loadJSON("data/uip-roofs.json"), loadJSON("data/uip-hulls.json"), loadJSON("data/uip-zones.json"),
@@ -1110,6 +1213,7 @@
     buildPipeline();
     buildSections();
     wireReveal();
+    wireEmbedExpand();
     buildPipeNav();
   }).catch(function (e) {
     document.getElementById("sections").innerHTML =
