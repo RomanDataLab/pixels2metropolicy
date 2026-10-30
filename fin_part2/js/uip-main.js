@@ -949,7 +949,7 @@
     addVid(seg, "seg3");
 
     var mt = sectionEl("match", "02", "Formal matching",
-      "Formal matching checks every settlement candidate against the official city registers — cadastral parcels, comprehensive-plan zones, municipal regulation. A candidate that conforms to the plan and sits on registered land drops out as regular; one that violates the plan, sits on unregistered land or lacks any record is flagged as an irregular block.",
+      "Formal matching checks every settlement candidate against the regular-property layer — in this build Overture open footprints standing in for the cadastral register, with a live land-department connection proposed, plus comprehensive-plan zones and municipal regulation. A candidate that conforms to the plan and sits on a registered footprint drops out as regular; one that violates the plan or has no overlapping footprint is flagged as an irregular block.",
       "tool · segmented blocks → irregular neighborhoods");
     buildMatch(mt);
     addVid(mt, "match");
