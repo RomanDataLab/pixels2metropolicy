@@ -972,7 +972,7 @@
     addVid(so, "social");
 
     var rk = sectionEl("rank", "04", "Ranked irregular neighborhoods",
-      "Cumulative rank over all sensed communities — signal-weighted (natural disaster .30 · technical disaster .25 · crime .15 · traffic .10 · street retail .10 · begging .10), then joined to the segmentation's irregular blocks. The embedded rankings-only map: pick a ranking, its top 30 light up.",
+      "Every irregular neighborhood is ranked by the pressure the city puts on it — a cumulative headline score plus switchable lenses over the same evidence: deprivation, dangerous events, flood exposure, build-code risk. Each ranking is one lens, not the verdict; the order sets the intervention agenda and is re-earned on every sensing epoch.",
       "tool · scores → ranked irregular blocks");
     buildRank(rk);
     addVid(rk, "rank");
@@ -994,7 +994,7 @@
     buildToolkits(ki);
 
     var de = sectionEl("design", "08→", "Design & approval of urban intervention",
-      "The selected metro policy toolkit becomes a strategy: layers of change on the map of the #1 ranked area, each location connected to a component card that flips to its description. The walkthrough video shows the full journey; approval passes through the participation gate.",
+      "The selected metro policy toolkit becomes a strategy on the map: its actions placed as layers of change across the metropolis — a fire lane, re-blocked plots, a common-use area, a market zone — each location tied to a component card that flips to its description. Governance first, structure second, instruments third — the doctrine now runs on live pipeline evidence; the community co-draws every layer, and approval passes through the participation gate.",
       "tool · metro policy toolkit → approved strategy");
     buildDesign(de);
   }
