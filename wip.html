@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoHackathon 2026 — NGIS Layers Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; font-family: "Segoe UI", system-ui, sans-serif; }
+  #map { width: 100%; height: 100%; background: #aad3df; }
+
+  .title-box {
+    position: absolute; top: 48px; left: 12px; z-index: 1000;
+    background: rgba(255,255,255,.95); border-radius: 10px;
+    padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.25); max-width: 340px;
+  }
+  .title-box h1 { font-size: 15px; margin: 0 0 2px; }
+  .title-box p { font-size: 11.5px; margin: 0; color: #555; }
+  .title-box .info-link { margin-top: 4px; font-size: 11px; }
+  .title-box .info-link a { color: #1565c0; text-decoration: none; }
+  .title-box .info-link a:hover { text-decoration: underline; }
+
+  #legend {
+    position: absolute; top: 48px; right: 12px; z-index: 1000;
+    width: 295px; max-height: calc(100% - 60px);
+    background: rgba(255,255,255,.97); border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #legend header {
+    padding: 10px 12px 8px; border-bottom: 1px solid #e5e5e5;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #legend header h2 { font-size: 13px; margin: 0; text-transform: uppercase; letter-spacing: .04em; }
+  #collapse-btn {
+    border: none; background: #eee; border-radius: 6px; cursor: pointer;
+    font-size: 12px; padding: 3px 8px;
+  }
+  #legend-body { overflow-y: auto; padding: 6px 0; }
+  #legend.collapsed #legend-body, #legend.collapsed #legend footer { display: none; }
+
+  .basemap-row { padding: 6px 12px 4px; font-size: 12px; color: #444; display: flex; gap: 12px; align-items: center; }
+  .basemap-row label { cursor: pointer; display: flex; gap: 4px; align-items: center; }
+
+  .group-label {
+    font-size: 10.5px; font-weight: 600; color: #888; text-transform: uppercase;
+    letter-spacing: .05em; padding: 8px 12px 2px;
+  }
+  .layer-row {
+    padding: 6px 12px; display: flex; flex-direction: column; gap: 4px;
+    border-left: 3px solid transparent;
+  }
+  .layer-row:hover { background: #f6f8fa; }
+  .layer-row.off { opacity: .55; }
+  .layer-row .main { display: flex; align-items: center; gap: 8px; }
+  .layer-row input[type=checkbox] { margin: 0; cursor: pointer; }
+  .swatch {
+    width: 22px; height: 13px; border-radius: 3px; flex: none;
+    border: 1.5px solid rgba(0,0,0,.35);
+  }
+  .layer-names { flex: 1; min-width: 0; cursor: pointer; }
+  .layer-names .en { font-size: 12.5px; font-weight: 600; color: #222; display: block; }
+  .layer-names .th { font-size: 10.5px; color: #777; display: block; }
+  .layer-meta { font-size: 10px; color: #999; text-align: right; flex: none; }
+  .layer-row .sub { display: flex; align-items: center; gap: 8px; padding-left: 30px; }
+  .layer-row .sub input[type=range] { width: 100%; height: 14px; cursor: pointer; }
+  .layer-row .sub .op-label { font-size: 10px; color: #999; flex: none; width: 62px; }
+  .layer-row.nodata .layer-names { color: #b00; }
+
+  #legend footer {
+    border-top: 1px solid #e5e5e5; padding: 7px 12px; font-size: 10px; color: #888;
+    line-height: 1.45;
+  }
+  .leaflet-popup-content { font-size: 12px; line-height: 1.5; }
+  .popup-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .popup-row { display: flex; gap: 6px; }
+  .popup-row .k { color: #777; min-width: 86px; }
+  .fit-btn {
+    border: none; background: #2b6cb0; color: #fff; border-radius: 6px;
+    font-size: 11px; padding: 3px 8px; cursor: pointer;
+  }
+
+  /* ---- shared site header nav ---- */
+  #site-header {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px; z-index: 2000;
+    display: flex; align-items: center; gap: 16px; padding: 0 12px;
+    background: #12314e; color: #fff;
+    font: 13px/36px "Segoe UI", system-ui, sans-serif;
+    box-shadow: 0 1px 5px rgba(0,0,0,.4);
+  }
+  #site-header .brand { font-weight: 700; color: #fff; text-decoration: none; white-space: nowrap; }
+  #site-header nav { display: flex; gap: 2px; }
+  #site-header nav a { color: #d7e4f0; text-decoration: none; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  #site-header nav a:hover { background: #1d4e79; color: #fff; }
+  #site-header nav a.active { background: #2b6cb0; color: #fff; }
+
+</style>
+</head>
+<body>
+<div id="site-header">
+  <a class="brand" href="index.html">Pixel2Policy TH</a>
+  <nav>
+    <a href="wip.html" class="active">Main map</a>
+    <a href="datamatch.html">Data match</a>
+    <a href="slum.html">Slum map</a>
+    <a href="slum_review.html">Slum policies review</a>
+    <a href="participation.html">Participation</a>
+    <a href="gen1_samgeo.html">Gen 1: SAM roofs</a>
+    <a href="gen2_unet.html">Gen 2: U-Net roofs</a>
+    <a href="gen3_yolo.html">Gen 3: YOLO roofs</a>
+    <a href="theos_native.html">THEOS native</a>
+    <a href="social.html">Social pulse</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="proposal.html">Proposal</a>
+    <a href="sources.html">Sources</a>
+    <a href="geohackathon_information.html" target="_blank" rel="noopener">Info</a>
+  </nav>
+</div>
+
+
+<div id="map"></div>
+
+<div class="title-box">
+  <h1>GeoHackathon 2026 · NGIS Layers</h1>
+  <p>Pixel to Policy — Thailand reference data from the NGIS Platform (10 layers from geohackathon.gistda.or.th)</p>
+  <p class="info-link"><a href="datamatch.html">Data match (THEOS-2 × BMA plan) →</a> · <a href="geohackathon_information.html" target="_blank" rel="noopener">Competition info &amp; plan →</a></p>
+</div>
+
+<div id="legend">
+  <header>
+    <h2>Layers</h2>
+    <div style="display:flex;gap:6px;">
+      <button class="fit-btn" id="fit-th">Fit Thailand</button>
+      <button id="collapse-btn" title="Collapse">–</button>
+    </div>
+  </header>
+  <div id="legend-body">
+    <div class="basemap-row">
+      Base map:
+      <label><input type="radio" name="basemap" value="osm" checked> Streets</label>
+      <label><input type="radio" name="basemap" value="sat"> Satellite</label>
+    </div>
+    <div id="layer-list"></div>
+  </div>
+  <footer>
+    Sources via GeoHackathon 2026 “NGIS Platform Data”: DOPA, Ministry of Transport, LDD, DNP,
+    Royal Irrigation Dept, DWR, GISTDA. Vector data pre-downloaded from ngis.go.th (ArcGIS REST);
+    flood layer = live GISTDA Vallaris WMS; LDD orthophoto = live LDD tile server.
+  </footer>
+</div>
+
+<!-- Pre-downloaded vector data (written by download.js) -->
+<script src="data/provinces.js"></script>
+<script src="data/districts.js"></script>
+<script src="data/tambons.js"></script>
+<script src="data/highways.js"></script>
+<script src="data/wildlife.js"></script>
+<script src="data/parks.js"></script>
+<script src="data/irrigation.js"></script>
+<script src="data/rivers.js"></script>
+<script src="data/nha_communities.js"></script>
+<script src="data/roofs.js"></script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  var map = L.map("map", { preferCanvas: true, zoomControl: true }).setView([13.5, 101.0], 6);
+  var THAILAND = L.latLngBounds([5.61, 97.34], [20.47, 105.64]);
+  map.fitBounds(THAILAND);
+  L.control.scale({ imperial: false }).addTo(map);
+
+  // ---------- base maps ----------
+  var basemaps = {
+    osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19, attribution: "&copy; OpenStreetMap contributors",
+    }),
+    sat: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19, attribution: "Esri World Imagery",
+    }),
+  };
+  basemaps.osm.addTo(map);
+  document.querySelectorAll('input[name=basemap]').forEach(function (r) {
+    r.addEventListener("change", function () {
+      Object.values(basemaps).forEach(function (b) { return map.removeLayer(b); });
+      basemaps[this.value].addTo(map);
+    });
+  });
+
+  // ---------- layer definitions ----------
+  // style: colors for vectors; makeRow builds the legend row; popup builds the click popup.
+  var LAYERS = [
+    {
+      group: "Admin boundaries (DOPA)",
+      defs: [
+        {
+          id: "provinces", en: "Province boundaries", th: "ขอบเขตจังหวัด", color: "#d7191c", weight: 2.2, fill: 0.06, on: true,
+          popup: function (p) { return row("Province", p.changwat_e) + row("จังหวัด", p.changwat_t) + row("Code", p.ch_id); },
+        },
+        {
+          id: "districts", en: "District (amphoe) boundaries", th: "ขอบเขตอำเภอ", color: "#fdae61", weight: 1.6, fill: 0.04, on: false,
+          popup: function (p) { return row("District", p.amphoe_e) + row("อำเภอ", p.amphoe_t) + row("Province", p.changwat_e) + row("Code", p.am_id); },
+        },
+        {
+          id: "tambons", en: "Sub-district (tambon) boundaries", th: "ขอบเขตตำบล", color: "#ab7ca1", weight: 1, fill: 0.03, on: false,
+          popup: function (p) { return row("Sub-district", p.tambon_e) + row("ตำบล", p.tambon_t) + row("District", p.amphoe_e) + row("Province", p.changwat_e); },
+        },
+      ],
+    },
+    {
+      group: "Environment & water",
+      defs: [
+        {
+          id: "parks", en: "National parks", th: "อุทยานแห่งชาติ", color: "#1a9850", weight: 1.2, fill: 0.25, on: true,
+          popup: function (p) { return row("National park", p.name) + row("อุทยานฯ", p.namt) + row("Gazetted", p.ann_date) + row("Area (rai)", fmt(p.gis_rai)); },
+        },
+        {
+          id: "wildlife", en: "Wildlife sanctuaries", th: "เขตรักษาพันธุ์สัตว์ป่า", color: "#a6d96a", weight: 1.2, fill: 0.25, on: true,
+          popup: function (p) { return row("Sanctuary", p.name) + row("เขตรักษาพันธุ์", p.namt) + row("Gazetted", p.ann_date) + row("Area (rai)", fmt(p.gis_rai)); },
+        },
+        {
+          id: "irrigation", en: "Irrigation zones", th: "พื้นที่ชลประทาน", color: "#7fb8da", weight: 1, fill: 0.3, on: false,
+          popup: function (p) { return row("Project", p.projname) + row("Type", p.projtype) + row("Province", p.provname) + row("Irrigable (rai)", fmt(p.irrarea)); },
+        },
+        {
+          id: "rivers", en: "Rivers & streams (major)", th: "เส้นทางน้ำธรรมชาติ (ลำธารหลัก)", color: "#08519c", weight: 1.6, line: true, on: true,
+          note: "str_type 1 only — 21,900 of 489,807 segments",
+          popup: function (p) { return row("River", p.str_name_e) + row("แม่น้ำ/ลำธาร", p.str_name_t) + row("ID", p.str_id); },
+        },
+      ],
+    },
+    {
+      group: "Infrastructure",
+      defs: [
+        {
+          id: "highways", en: "National highway centerlines", th: "เส้นกลางถนน (ทางหลวงแผ่นดิน)", color: "#f28e2b", weight: 1.6, line: true, on: true,
+          popup: function (p) { return row("Road", p.road_name) + row("Class", p.road_class) + row("Lanes", p.no_lane) + row("Length (km)", fmt(p.length)); },
+        },
+      ],
+    },
+    {
+      group: "Housing & informal settlements",
+      defs: [
+        {
+          id: "nha_communities", en: "NHA low-income communities (by plan zone)", th: "ชุมชนผู้มีรายได้น้อย (ตามโซนผังเมือง)",
+          point: true, on: false, swatch: "#d7301f",
+          note: 'Dot color = plan zone: <span style="color:#d7301f">●</span> high-density res <span style="color:#fe9929">●</span> medium-density res <span style="color:#fdbb84">●</span> low-density res <span style="color:#7a0177">●</span> commercial <span style="color:#238b45">●</span> gov/public <span style="color:#41ab5d">●</span> rural/agri <span style="color:#08519c">●</span> industrial <span style="color:#8c6d31">●</span> outside AOI. Fill 50% transparent; resident figures modeled.',
+          popup: function (p) {
+            return row("Community", p.COMM_NAME) + row("Romanized", p.NAME_EN) +
+              row("NHA ID", p.COMM_ID) + row("Survey (BE)", p.SHAPE_YEAR) +
+              row("Plan zone", p.ZONE_CAT || "outside AOI") + row("Zone code", p.ZONE_CODE) +
+              row("Est. residents (modeled)", p.EST_POP);
+          },
+        },
+        {
+          id: "roofs", en: "THEOS-2 slum roofs — test segmentation", th: "หลังค้าแออัดจากภาพ THEOS-2 (ทดสอบ)",
+          on: false, swatch: "linear-gradient(90deg,#e31a1c 50%,#ff8c00 50%)",
+          note: 'Rule-based v3 · 2 AOIs near Pathum Thani · <span style="color:#e31a1c">■</span> zinc/corrugated <span style="color:#ff8c00">■</span> tarpaulin/mixed — map zooms in when enabled',
+          fitTo: [[13.875, 100.465], [13.978, 100.628]],
+          popup: function (p) {
+            return row("Material", p.material === 1 ? "zinc / corrugated" : "tarpaulin / mixed") +
+              row("Area (m²)", p.area_m2) + row("AOI", p.aoi) + row("Source", "THEOS-2 0.5 m");
+          },
+          featureStyle: function (f, op) {
+            return {
+              color: f.properties.material === 1 ? "#e31a1c" : "#ff8c00",
+              weight: 1, fillOpacity: 0.55 * op, opacity: Math.min(1, op + .2),
+            };
+          },
+        },
+      ],
+    },
+    {
+      group: "Imagery & raster (live services)",
+      defs: [
+        {
+          id: "flood", en: "Repeated flood areas (WMS)", th: "พื้นที่น้ำท่วมซ้ำซาก", on: false, raster: true,
+          swatch: "linear-gradient(90deg,#ffffd9,#41b6c4,#081d58)",
+          make: function () {
+            return L.tileLayer.wms("https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood-freq/wms", {
+              layers: "6799ab8c6f832362f99030e6", format: "image/png", transparent: true,
+              version: "1.1.1", api_key: "eEpbI0F7pN5cL1EPQoZcdUfKPJVyhQWjfsssUJjk8TelSFYYDU1gDUV30SLY6MPT",
+              attribution: "GISTDA Vallaris Maps",
+            });
+          },
+        },
+        {
+          id: "ldd", en: "Orthophoto aerial imagery (LDD)", th: "ภาพถ่ายทางอากาศ (กรมพัฒนาที่ดิน)", on: false, raster: true,
+          swatch: "repeating-linear-gradient(45deg,#d9d0bf,#d9d0bf 4px,#b3a68d 4px,#b3a68d 8px)",
+          note: "LDD server was unreachable during build — may stay blank",
+          make: function () {
+            return L.tileLayer("https://lddzoning.ldd.go.th/arcgis/rest/services/LDD_RASTER_WM_CACHE/MapServer/tile/{z}/{y}/{x}", {
+              maxZoom: 19, attribution: "Land Development Department",
+            });
+          },
+        },
+      ],
+    },
+  ];
+
+  function fmt(v) { return v == null ? "—" : (typeof v === "number" ? v.toLocaleString("en-US") : v); }
+  function row(k, v) { return '<div class="popup-row"><span class="k">' + k + '</span><span>' + (v == null || v === " " ? "—" : v) + "</span></div>"; }
+
+  // Line layers drawn at full weight wash out the whole country at national
+  // zoom; thin them out until the user zooms in.
+  var lineScale = function () { var z = map.getZoom(); return z <= 6 ? 0.4 : z <= 8 ? 0.7 : 1; };
+
+  // ---------- build layers + legend ----------
+  var list = document.getElementById("layer-list");
+  var currentGroup = null;
+
+  LAYERS.forEach(function (group) {
+    group.defs.forEach(function (d) {
+      if (group.group !== currentGroup) {
+        currentGroup = group.group;
+        var gl = document.createElement("div");
+        gl.className = "group-label";
+        gl.textContent = group.group;
+        list.appendChild(gl);
+      }
+
+      var geo = window.__LAYERS__ && window.__LAYERS__[d.id];
+      var layer = null;
+
+      if (d.raster) {
+        layer = d.make();
+      } else if (geo) {
+        var style = function (opacity) {
+          return d.line
+            ? { color: d.color, weight: Math.max(0.5, d.weight * lineScale()), opacity: opacity }
+            : { color: d.color, weight: d.weight, fillOpacity: d.fill * opacity, opacity: Math.min(1, opacity + .2) };
+        };
+        if (d.featureStyle) {
+          d._styleFn = function (op) { return function (f) { return d.featureStyle(f, op); }; };
+        }
+        var ptOptions = d.point
+          ? {
+              pointToLayer: function (f, latlng) {
+                var c = (f.properties && f.properties.CAT_COLOR) || d.color || "#d7301f";
+                return L.circleMarker(latlng, { radius: 5, color: "#222", weight: 0.7, fillColor: c, fillOpacity: 0.5, opacity: 0.9 });
+              },
+            }
+          : {};
+        layer = L.geoJSON(geo, Object.assign({
+          style: d._styleFn ? d._styleFn(1) : function () { return style(1); },
+          onEachFeature: function (f, ly) {
+            ly.bindPopup(function () {
+              var props = f.properties || {};
+              var head = (props.changwat_e || props.amphoe_e || props.tambon_e || props.name ||
+                          props.projname || props.road_name || props.str_name_e || props.COMM_NAME || d.en);
+              return '<div class="popup-title">' + head + "</div>" + d.popup(props);
+            });
+          },
+        }, ptOptions));
+        if (!d._styleFn) d._styleFn = d.point
+          ? function (op) { return { fillOpacity: 0.5 * op, opacity: Math.min(1, op + .2) }; }
+          : style;
+      }
+
+      d.layer = layer;
+      var hasData = !!layer;
+
+      // legend row
+      var el = document.createElement("div");
+      el.className = "layer-row" + (hasData ? "" : " nodata") + (d.on ? "" : " off");
+      el.innerHTML =
+        '<div class="main">' +
+          '<input type="checkbox"' + (d.on ? " checked" : "") + (hasData ? "" : " disabled") + ">" +
+          '<span class="swatch" style="background:' + (d.swatch || d.color) + '"></span>' +
+          '<span class="layer-names"><span class="en">' + d.en + "</span>" +
+            (d.th ? '<span class="th">' + d.th + "</span>" : "") + "</span>" +
+          '<span class="layer-meta">' +
+            (hasData ? (d.raster ? "live" : (geo.features.length.toLocaleString("en-US"))) : "no data") +
+          "</span>" +
+        "</div>" +
+        '<div class="sub">' +
+          '<span class="op-label">Opacity</span>' +
+          '<input type="range" min="10" max="100" value="100"' + (hasData ? "" : " disabled") + ">" +
+        "</div>" +
+        (d.note ? '<div class="sub" style="font-size:10px;color:#aaa;padding-top:0">' + d.note + "</div>" : "");
+      list.appendChild(el);
+
+      var cb = el.querySelector("input[type=checkbox]");
+      var range = el.querySelector("input[type=range]");
+
+      function apply(op) {
+        d._op = op;
+        if (!layer) return;
+        if (d.raster) { layer.setOpacity(op); return; }
+        layer.setStyle(d._styleFn(op));
+      }
+
+      cb.addEventListener("change", function () {
+        if (!layer) return;
+        if (cb.checked) { layer.addTo(map); el.classList.remove("off"); if (d.fitTo) map.fitBounds(d.fitTo, { padding: [30, 30] }); }
+        else { map.removeLayer(layer); el.classList.add("off"); }
+      });
+      el.querySelector(".layer-names").addEventListener("click", function () {
+        cb.checked = !cb.checked; cb.dispatchEvent(new Event("change"));
+      });
+      range.addEventListener("input", function () { apply(range.value / 100); });
+
+      if (d.on && layer) layer.addTo(map);
+    });
+  });
+
+  document.getElementById("fit-th").addEventListener("click", function () { map.fitBounds(THAILAND); });
+
+  // Re-apply line weights when zoom changes (see lineScale).
+  map.on("zoomend", function () {
+    LAYERS.forEach(function (g) {
+      g.defs.forEach(function (d) {
+        if (d.line && d.layer && map.hasLayer(d.layer)) d.layer.setStyle(d._styleFn(d._op == null ? 1 : d._op));
+      });
+    });
+  });
+  document.getElementById("collapse-btn").addEventListener("click", function () {
+    var lg = document.getElementById("legend");
+    lg.classList.toggle("collapsed");
+    this.textContent = lg.classList.contains("collapsed") ? "+" : "–";
+  });
+})();
+</script>
+</body>
+</html>

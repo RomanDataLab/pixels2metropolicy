@@ -25,6 +25,26 @@
       "source": "/app/:path*",
       "destination": "/:path*",
       "permanent": true
+    },
+    {
+      "source": "/fin_part1",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/fin_part1/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/slum_policies",
+      "destination": "/slum_review",
+      "permanent": true
+    },
+    {
+      "source": "/slum_policies.html",
+      "destination": "/slum_review",
+      "permanent": true
     }
   ]
 }

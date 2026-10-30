@@ -44,21 +44,17 @@
   <div class="wrap cols">
     <div>
       <span class="label" style="color:var(--cyan)">Metropolitan Planning Intelligence Platform</span>
-      <p style="margin-top:10px">Pipeline after «urban platform scheme» (Q4 2026). Evidence layers: THEOS-2 segmentation (this repo), BMA comprehensive-plan zones, cadastre proxy (Overture footprints in this build; live land-department cadastre proposed), urban datalake (news RSS, Traffy Fondue, traffic cameras, traffic events, official statistics), 1,993-community social sensing, the world's slum policies review. Part of <a href="../kla/final_html/Pixels_to_Metro_Policy_landing/web/index.html">Pixels to METRO Policy</a>.</p>
     </div>
     <div>
       <span class="label">Interactive tabs this page extends</span>
       <ul>
-        <li><a href="../../../../slum.html">Main map · slum map</a></li>
-        <li><a href="../../../../datamatch.html">Data match</a></li>
-        <li><a href="../../../../social.html">Social pulse</a></li>
-        <li><a href="../../../../participation.html">Participation</a></li>
-        <li><a href="../../../../proposal.html">Proposal · metro policy toolkits</a></li>
+        <li><a href="../wip.html" data-pass="$olo2026thai">WIP · NGIS layers map (password)</a></li>
+        <li><a href="../slum_review.html">Slum policies review</a></li>
       </ul>
     </div>
     <div>
       <span class="label">Image &amp; video credits</span>
-      <p style="margin-top:10px">Participation class backgrounds and metro policy toolkit imagery: Wikimedia Commons contributors and this project's own segmentation outputs — per-file attribution in <span style="font-family:var(--mono);font-size:11px">img/part/SOURCES.md</span>.</p>
+      <p style="margin-top:10px">Participation class backgrounds and metro policy toolkit imagery: Wikimedia Commons contributors.</p>
       <p style="margin-top:6px">Pipeline hover videos: Pexels contributors (free licence, no attribution required) and <a href="https://commons.wikimedia.org/wiki/File:Mae_Jo_Loy_Krathong_2010.webm" target="_blank" rel="noopener">Mae Jo Loy Krathong 2010</a> © Mike Griffiths, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</p>
     </div>
   </div>
@@ -87,5 +83,18 @@
 <script src="js/blocks/program.js"></script>
 <script src="js/blocks/assess.js"></script>
 <script src="js/uip-main.js?v=78"></script>
+<script>
+(function () {
+  document.querySelectorAll('a[data-pass]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var p = window.prompt('Password');
+      if (p === null) return;
+      if (p === a.getAttribute('data-pass')) window.location.href = a.getAttribute('href');
+      else window.alert('Wrong password.');
+    });
+  });
+})();
+</script>
 </body>
 </html>
