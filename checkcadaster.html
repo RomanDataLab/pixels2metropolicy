@@ -106,10 +106,14 @@ const satNoLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/ser
   maxZoom: 19, attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics' });
 const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
-// gray basemap — Carto dark tiles (keyless)
-const mapboxLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19, subdomains: 'abcd',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' });
+// gray basemap — Esri World Dark Gray (keyless; Carto dark tiles now require an API key)
+const mapboxLight = L.layerGroup([
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19, maxNativeZoom: 16,
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ' }),
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19, maxNativeZoom: 16, opacity: 0.8, attribution: '' })
+]);
 const googleSat = L.tileLayer('https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
   maxZoom: 20, subdomains: '0123', attribution: 'Imagery &copy; Google' });
 satNoLabels.addTo(map);
