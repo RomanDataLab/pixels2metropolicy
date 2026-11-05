@@ -822,9 +822,9 @@ const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
-// gray basemap — Carto dark tiles (basemaps key; keyless tiles get an 'API KEY REQUIRED' watermark)
-const mapboxLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_3n3g_1_7e65dbf86a711155a8049b57', {
-  maxZoom: 19, subdomains: 'abcd',
+// gray basemap — Carto dark tiles via the /api/tiles proxy (key stays server-side on Vercel)
+const mapboxLight = L.tileLayer('api/tiles?z={z}&x={x}&y={y}&r={r}', {
+  maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 });
 // google satellite
